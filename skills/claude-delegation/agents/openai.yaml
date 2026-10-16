@@ -1,0 +1,6 @@
+interface:
+  display_name: "Claude Delegation"
+  short_description: "Consult, implement, or orchestrate with Claude Code."
+  default_prompt: "Use $claude-delegation with the configured model, tools, approvals, and deadline for this assignment. Require an explicit request for orchestration."
+policy:
+  allow_implicit_invocation: false

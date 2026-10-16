@@ -1,0 +1,19 @@
+{
+  "modes": {
+    "opus-haiku": [{"profile": "OH"}, {"profile": "OX"}]
+  },
+  "claude": {
+    "modes": {
+      "orchestration": {
+        "enabled": true,
+        "permission_mode": "bypassPermissions",
+        "tools": "default",
+        "timeout_seconds": null,
+        "max_turns": null,
+        "controller_profiles": ["OH", "OX"],
+        "worker": {"model": "claude-haiku-5-5", "effort": "xhigh", "tools": "default", "context_target_tokens": null},
+        "nested_delegation": true
+      }
+    }
+  }
+}

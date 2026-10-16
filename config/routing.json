@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "controller_design": "codex-first",
+  "default_mode": "balanced",
+  "execution_style": "pure-orchestration",
+  "max_parallel_workers": 3,
+  "max_external_sessions_per_assignment": 1,
+  "roles": ["research", "planning", "implementation", "frontend", "integration", "qa", "spec-review", "browser"],
+  "designs": {
+    "codex-first": {"controller": "codex", "native_workers": "codex", "external_workers": "claude"},
+    "claude-first": {"controller": "claude", "native_workers": "claude", "external_workers": "codex"}
+  },
+  "selection": {
+    "method": "curated-pareto-frontier",
+    "source": "https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index",
+    "methodology": "https://artificialanalysis.ai/methodology",
+    "reviewed_on": "2026-10-16",
+    "status": "illustrative profiles informed by the supplied chart; exact benchmark measurements are not bundled",
+    "automatic_refresh": false,
+    "bias": "default",
+    "bias_options": ["low", "default", "high"]
+  },
+  "profiles": {
+    "L":   {"provider": "codex", "model": "gpt-6-luna", "effort": "max", "service_tier": "standard"},
+    "LF":  {"provider": "codex", "model": "gpt-6-luna", "effort": "max", "service_tier": "fast"},
+    "HK":  {"provider": "claude", "model": "claude-haiku-5-5", "effort": "xhigh", "context_target_tokens": 100000},
+    "HM":  {"provider": "claude", "model": "claude-haiku-5-5", "effort": "xhigh", "context_target_tokens": null},
+    "SM":  {"provider": "codex", "model": "gpt-6.1-sol", "effort": "medium", "service_tier": "standard"},
+    "SMF": {"provider": "codex", "model": "gpt-6.1-sol", "effort": "medium", "service_tier": "fast"},
+    "SF":  {"alias_of": "SMF"},
+    "SH":  {"provider": "codex", "model": "gpt-6.1-sol", "effort": "high", "service_tier": "standard"},
+    "SHF": {"provider": "codex", "model": "gpt-6.1-sol", "effort": "high", "service_tier": "fast"},
+    "SX":  {"provider": "codex", "model": "gpt-6.1-sol", "effort": "xhigh", "service_tier": "standard"},
+    "SXF": {"provider": "codex", "model": "gpt-6.1-sol", "effort": "xhigh", "service_tier": "fast"},
+    "SMAX": {"provider": "codex", "model": "gpt-6.1-sol", "effort": "max", "service_tier": "standard"},
+    "CMAX": {"provider": "claude", "model": "claude-sonnet-5-5", "effort": "max", "context_target_tokens": null},
+    "ALF": {"provider": "codex", "model": "gpt-6-astra", "effort": "low", "service_tier": "fast"},
+    "AMF": {"provider": "codex", "model": "gpt-6-astra", "effort": "medium", "service_tier": "fast"},
+    "AHF": {"provider": "codex", "model": "gpt-6-astra", "effort": "high", "service_tier": "fast"},
+    "AX":  {"provider": "codex", "model": "gpt-6-astra", "effort": "xhigh", "service_tier": "standard"},
+    "AXF": {"provider": "codex", "model": "gpt-6-astra", "effort": "xhigh", "service_tier": "fast"},
+    "AUF": {"provider": "codex", "model": "gpt-6-astra", "effort": "ultra", "service_tier": "fast"},
+    "OM":  {"provider": "claude", "model": "claude-opus-5-5", "effort": "medium", "context_target_tokens": null},
+    "OH":  {"provider": "claude", "model": "claude-opus-5-5", "effort": "high", "context_target_tokens": null},
+    "OX":  {"provider": "claude", "model": "claude-opus-5-5", "effort": "xhigh", "context_target_tokens": null}
+  },
+  "modes": {
+    "efficient": [
+      {"profile": "L"}, {"profile": "HK", "one_off_only": true}, {"profile": "HM", "one_off_only": true},
+      {"profile": "SM"}, {"profile": "SH"}, {"profile": "OM", "roles": ["qa"]}, {"profile": "SX"},
+      {"profile": "OH", "roles": ["qa", "spec-review", "frontend"]}
+    ],
+    "fast": [
+      {"profile": "LF"}, {"profile": "HM", "one_off_only": true}, {"profile": "SM"}, {"profile": "SMF"},
+      {"profile": "SHF"}, {"profile": "OH", "roles": ["qa", "spec-review", "frontend"], "ongoing_thread_only": true},
+      {"profile": "SXF"}, {"profile": "OX", "roles": ["qa", "spec-review"], "ongoing_thread_only": true, "final_only": true}
+    ],
+    "performance": [
+      {"profile": "SMF"}, {"profile": "ALF", "roles": ["browser"], "specialist": true}, {"profile": "SHF"},
+      {"profile": "OH", "roles": ["qa", "spec-review", "frontend"]}, {"profile": "SXF"},
+      {"profile": "OX", "roles": ["qa", "spec-review", "frontend"]}, {"profile": "AX", "roles": ["qa", "spec-review"]}
+    ],
+    "balanced": [
+      {"profile": "HM", "one_off_only": true}, {"profile": "SM"}, {"profile": "SMF"}, {"profile": "SH"},
+      {"profile": "OH", "roles": ["qa", "spec-review", "frontend"]}, {"profile": "SX"}, {"profile": "SMAX"}, {"profile": "CMAX"},
+      {"profile": "OX", "roles": ["qa", "spec-review", "frontend"], "ongoing_thread_only": true},
+      {"profile": "AX", "roles": ["qa", "spec-review"]}
+    ],
+    "tokenburn": [
+      {"profile": "SHF"}, {"profile": "AMF", "roles": ["browser"], "specialist": true}, {"profile": "SXF"},
+      {"profile": "AHF"}, {"profile": "AXF"}, {"profile": "AUF"},
+      {"profile": "OX", "roles": ["qa", "spec-review"], "ongoing_thread_only": true, "final_only": true}
+    ]
+  },
+  "codex": {
+    "sandbox_by_role": {"default": "workspace-write", "research": "read-only", "planning": "read-only", "qa": "read-only", "spec-review": "read-only"},
+    "approval_policy": "never",
+    "bypass_approvals_and_sandbox": false,
+    "timeout_seconds": null
+  },
+  "claude": {
+    "default_profile": "OH",
+    "default_mode": "consultation",
+    "modes": {
+      "consultation": {
+        "permission_mode": "dontAsk", "permission_prompts": "none", "tools": ["Read", "Glob", "Grep"],
+        "allowed_tools": ["Read", "Glob", "Grep", "Agent(review-worker)"], "disallowed_tools": [],
+        "restricted": true, "suppress_mcp": true, "no_chrome": true,
+        "reviewer": {"enabled": true, "tools": ["Read", "Glob", "Grep"], "permission_mode": "dontAsk", "model": "inherit", "prompt": "Review the assigned work and return evidence and uncertainties. Honor the requested role, authorized checks, file ownership, and any shared deadline. Available tools do not authorize unrelated edits."},
+        "timeout_seconds": 3600, "max_turns": null
+      },
+      "implementation": {
+        "permission_mode": "auto", "permission_prompts": "none", "tools": "default",
+        "allowed_tools": [], "disallowed_tools": [], "restricted": false, "suppress_mcp": false, "no_chrome": false,
+        "timeout_seconds": 3600, "max_turns": null
+      },
+      "orchestration": {
+        "enabled": false, "permission_mode": "auto", "permission_prompts": "none", "tools": "default",
+        "allowed_tools": [], "disallowed_tools": [], "restricted": false, "suppress_mcp": false, "no_chrome": false,
+        "timeout_seconds": null, "max_turns": null
+      }
+    }
+  }
+}
