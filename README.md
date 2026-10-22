@@ -13,4 +13,4 @@ python3 scripts/bundle.py resolve --mode balanced --role implementation
 
 Keep this checkout together. [Configure and install](docs/configuration.md) the router and optional Claude companion. Choose [Codex-first or Claude-first](docs/controller-designs.md). Enable the Opus/Haiku preset only when wanted.
 
-[MIT License](LICENSE) · Tim Osterhus · tim@millrace.ai
+[MIT License](LICENSE) · Tim Osterhus
