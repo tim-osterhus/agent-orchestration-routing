@@ -4,7 +4,9 @@ The selection method follows the [Artificial Analysis capability–cost chart](h
 
 The supplied chart is a dated, filtered view. Frontier membership depends on the comparison set, benchmark version, effort, fallback behavior, and provider pricing. A capability score is not proof that a model will succeed at a particular repository task. Do not convert the plotted values into fabricated exact scores or prices.
 
-[Artificial Analysis methodology](https://artificialanalysis.ai/methodology) defines cost per task using benchmark token consumption and API prices. It does not measure the user's subscription quota per completed assignment. Fast service tiers, compact-context policies, and specialist routes can be useful even when their precise configurations are unmeasured or off the plotted frontier.
+[Artificial Analysis methodology](https://artificialanalysis.ai/methodology) defines cost per task using benchmark token consumption and API prices. It does not measure the user's subscription quota per completed assignment. Compact-context policies and specialist routes can be useful even when their precise configurations are unmeasured or off the plotted frontier. Provider-primary pools and burn modes are approved routing choices, not new benchmark measurements. Sonnet High is in the pools. Retained Sonnet XHigh is available explicitly. Sonnet Max is not bundled.
+
+The Fable profiles are opt-in trials, not evidence of superior vulnerability review or general UI-visual performance. Read their descriptions in the master catalog when considering them. A lower composite score does not establish poor fit for every narrow task. No refreshed AAI measurements or account-access tests accompany these pool changes.
 
 The registry is a configurable example informed by that method, not an automatic frontier calculator. Refresh it only when requested. Record source/date, exact model and effort, benchmark version, measured cost and latency, fallback behavior, and any specialization exception. Leave unavailable measurements unknown. Review changes before replacing the active registry.
 

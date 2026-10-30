@@ -4,6 +4,8 @@ from copy import deepcopy
 import importlib.util
 import json
 from pathlib import Path
+import re
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -22,10 +24,16 @@ class RoutingTests(unittest.TestCase):
     def resolve(self, **kwargs):
         return bundle.resolve(self.config, **kwargs)
 
-    def test_default_config_and_alias(self):
-        self.assertEqual(bundle.profile(self.config, "SF"), bundle.profile(self.config, "SMF"))
+    def test_default_config_and_standard_catalog(self):
         self.assertEqual(self.config["controller_design"], "codex-first")
         self.assertFalse(self.config["claude"]["modes"]["orchestration"]["enabled"])
+        self.assertEqual(bundle.profile(self.config, "SNX")["effort"], "xhigh")
+        self.assertEqual(bundle.profile(self.config, "SNX")["model"], "claude-sonnet-5-5")
+        self.assertTrue(all(item["service_tier"] == "standard" for item in self.config["profiles"].values()
+                            if item["provider"] == "codex"))
+        self.assertEqual(self.resolve()["routing_variant"], "codex-primary")
+        self.assertEqual([entry["profile"] for entry in bundle.mode_pools(self.config)["balanced"]],
+                         ["SL", "TM", "TH", "SM", "SH", "SX", "SMAX", "AL", "OH"])
 
     def test_designs_invert_native_and_external_routes(self):
         for design, codex, claude in [("codex-first", "native-codex", "external-claude"),
@@ -46,31 +54,124 @@ class RoutingTests(unittest.TestCase):
 
     def test_one_off_restriction(self):
         with self.assertRaisesRegex(ValueError, "role/lifecycle"):
-            self.resolve(code="HM", assignment_kind="controller")
+            self.resolve(code="HM", variant="claude-primary", assignment_kind="controller")
 
     def test_ongoing_thread_and_final_review_are_separate(self):
+        self.config["modes"]["restricted-review"] = [{"profile": "OX", "roles": ["qa", "spec-review"],
+                                                     "ongoing_thread_only": True, "final_only": True}]
         for kwargs in ({}, {"ongoing": True}, {"final": True}):
-            with self.assertRaises(ValueError):
-                self.resolve(mode="fast", code="OX", role="qa", **kwargs)
-        result = self.resolve(mode="fast", code="OX", role="qa", ongoing=True, final=True)
+            with self.assertRaisesRegex(ValueError, "role/lifecycle"):
+                self.resolve(mode="restricted-review", code="OX", role="qa", **kwargs)
+        result = self.resolve(mode="restricted-review", code="OX", role="qa", ongoing=True, final=True)
         self.assertEqual(result["choices"][0]["claude_mode"], "consultation")
 
     def test_browser_specialists(self):
-        self.assertEqual(self.resolve(mode="performance", role="browser")["choices"][0]["code"], "ALF")
-        self.assertEqual(self.resolve(mode="tokenburn", role="browser")["choices"][0]["code"], "AMF")
+        self.assertEqual(self.resolve(mode="balanced", role="browser")["choices"][0]["code"], "AL")
+        self.assertEqual(self.resolve(mode="performance", role="browser")["choices"][0]["code"], "AH")
+        self.assertEqual(self.resolve(mode="performance", role="browser", variant="claude-primary")["choices"][0]["code"], "AMAX")
+        # Browser-specialist preference is not an assertion that other models lack browser capability.
+        self.assertEqual(self.resolve(mode="balanced", role="browser", code="SM")["choices"][0]["code"], "SM")
+        self.assertEqual(self.resolve(mode="codex-burn", role="browser", burn_account="codex-work",
+                                      burn_endpoint="next reset")["choices"][0]["code"], "AL")
 
-    def test_out_of_pool_requires_recorded_override(self):
-        with self.assertRaisesRegex(ValueError, "outside"):
-            self.resolve(code="L")
-        result = self.resolve(code="L", allow_out_of_pool=True)
-        self.assertEqual(result["choices"][0]["code"], "L")
+    def test_burn_modes_are_provider_exclusive_under_both_designs(self):
+        for mode, provider, expected in [("codex-burn", "codex", ["AL", "SM", "SH", "SX", "AH", "AMAX"]),
+                                          ("claude-burn", "claude", ["HMAX", "SNH", "OM", "OH", "OX", "OMAX"])]:
+            self.assertEqual([entry["profile"] for entry in self.config["modes"][mode]], expected)
+            for design in ("codex-first", "claude-first"):
+                for role in self.config["roles"]:
+                    result = self.resolve(mode=mode, design=design, role=role, burn_account="work-account", burn_endpoint="reset")
+                    self.assertTrue(all(choice["provider"] == provider for choice in result["choices"]))
+                    dispatch = ("native-" if design == provider + "-first" else "external-") + provider
+                    self.assertTrue(all(choice["dispatch"] == dispatch for choice in result["choices"]))
+                    self.assertEqual(result["burn"], {"provider": provider, "account": "work-account", "endpoint": "reset"})
+            other = "OH" if provider == "codex" else "SM"
+            with self.assertRaisesRegex(ValueError, "outside"):
+                self.resolve(mode=mode, code=other, role="qa", burn_account="work-account", burn_endpoint="reset")
+            exception = self.resolve(mode=mode, code=other, role="qa", allow_out_of_pool=True, role_override=True,
+                                     burn_account="work-account", burn_endpoint="reset")
+            self.assertTrue(exception["burn"]["out_of_provider_exception"])
+            self.assertIn("does not apply", exception["notice"])
+            self.assertTrue(exception["overrides"]["out_of_pool"])
+            with self.assertRaisesRegex(ValueError, "profiles only"):
+                bundle.validate(bundle.merge(self.config, {"modes": {mode: [{"profile": other}]}}))
+
+    def test_burn_modes_require_explicit_invocation_account_and_endpoint(self):
+        for mode in bundle.BURN_PROVIDERS:
+            for kwargs in ({}, {"burn_account": "account"}, {"burn_endpoint": "reset"},
+                           {"burn_account": " ", "burn_endpoint": "reset"}):
+                with self.assertRaisesRegex(ValueError, "identified"):
+                    self.resolve(mode=mode, **kwargs)
+            self.config["default_mode"] = mode
+            with self.assertRaisesRegex(ValueError, "explicit invocation"):
+                self.resolve(burn_account="account", burn_endpoint="reset")
+        with self.assertRaisesRegex(ValueError, "only to burn"):
+            self.resolve(mode="balanced", burn_account="account", burn_endpoint="reset")
+
+    def test_claude_burn_native_haiku_and_role_limits_remain_independent(self):
+        kwargs = {"mode": "claude-burn", "burn_account": "claude-work", "burn_endpoint": "queue end"}
+        haiku = self.resolve(code="HMAX", design="claude-first", **kwargs)["choices"][0]
+        self.assertEqual(haiku["dispatch"], "native-claude")
+        self.assertEqual(haiku["model"], "claude-haiku-5-5")
+        self.assertEqual(haiku["claude_mode"], "implementation")
+        for code, extra in [("HMAX", {"assignment_kind": "controller"})]:
+            with self.assertRaisesRegex(ValueError, "role/lifecycle"):
+                self.resolve(code=code, **kwargs, **extra)
+        for code in ("OM", "OH", "OX", "OMAX"):
+            self.assertEqual(self.resolve(code=code, **kwargs)["choices"][0]["claude_mode"], "implementation")
+        result = self.resolve(code="SNH", role="qa", claude_mode="implementation", **kwargs)
+        self.assertEqual(result["choices"][0]["claude_mode"], "implementation")
+        self.assertEqual(result["role"], "qa")
+
+    def test_retired_modes_and_codes_fail_without_fallback(self):
+        for mode in ("fast", "tokenburn"):
+            with self.assertRaisesRegex(ValueError, "retired.*explicitly"):
+                self.resolve(mode=mode)
+            with self.assertRaisesRegex(ValueError, "retired"):
+                bundle.validate(bundle.merge(self.config, {"modes": {mode: [{"profile": "SM"}]}}))
+        for code in bundle.RETIRED_PROFILES:
+            self.assertNotIn(code, self.config["profiles"])
+            with self.assertRaisesRegex(ValueError, "retired.*explicitly"):
+                self.resolve(code=code, allow_out_of_pool=True, role_override=True)
+            with self.assertRaisesRegex(ValueError, "retired"):
+                bundle.validate(bundle.merge(self.config, {"profiles": {code: {"alias_of": "SM"}}}))
+        with self.assertRaisesRegex(ValueError, "Standard"):
+            bundle.validate(bundle.merge(self.config, {"profiles": {"SM": {"service_tier": "fast"}}}))
+        with self.assertRaisesRegex(ValueError, "Sonnet Max"):
+            bundle.validate(bundle.merge(self.config, {"profiles": {"SNX": {"effort": "max"}}}))
+
+    def test_out_of_pool_requires_separate_pool_and_eligibility_overrides(self):
+        for mode, code, role in [("balanced", "L", "implementation"), ("codex-burn", "OH", "qa"),
+                                 ("codex-burn", "OX", "implementation"), ("claude-burn", "AM", "implementation")]:
+            with self.subTest(mode=mode, code=code, role=role):
+                kwargs = {"mode": mode, "code": code, "role": role}
+                if mode in bundle.BURN_PROVIDERS:
+                    kwargs.update(burn_account="work-account", burn_endpoint="queue end")
+                for overrides in ({}, {"role_override": True}):
+                    with self.assertRaisesRegex(ValueError, "outside"):
+                        self.resolve(**kwargs, **overrides)
+                with self.assertRaisesRegex(ValueError, "no role/lifecycle eligibility.*--role-override"):
+                    self.resolve(**kwargs, allow_out_of_pool=True)
+                result = self.resolve(**kwargs, allow_out_of_pool=True, role_override=True)
+                self.assertEqual(result["choices"][0]["code"], code)
+                self.assertEqual(result["overrides"], {"out_of_pool": True, "role_or_lifecycle": True})
+
+    def test_pool_override_does_not_waive_in_pool_role_or_lifecycle_fences(self):
+        for kwargs in ({"code": "OH", "role": "implementation"},
+                       {"code": "HM", "variant": "claude-primary", "assignment_kind": "controller"},
+                       {"code": "OX", "mode": "performance", "role": "implementation"}):
+            with self.subTest(**kwargs):
+                with self.assertRaisesRegex(ValueError, "role/lifecycle restrictions"):
+                    self.resolve(**kwargs, allow_out_of_pool=True)
+        allowed = self.resolve(code="OH", role="qa", allow_out_of_pool=True)
+        self.assertFalse(allowed["overrides"]["role_or_lifecycle"])
 
     def test_invalid_mode_profile_role_and_alias_cycle(self):
         for kwargs in ({"mode": "missing"}, {"code": "missing"}, {"role": "missing"}):
             with self.assertRaises(ValueError):
                 self.resolve(**kwargs)
-        self.config["profiles"]["SM"] = {"alias_of": "SF"}
-        self.config["profiles"]["SMF"] = {"alias_of": "SM"}
+        self.config["profiles"]["SM"] = {"alias_of": "SH"}
+        self.config["profiles"]["SH"] = {"alias_of": "SM"}
         with self.assertRaisesRegex(ValueError, "cycle"):
             bundle.validate(self.config)
 
@@ -111,9 +212,135 @@ class RoutingTests(unittest.TestCase):
     def test_no_silent_orchestration_or_model_substitution(self):
         with self.assertRaisesRegex(ValueError, "disabled"):
             self.resolve(code="OH", role_override=True, claude_mode="orchestration")
-        result = self.resolve(code="OH", role="frontend")
+        result = self.resolve(code="OH", role="frontend", variant="claude-primary")
         self.assertEqual(result["choices"][0]["model"], "claude-opus-5-5")
         self.assertEqual(result["choices"][0]["claude_mode"], "implementation")
+
+
+class VariantTests(unittest.TestCase):
+    def setUp(self):
+        self.config = bundle.load_config()
+
+    def test_exact_bundled_pools_and_counts(self):
+        expected = {
+            "codex-primary": {
+                "efficient": ["LM", "TL", "SL", "TM", "TH", "SM", "SH"],
+                "balanced": ["SL", "TM", "TH", "SM", "SH", "SX", "SMAX", "AL", "OH"],
+                "performance": ["SH", "SX", "SMAX", "AMAX", "AH", "OX", "OMAX"]},
+            "claude-primary": {
+                "efficient": ["HMED", "HH", "HM", "HMAX", "SNH", "OM", "OH"],
+                "balanced": ["HH", "HM", "HMAX", "SNH", "OM", "OH", "OX", "SM", "SMAX"],
+                "performance": ["OM", "OH", "OX", "OMAX", "SMAX", "AMAX"]}}
+        for variant, modes in expected.items():
+            actual = bundle.mode_pools(self.config, variant)
+            self.assertEqual(set(actual), {"efficient", "balanced", "performance", "codex-burn", "claude-burn"})
+            for mode, codes in modes.items():
+                self.assertEqual([entry["profile"] for entry in actual[mode]], codes)
+        for mode in bundle.BURN_PROVIDERS:
+            self.assertEqual(bundle.mode_pools(self.config, "codex-primary")[mode],
+                             bundle.mode_pools(self.config, "claude-primary")[mode])
+            self.assertTrue(all(mode not in variant["modes"] for variant in self.config["variants"].values()))
+
+    def test_exact_catalog_ids_efforts_and_retained_meanings(self):
+        families = {
+            "gpt-6-luna": {"LM": "medium", "L": "max"},
+            "gpt-6.1-terra": {"TL": "low", "TM": "medium", "TH": "high"},
+            "gpt-6.1-sol": {"SL": "low", "SM": "medium", "SH": "high", "SX": "xhigh", "SMAX": "max"},
+            "gpt-6-astra": {"AL": "low", "AM": "medium", "AH": "high", "AX": "xhigh", "AMAX": "max", "AU": "ultra"},
+            "claude-haiku-5-5": {"HMED": "medium", "HH": "high", "HM": "xhigh", "HK": "xhigh", "HMAX": "max"},
+            "claude-sonnet-5-5": {"SNH": "high", "SNX": "xhigh"},
+            "claude-opus-5-5": {"OM": "medium", "OH": "high", "OX": "xhigh", "OMAX": "max"},
+            "claude-fable-5-1": {"FH": "high", "FX": "xhigh"}}
+        self.assertEqual(set(self.config["profiles"]), {code for efforts in families.values() for code in efforts})
+        for model, efforts in families.items():
+            for code, effort in efforts.items():
+                item = bundle.profile(self.config, code)
+                self.assertEqual((item["model"], item["effort"]), (model, effort))
+                self.assertEqual(item["provider"], "codex" if model.startswith("gpt-") else "claude")
+                self.assertTrue(item["description"].strip())
+        self.assertEqual(bundle.profile(self.config, "HK")["context_target_tokens"], 100000)
+        self.assertIsNone(bundle.profile(self.config, "HM")["context_target_tokens"])
+
+    def test_variants_all_modes_roles_and_designs_have_eligible_workers(self):
+        for variant in self.config["variants"]:
+            for mode in bundle.mode_pools(self.config, variant):
+                for role in self.config["roles"]:
+                    for design in self.config["designs"]:
+                        kwargs = {"burn_account": "work", "burn_endpoint": "queue end"} if mode in bundle.BURN_PROVIDERS else {}
+                        result = bundle.resolve(self.config, variant=variant, mode=mode, role=role, design=design, **kwargs)
+                        self.assertTrue(result["choices"])
+                        self.assertEqual(result["routing_variant"], variant)
+                        for item in result["choices"]:
+                            expected = ("native-" if item["provider"] == result["controller"] else "external-") + item["provider"]
+                            self.assertEqual(item["dispatch"], expected)
+                            if mode in bundle.BURN_PROVIDERS:
+                                self.assertEqual(item["provider"], bundle.BURN_PROVIDERS[mode])
+
+    def test_variant_does_not_change_controller_permissions_or_effort(self):
+        for variant in self.config["variants"]:
+            for bias in ("low", "default", "high"):
+                result = bundle.resolve(self.config, variant=variant, bias=bias)
+                self.assertEqual(result["controller_design"], "codex-first")
+                self.assertEqual(result["selection_bias"], bias)
+                for item in result["choices"]:
+                    self.assertEqual(item["effort"], bundle.profile(self.config, item["code"])["effort"])
+                if bias == "low":
+                    baseline = [(item["code"], item["effort"]) for item in result["choices"]]
+                self.assertEqual([(item["code"], item["effort"]) for item in result["choices"]], baseline)
+        native = bundle.resolve(self.config, variant="claude-primary", design="claude-first", code="OH")
+        self.assertEqual(native["choices"][0]["dispatch"], "native-claude")
+        self.assertEqual(native["choices"][0]["execution"], self.config["claude"]["modes"]["implementation"])
+
+    def test_general_opus_implementation_and_optional_review(self):
+        for mode, codes in [("efficient", ["OM", "OH"]), ("balanced", ["OM", "OH", "OX"]),
+                            ("performance", ["OM", "OH", "OX", "OMAX"])]:
+            for code in codes:
+                result = bundle.resolve(self.config, variant="claude-primary", mode=mode, code=code)
+                self.assertEqual(result["choices"][0]["claude_mode"], "implementation")
+                self.assertFalse(result["overrides"]["role_or_lifecycle"])
+        review = bundle.resolve(self.config, variant="claude-primary", code="SM", role="qa")
+        self.assertTrue(review["choices"][0]["independent_review"])
+        with self.assertRaisesRegex(ValueError, "role/lifecycle"):
+            bundle.resolve(self.config, variant="claude-primary", code="SM", role="implementation")
+        authored = bundle.resolve(self.config, variant="claude-primary", code="OH")
+        self.assertNotIn("independent_review", authored["choices"][0])
+        escalation = bundle.resolve(self.config, mode="performance", code="OMAX")
+        self.assertTrue(escalation["choices"][0]["escalation"])
+
+    def test_custom_variant_overlays_legacy_modes_and_presets(self):
+        config = bundle.merge(self.config, {"variants": {"claude-primary": {"modes": {"balanced": [{"profile": "OM"}]}}}})
+        bundle.validate(config)
+        self.assertEqual([item["code"] for item in bundle.resolve(config, variant="claude-primary")["choices"]], ["OM"])
+        config = bundle.merge(config, {"modes": {"balanced": [{"profile": "SH"}]}})
+        bundle.validate(config)
+        for variant in config["variants"]:
+            self.assertEqual([item["code"] for item in bundle.resolve(config, variant=variant)["choices"]], ["SH"])
+        legacy = deepcopy(config)
+        del legacy["variants"], legacy["default_variant"]
+        bundle.validate(legacy)
+        self.assertIsNone(bundle.resolve(legacy)["routing_variant"])
+        for variant in self.config["variants"]:
+            config = bundle.load_config(presets=["opus-haiku"])
+            bundle.validate(config)
+            result = bundle.resolve(config, variant=variant, mode="opus-haiku", code="OH", claude_mode="orchestration")
+            self.assertIsNone(result["choices"][0]["execution"]["timeout_seconds"])
+        with self.assertRaisesRegex(ValueError, "Unknown routing variant"):
+            bundle.resolve(self.config, variant="missing")
+        with self.assertRaisesRegex(ValueError, "shared top-level"):
+            bundle.validate(bundle.merge(self.config, {"variants": {"codex-primary": {"modes": {"codex-burn": [{"profile": "SH"}]}}}}))
+
+    def test_fable_absent_from_automatic_pools_and_preset(self):
+        config = bundle.load_config(presets=["opus-haiku"])
+        for variant in config["variants"]:
+            for pool in bundle.mode_pools(config, variant).values():
+                self.assertFalse({"FH", "FX"} & {entry["profile"] for entry in pool})
+            for code in ("FH", "FX"):
+                with self.assertRaisesRegex(ValueError, "outside"):
+                    bundle.resolve(config, variant=variant, code=code)
+                with self.assertRaisesRegex(ValueError, "--role-override"):
+                    bundle.resolve(config, variant=variant, code=code, allow_out_of_pool=True)
+                result = bundle.resolve(config, variant=variant, code=code, allow_out_of_pool=True, role_override=True)
+                self.assertEqual(result["choices"][0]["model"], "claude-fable-5-1")
 
 
 class PlanTests(unittest.TestCase):
@@ -150,7 +377,7 @@ class PlanTests(unittest.TestCase):
         self.assertEqual(self.value(plan["argv"], "--tools"), "Read,Glob,Grep")
 
     def test_implementation_is_full_tool_auto_without_bypass(self):
-        plan = self.plan(code="HM")
+        plan = self.plan(code="HM", variant="claude-primary")
         self.assertEqual(self.value(plan["argv"], "--permission-mode"), "auto")
         self.assertEqual(self.value(plan["argv"], "--tools"), "default")
         self.assertNotIn("--restricted", plan["argv"])
@@ -179,7 +406,7 @@ class PlanTests(unittest.TestCase):
 
     def test_configured_implementation_bypass_needs_explicit_authorization(self):
         config = bundle.merge(self.config, {"claude": {"modes": {"implementation": {"permission_mode": "bypassPermissions"}}}})
-        plan = self.plan(config=config, code="HM")
+        plan = self.plan(config=config, code="HM", variant="claude-primary")
         self.assertIn("--dangerously-skip-permissions", plan["argv"])
         self.assertIn("explicit assignment-level permission-bypass authorization", plan["required_checks"])
 
@@ -237,11 +464,67 @@ class PlanTests(unittest.TestCase):
         readonly = self.plan(code="SM", role="qa", design="claude-first")
         self.assertEqual(self.value(readonly["argv"], "--sandbox"), "read-only")
 
-    def test_fast_codex_and_codex_resume_fail_without_fake_support(self):
-        with self.assertRaisesRegex(ValueError, "Fast"):
+    def test_retired_codex_and_codex_resume_fail_without_fake_support(self):
+        with self.assertRaisesRegex(ValueError, "retired"):
             self.plan(code="SMF", design="claude-first")
         with self.assertRaisesRegex(ValueError, "resume"):
             self.plan(code="SM", design="claude-first", resume="12345678-1234-4234-8234-123456789abc")
+
+    def test_standard_launch_plans_preserve_exact_codex_model_effort(self):
+        for code, item in self.config["profiles"].items():
+            if item["provider"] != "codex":
+                continue
+            plan = self.plan(code=code, allow_out_of_pool=True, role_override=True, design="claude-first")
+            self.assertEqual(self.value(plan["argv"], "--model"), item["model"])
+            self.assertIn("model_reasoning_effort=" + json.dumps(item["effort"]), plan["argv"])
+            self.assertEqual(plan["profile"]["service_tier"], "standard")
+            self.assertIn("Standard service tier on the actual route", plan["required_checks"])
+            self.assertNotIn("--fast", plan["argv"])
+
+    def test_burn_plan_retains_scope_and_preset_compatibility(self):
+        for mode, code, design in [("codex-burn", "SH", "claude-first"), ("claude-burn", "SNH", "codex-first")]:
+            plan = self.plan(mode=mode, code=code, design=design, burn_account="work-account", burn_endpoint="reset")
+            self.assertEqual(plan["burn"]["provider"], "codex" if code == "SH" else "claude")
+            self.assertEqual(plan["burn"]["endpoint"], "reset")
+        exception = self.plan(mode="codex-burn", code="OH", role="qa", allow_out_of_pool=True, role_override=True,
+                              burn_account="codex-work", burn_endpoint="reset")
+        self.assertTrue(exception["burn"]["out_of_provider_exception"])
+        self.assertIn("explicit cross-provider exception uses a separate account route, not the selected burn account",
+                      exception["required_checks"])
+        config = bundle.load_config(presets=["opus-haiku"])
+        plan = self.plan(config=config, mode="claude-burn", code="OH", role="qa", claude_mode="orchestration",
+                         burn_account="claude-work", burn_endpoint="queue end")
+        self.assertIsNone(plan["timeout_seconds"])
+        self.assertEqual(json.loads(self.value(plan["argv"], "--agents"))["haiku-worker"]["effort"], "xhigh")
+        with self.assertRaisesRegex(ValueError, "cannot control"):
+            self.plan(config=config, mode="claude-burn", code="SNH", claude_mode="orchestration",
+                      burn_account="claude-work", burn_endpoint="queue end")
+
+    def test_cli_burn_requirements_and_migration_errors(self):
+        command = [sys.executable, str(ROOT / "scripts/bundle.py"), "resolve"]
+        for extra, message in [(["--mode", "fast"], "retired"), (["--mode", "tokenburn"], "retired"),
+                               (["--profile", "CMAX"], "retired"), (["--mode", "codex-burn"], "burn-account")]:
+            result = subprocess.run(command + extra, capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn(message, result.stderr)
+        for mode in ("codex-burn", "claude-burn"):
+            result = subprocess.run(command + ["--mode", mode, "--burn-account", "work", "--burn-endpoint", "queue end"],
+                                    capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads(result.stdout)["burn"]["account"], "work")
+
+    def test_cli_requires_both_out_of_pool_exception_flags(self):
+        command = [sys.executable, str(ROOT / "scripts/bundle.py"), "resolve", "--mode", "codex-burn",
+                   "--profile", "OH", "--role", "qa", "--burn-account", "work", "--burn-endpoint", "queue end"]
+        for flags, message in [(["--allow-out-of-pool"], "--role-override"), (["--role-override"], "outside")]:
+            result = subprocess.run(command + flags, capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn(message, result.stderr)
+        result = subprocess.run(command + ["--allow-out-of-pool", "--role-override"], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        resolved = json.loads(result.stdout)
+        self.assertEqual(resolved["overrides"], {"out_of_pool": True, "role_or_lifecycle": True})
+        self.assertTrue(resolved["burn"]["out_of_provider_exception"])
 
     def test_missing_paths_and_multiple_choices_fail(self):
         resolved = bundle.resolve(self.config, code="OH", role="qa")
@@ -262,6 +545,59 @@ class PlanTests(unittest.TestCase):
         result = subprocess.run([sys.executable, str(ROOT / "scripts/bundle.py"), "validate"], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertTrue(json.loads(result.stdout)["valid"])
+
+    def test_native_routes_never_generate_external_cli_plans(self):
+        for variant, design, code in [("codex-primary", "codex-first", "SM"),
+                                       ("claude-primary", "claude-first", "OH")]:
+            with self.assertRaisesRegex(ValueError, "Native routes require"):
+                self.plan(variant=variant, design=design, code=code)
+
+    def test_fable_explicit_launch_uses_exact_profile_and_existing_permissions(self):
+        for variant in self.config["variants"]:
+            for code, effort in [("FH", "high"), ("FX", "xhigh")]:
+                plan = self.plan(variant=variant, code=code, role="frontend", allow_out_of_pool=True, role_override=True)
+                self.assertEqual(self.value(plan["argv"], "--model"), "claude-fable-5-1")
+                self.assertEqual(self.value(plan["argv"], "--effort"), effort)
+                self.assertEqual(self.value(plan["argv"], "--permission-mode"), "auto")
+                self.assertEqual(plan["timeout_seconds"], 3600)
+                self.assertNotIn("--dangerously-skip-permissions", plan["argv"])
+
+    def test_cli_variant_bias_and_preset_combinations(self):
+        command = [sys.executable, str(ROOT / "scripts/bundle.py")]
+        for variant in self.config["variants"]:
+            for preset in ([], ["--preset", "opus-haiku"]):
+                result = subprocess.run(command + ["validate", "--variant", variant, *preset], capture_output=True, text=True)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(json.loads(result.stdout)["variant"], variant)
+        result = subprocess.run(command + ["resolve", "--variant", "claude-primary", "--design", "claude-first",
+                                           "--profile", "OH", "--bias", "high"], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        resolved = json.loads(result.stdout)
+        self.assertEqual(resolved["choices"][0]["dispatch"], "native-claude")
+        self.assertEqual(resolved["choices"][0]["effort"], "high")
+        self.assertEqual(resolved["selection_bias"], "high")
+
+    def test_local_markdown_links_resolve(self):
+        for source in ROOT.rglob("*.md"):
+            for target in re.findall(r"\[[^\]]*\]\(([^)]+)\)", source.read_text()):
+                if target.startswith(("https://", "http://", "#")):
+                    continue
+                target = target.split("#", 1)[0]
+                self.assertTrue((source.parent / target).exists(), f"Broken link in {source.relative_to(ROOT)}: {target}")
+
+    def test_documented_bundle_commands_are_valid_offline(self):
+        for source in ROOT.rglob("*.md"):
+            for line in source.read_text().splitlines():
+                if not line.startswith("python3 scripts/bundle.py "):
+                    continue
+                args = shlex.split(line)
+                args[0] = sys.executable
+                args = [self.prompt if arg == "task.txt" else arg for arg in args]
+                result = subprocess.run(args, cwd=ROOT, capture_output=True, text=True)
+                self.assertEqual(result.returncode, 0, f"{source.relative_to(ROOT)}: {line}\n{result.stderr}")
+                output = json.loads(result.stdout)
+                if args[2].endswith("-plan"):
+                    self.assertFalse(output["executes"])
 
     def test_direct_companion_defaults_and_explicit_implementation(self):
         for extra, expected_mode in [([], "consultation"), (["--role", "implementation"], "implementation")]:

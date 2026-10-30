@@ -1,17 +1,19 @@
 # Two controller designs
 
-Both designs share the registry, routing pools, role restrictions, work-order contract, and evidence checks. Choose `controller_design` in the configuration or use `--design` when inspecting a route. This chooses dispatch interpretation, not the host of an already running conversation.
+Both designs share the master catalog, variants, work-order contract, and evidence checks. `--variant` chooses pool preference. `--design` describes the actual controller host and determines dispatch. Neither changes an already running conversation. Permissions and bias are independent controls.
 
 | Responsibility | Codex-first | Claude-first |
 | --- | --- | --- |
 | Primary controller | Existing Codex chat | Existing Claude Code session |
 | Native workers | Codex subagents | Claude Agent workers |
 | Secondary provider | Claude through `claude-delegation` | Codex through a bounded `codex exec` session |
-| Default cross-provider review | Read-only Claude consultation | Read-only Codex worker |
+| Optional cross-provider review | Read-only Claude consultation | Read-only Codex worker |
 | Optional team | External Opus controller plus Haiku workers | Native Opus controller plus Haiku workers |
 | Integration owner | Codex controller | Claude controller |
 
-The primary host is not a claim that its models are always cheaper or better. Apply task suitability and the configured pools on either host. A caller may maintain different mode pools per design through configuration overlays. Account availability and specialist tools can justify an explicit exception to the benchmark frontier.
+The primary host is not a claim that its models are always cheaper or better. Both provider-primary variants work with either host design. For example, `--variant claude-primary --design claude-first --profile OH` resolves a native Claude worker. The variant alone leaves the current design unchanged. An author cannot be the sole acceptance check, but cross-provider review is optional.
+
+Burn mode names select the allowance provider, not the controller. `codex-burn` uses native Codex workers under Codex-first and external Codex workers under Claude-first. `claude-burn` uses external Claude workers under Codex-first and native Claude workers, including bounded Haiku, under Claude-first. Each requires explicit account and endpoint identifiers. Neither changes authentication or enables Orchestration. The parent owns the one external-session slot across descendants.
 
 ## Codex-first
 
@@ -39,6 +41,6 @@ Cross-provider Codex workers are leaves by default. They must not reopen this ro
 
 Both designs have configuration, skill instructions, offline eligibility checks, and new-session launch-plan generation. There is no dispatcher, durable scheduler, live installer, or verified completion callback. Native spawning is performed by the host agent, not by the Python script.
 
-The external Codex plan generator supports Standard-tier new sessions only. It rejects Fast because this version does not verify the CLI's tier controls. Exact-session Codex resume and native Claude-first launch/permission changes are caller responsibilities, not implemented automation. Claude plans support exact-ID resume but do not manage the original deadline's elapsed time.
+CLI plan generators reject native routes. Use native host controls instead of launching another CLI controller. External Codex plans accept Standard-targeted new-session profiles only. They do not set a tier. Verify and report the actual inherited/effective tier without changing global speed settings. Retired Fast codes and modes fail instead of falling back. Exact-session Codex resume and native Claude-first launch/permission changes remain caller responsibilities. Claude plans support exact-ID resume but do not manage elapsed deadlines.
 
 A later runtime layer could add portable process-tree supervision, owner-bound callbacks, and capability probes without changing the shared routing policy. Those are proposed next steps, not claims about the current template.

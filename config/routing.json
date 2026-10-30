@@ -2,6 +2,7 @@
   "schema_version": 1,
   "controller_design": "codex-first",
   "default_mode": "balanced",
+  "default_variant": "codex-primary",
   "execution_style": "pure-orchestration",
   "max_parallel_workers": 3,
   "max_external_sessions_per_assignment": 1,
@@ -21,55 +22,85 @@
     "bias_options": ["low", "default", "high"]
   },
   "profiles": {
-    "L":   {"provider": "codex", "model": "gpt-6-luna", "effort": "max", "service_tier": "standard"},
-    "LF":  {"provider": "codex", "model": "gpt-6-luna", "effort": "max", "service_tier": "fast"},
-    "HK":  {"provider": "claude", "model": "claude-haiku-5-5", "effort": "xhigh", "context_target_tokens": 100000},
-    "HM":  {"provider": "claude", "model": "claude-haiku-5-5", "effort": "xhigh", "context_target_tokens": null},
-    "SM":  {"provider": "codex", "model": "gpt-6.1-sol", "effort": "medium", "service_tier": "standard"},
-    "SMF": {"provider": "codex", "model": "gpt-6.1-sol", "effort": "medium", "service_tier": "fast"},
-    "SF":  {"alias_of": "SMF"},
-    "SH":  {"provider": "codex", "model": "gpt-6.1-sol", "effort": "high", "service_tier": "standard"},
-    "SHF": {"provider": "codex", "model": "gpt-6.1-sol", "effort": "high", "service_tier": "fast"},
-    "SX":  {"provider": "codex", "model": "gpt-6.1-sol", "effort": "xhigh", "service_tier": "standard"},
-    "SXF": {"provider": "codex", "model": "gpt-6.1-sol", "effort": "xhigh", "service_tier": "fast"},
-    "SMAX": {"provider": "codex", "model": "gpt-6.1-sol", "effort": "max", "service_tier": "standard"},
-    "CMAX": {"provider": "claude", "model": "claude-sonnet-5-5", "effort": "max", "context_target_tokens": null},
-    "ALF": {"provider": "codex", "model": "gpt-6-astra", "effort": "low", "service_tier": "fast"},
-    "AMF": {"provider": "codex", "model": "gpt-6-astra", "effort": "medium", "service_tier": "fast"},
-    "AHF": {"provider": "codex", "model": "gpt-6-astra", "effort": "high", "service_tier": "fast"},
-    "AX":  {"provider": "codex", "model": "gpt-6-astra", "effort": "xhigh", "service_tier": "standard"},
-    "AXF": {"provider": "codex", "model": "gpt-6-astra", "effort": "xhigh", "service_tier": "fast"},
-    "AUF": {"provider": "codex", "model": "gpt-6-astra", "effort": "ultra", "service_tier": "fast"},
-    "OM":  {"provider": "claude", "model": "claude-opus-5-5", "effort": "medium", "context_target_tokens": null},
-    "OH":  {"provider": "claude", "model": "claude-opus-5-5", "effort": "high", "context_target_tokens": null},
-    "OX":  {"provider": "claude", "model": "claude-opus-5-5", "effort": "xhigh", "context_target_tokens": null}
+    "LM": {"provider": "codex", "model": "gpt-6-luna", "effort": "medium", "service_tier": "standard", "description": "Candidate for trivial, tightly bounded work with inexpensive acceptance checks."},
+    "L": {"provider": "codex", "model": "gpt-6-luna", "effort": "max", "service_tier": "standard", "description": "Retained Luna Max profile for explicit selection or custom pools, not a synonym for Luna Medium."},
+    "TL": {"provider": "codex", "model": "gpt-6.1-terra", "effort": "low", "service_tier": "standard", "description": "Candidate for bounded, inexpensive assignments with clear inputs and checks."},
+    "TM": {"provider": "codex", "model": "gpt-6.1-terra", "effort": "medium", "service_tier": "standard", "description": "Candidate for straightforward implementation where modest reasoning can avoid repair work."},
+    "TH": {"provider": "codex", "model": "gpt-6.1-terra", "effort": "high", "service_tier": "standard", "description": "Candidate for repository work needing more reasoning than Terra Medium, subject to task-specific verification."},
+    "SL": {"provider": "codex", "model": "gpt-6.1-sol", "effort": "low", "service_tier": "standard", "description": "Candidate for routine bounded work with clear acceptance checks."},
+    "SM": {"provider": "codex", "model": "gpt-6.1-sol", "effort": "medium", "service_tier": "standard", "description": "General-purpose implementation or independent verification candidate, depending on the active pool."},
+    "SH": {"provider": "codex", "model": "gpt-6.1-sol", "effort": "high", "service_tier": "standard", "description": "Candidate for assignments where uncertainty or likely repair work justifies additional reasoning."},
+    "SX": {"provider": "codex", "model": "gpt-6.1-sol", "effort": "xhigh", "service_tier": "standard", "description": "Candidate for difficult implementation, debugging, or integration with explicit acceptance checks."},
+    "SMAX": {"provider": "codex", "model": "gpt-6.1-sol", "effort": "max", "service_tier": "standard", "description": "Candidate for demanding implementation or independent code verification, not an automatic escalation requirement."},
+    "AL": {"provider": "codex", "model": "gpt-6-astra", "effort": "low", "service_tier": "standard", "description": "Browser-specialist candidate in Codex-primary Balanced and a general candidate in Codex-burn. Verify the actual worker has required tools."},
+    "AM": {"provider": "codex", "model": "gpt-6-astra", "effort": "medium", "service_tier": "standard", "description": "Retained Astra Medium profile for explicit selection or custom pools."},
+    "AH": {"provider": "codex", "model": "gpt-6-astra", "effort": "high", "service_tier": "standard", "description": "Browser-specialist candidate in Codex-primary Performance and a general candidate in Codex-burn. Verify required tools before dispatch."},
+    "AX": {"provider": "codex", "model": "gpt-6-astra", "effort": "xhigh", "service_tier": "standard", "description": "Retained Astra XHigh profile for explicit selection or custom pools."},
+    "AMAX": {"provider": "codex", "model": "gpt-6-astra", "effort": "max", "service_tier": "standard", "description": "Candidate for demanding work or specialist verification where its tools and task fit justify the route."},
+    "AU": {"provider": "codex", "model": "gpt-6-astra", "effort": "ultra", "service_tier": "standard", "description": "Retained Astra Ultra profile for explicit selection or custom pools, not an automatic burn escalation."},
+    "HMED": {"provider": "claude", "model": "claude-haiku-5-5", "effort": "medium", "context_target_tokens": null, "description": "Candidate for small, well-scoped worker assignments with concrete checks."},
+    "HH": {"provider": "claude", "model": "claude-haiku-5-5", "effort": "high", "context_target_tokens": null, "description": "Candidate for bounded delegation when additional Haiku reasoning may reduce controller repair work."},
+    "HM": {"provider": "claude", "model": "claude-haiku-5-5", "effort": "xhigh", "context_target_tokens": null, "description": "Bounded Haiku XHigh worker candidate, also used by the optional Opus/Haiku preset."},
+    "HK": {"provider": "claude", "model": "claude-haiku-5-5", "effort": "xhigh", "context_target_tokens": 100000, "description": "Retained Haiku XHigh profile with a soft 100K context target, not an independently enforced cap."},
+    "HMAX": {"provider": "claude", "model": "claude-haiku-5-5", "effort": "max", "context_target_tokens": null, "description": "Candidate for bounded delegation where higher Haiku reasoning is worth testing against accepted-task throughput."},
+    "SNH": {"provider": "claude", "model": "claude-sonnet-5-5", "effort": "high", "context_target_tokens": null, "description": "Middle-pool candidate for work needing stronger judgment than a bounded Haiku assignment."},
+    "SNX": {"provider": "claude", "model": "claude-sonnet-5-5", "effort": "xhigh", "context_target_tokens": null, "description": "Retained Sonnet XHigh profile for explicit selection or custom pools. Sonnet Max is not bundled."},
+    "OM": {"provider": "claude", "model": "claude-opus-5-5", "effort": "medium", "context_target_tokens": null, "description": "General-purpose implementation and integration candidate in Claude-primary pools."},
+    "OH": {"provider": "claude", "model": "claude-opus-5-5", "effort": "high", "context_target_tokens": null, "description": "General-purpose Claude-primary candidate or independent review candidate in Codex-primary Balanced. Role restrictions come from the active pool."},
+    "OX": {"provider": "claude", "model": "claude-opus-5-5", "effort": "xhigh", "context_target_tokens": null, "description": "General-purpose Claude-primary candidate or independent review candidate in Codex-primary Performance. Role restrictions come from the active pool."},
+    "OMAX": {"provider": "claude", "model": "claude-opus-5-5", "effort": "max", "context_target_tokens": null, "description": "Candidate for demanding Claude-primary work or a justified Codex-primary Performance escalation."},
+    "FH": {"provider": "claude", "model": "claude-fable-5-1", "effort": "high", "context_target_tokens": null, "description": "Opt-in trial for writing, prose, UI copy, alternative hypotheses, or security-sensitive implementation with concrete acceptance checks. No proven vulnerability-review or general UI-visual advantage is implied."},
+    "FX": {"provider": "claude", "model": "claude-fable-5-1", "effort": "xhigh", "context_target_tokens": null, "description": "Optional deeper-analysis trial for prose, UI copy, alternative hypotheses, or security-sensitive implementation with concrete checks, not routine escalation. A lower composite AAI score does not settle every task's fit."}
+  },
+  "variants": {
+    "codex-primary": {
+      "modes": {
+        "efficient": [
+          {"profile": "LM", "one_off_only": true}, {"profile": "TL"}, {"profile": "SL"}, {"profile": "TM"},
+          {"profile": "TH"}, {"profile": "SM"}, {"profile": "SH"}
+        ],
+        "balanced": [
+          {"profile": "SL"}, {"profile": "TM"}, {"profile": "TH"}, {"profile": "SM"}, {"profile": "SH"},
+          {"profile": "SX"}, {"profile": "SMAX"}, {"profile": "AL", "roles": ["browser"], "specialist": true},
+          {"profile": "OH", "roles": ["qa", "spec-review"], "independent_review": true}
+        ],
+        "performance": [
+          {"profile": "SH"}, {"profile": "SX"}, {"profile": "SMAX"}, {"profile": "AMAX"},
+          {"profile": "AH", "roles": ["browser"], "specialist": true},
+          {"profile": "OX", "roles": ["qa", "spec-review"], "independent_review": true},
+          {"profile": "OMAX", "escalation": true}
+        ]
+      }
+    },
+    "claude-primary": {
+      "modes": {
+        "efficient": [
+          {"profile": "HMED", "one_off_only": true}, {"profile": "HH", "one_off_only": true},
+          {"profile": "HM", "one_off_only": true}, {"profile": "HMAX", "one_off_only": true},
+          {"profile": "SNH"}, {"profile": "OM"}, {"profile": "OH"}
+        ],
+        "balanced": [
+          {"profile": "HH", "one_off_only": true}, {"profile": "HM", "one_off_only": true},
+          {"profile": "HMAX", "one_off_only": true}, {"profile": "SNH"}, {"profile": "OM"}, {"profile": "OH"},
+          {"profile": "OX"}, {"profile": "SM", "roles": ["qa", "spec-review"], "independent_review": true},
+          {"profile": "SMAX", "roles": ["qa", "spec-review"], "independent_review": true}
+        ],
+        "performance": [
+          {"profile": "OM"}, {"profile": "OH"}, {"profile": "OX"}, {"profile": "OMAX"},
+          {"profile": "SMAX", "roles": ["qa", "spec-review"], "independent_review": true},
+          {"profile": "AMAX", "roles": ["browser"], "specialist": true}
+        ]
+      }
+    }
   },
   "modes": {
-    "efficient": [
-      {"profile": "L"}, {"profile": "HK", "one_off_only": true}, {"profile": "HM", "one_off_only": true},
-      {"profile": "SM"}, {"profile": "SH"}, {"profile": "OM", "roles": ["qa"]}, {"profile": "SX"},
-      {"profile": "OH", "roles": ["qa", "spec-review", "frontend"]}
+    "codex-burn": [
+      {"profile": "AL"}, {"profile": "SM"}, {"profile": "SH"}, {"profile": "SX"},
+      {"profile": "AH"}, {"profile": "AMAX"}
     ],
-    "fast": [
-      {"profile": "LF"}, {"profile": "HM", "one_off_only": true}, {"profile": "SM"}, {"profile": "SMF"},
-      {"profile": "SHF"}, {"profile": "OH", "roles": ["qa", "spec-review", "frontend"], "ongoing_thread_only": true},
-      {"profile": "SXF"}, {"profile": "OX", "roles": ["qa", "spec-review"], "ongoing_thread_only": true, "final_only": true}
-    ],
-    "performance": [
-      {"profile": "SMF"}, {"profile": "ALF", "roles": ["browser"], "specialist": true}, {"profile": "SHF"},
-      {"profile": "OH", "roles": ["qa", "spec-review", "frontend"]}, {"profile": "SXF"},
-      {"profile": "OX", "roles": ["qa", "spec-review", "frontend"]}, {"profile": "AX", "roles": ["qa", "spec-review"]}
-    ],
-    "balanced": [
-      {"profile": "HM", "one_off_only": true}, {"profile": "SM"}, {"profile": "SMF"}, {"profile": "SH"},
-      {"profile": "OH", "roles": ["qa", "spec-review", "frontend"]}, {"profile": "SX"}, {"profile": "SMAX"}, {"profile": "CMAX"},
-      {"profile": "OX", "roles": ["qa", "spec-review", "frontend"], "ongoing_thread_only": true},
-      {"profile": "AX", "roles": ["qa", "spec-review"]}
-    ],
-    "tokenburn": [
-      {"profile": "SHF"}, {"profile": "AMF", "roles": ["browser"], "specialist": true}, {"profile": "SXF"},
-      {"profile": "AHF"}, {"profile": "AXF"}, {"profile": "AUF"},
-      {"profile": "OX", "roles": ["qa", "spec-review"], "ongoing_thread_only": true, "final_only": true}
+    "claude-burn": [
+      {"profile": "HMAX", "one_off_only": true}, {"profile": "SNH"}, {"profile": "OM"},
+      {"profile": "OH"}, {"profile": "OX"}, {"profile": "OMAX"}
     ]
   },
   "codex": {

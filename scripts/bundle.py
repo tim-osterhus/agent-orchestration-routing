@@ -11,6 +11,14 @@ import uuid
 ROOT = Path(__file__).resolve().parents[1]
 EFFORTS = {"low", "medium", "high", "xhigh", "max", "ultra"}
 PERMISSION_MODES = {"default", "manual", "dontAsk", "auto", "acceptEdits", "plan", "bypassPermissions"}
+RETIRED_PROFILES = {"LF": "L", "SF": "SM", "SMF": "SM", "SHF": "SH", "SXF": "SX",
+                    "ALF": "AL", "AMF": "AM", "AHF": "AH", "AXF": "AX", "AUF": "AU", "CMAX": "SNX"}
+BURN_PROVIDERS = {"codex-burn": "codex", "claude-burn": "claude"}
+
+
+def check_mode(mode):
+    require(mode != "fast", "Routing mode fast is retired. Select efficient, performance, or balanced explicitly.")
+    require(mode != "tokenburn", "Routing mode tokenburn is retired. Select codex-burn or claude-burn explicitly.")
 
 
 def valid_tools(value):
@@ -31,6 +39,8 @@ def merge(base, patch):
 
 def profile(config, code, seen=None):
     seen = set() if seen is None else seen
+    require(code not in RETIRED_PROFILES,
+            f"Profile {code} is retired. Select {RETIRED_PROFILES.get(code)} explicitly and review its model, effort, and tier.")
     require(code in config["profiles"], f"Unknown profile: {code}")
     require(code not in seen, f"Alias cycle at {code}")
     item = config["profiles"][code]
@@ -39,10 +49,19 @@ def profile(config, code, seen=None):
     return deepcopy(item)
 
 
+def mode_pools(config, variant=None):
+    variant = variant or config.get("default_variant")
+    variants = config.get("variants", {})
+    require(variant in variants if variants else variant is None, f"Unknown routing variant: {variant}")
+    # Shared/custom top-level modes also preserve legacy mode overlays and presets.
+    return {**variants.get(variant, {}).get("modes", {}), **config["modes"]}
+
+
 def validate(config):
     require(config.get("schema_version") == 1, "Expected schema_version 1")
     require(config["controller_design"] in config["designs"], "Unknown controller design")
-    require(config["default_mode"] in config["modes"], "Unknown default mode")
+    check_mode(config["default_mode"])
+    require(config["default_mode"] in mode_pools(config), "Unknown default mode")
     require(config["execution_style"] in {"pure-orchestration", "supporting"}, "Invalid execution style")
     for key in ("max_parallel_workers", "max_external_sessions_per_assignment"):
         require(type(config[key]) is int and config[key] > 0, f"Invalid {key}")
@@ -57,16 +76,28 @@ def validate(config):
         require(isinstance(item["model"], str) and item["model"].strip(), f"Missing model in {code}")
         require(item["effort"] in EFFORTS, f"Invalid effort in {code}")
         require(item["provider"] != "claude" or item["effort"] != "ultra", f"Claude does not use the Codex ultra effort in {code}")
-        require(item.get("service_tier", "standard") in {"standard", "fast"}, f"Invalid tier in {code}")
+        require("description" not in item or isinstance(item["description"], str) and item["description"].strip(), f"Invalid description in {code}")
+        require(item.get("service_tier", "standard") == "standard", f"Only Standard service tier is supported in {code}")
+        require(not (item["model"] == "claude-sonnet-5-5" and item["effort"] == "max"),
+                f"Sonnet Max is retired in {code}. Select claude-sonnet-5-5/xhigh explicitly.")
         target = item.get("context_target_tokens")
         require(target is None or type(target) is int and target > 0, f"Invalid context target in {code}")
-    for name, pool in config["modes"].items():
+    pools = list(config["modes"].items())
+    for name, variant in config.get("variants", {}).items():
+        require(variant.get("modes"), f"Missing mode pools in variant {name}")
+        require(not set(variant["modes"]) & set(BURN_PROVIDERS), "Burn pools must be shared top-level modes")
+        require(config["default_mode"] in mode_pools(config, name), f"Unknown default mode in variant {name}")
+        pools.extend(variant["modes"].items())
+    for name, pool in pools:
+        check_mode(name)
         require(isinstance(pool, list) and pool, f"Empty pool: {name}")
         require(len({entry["profile"] for entry in pool}) == len(pool), f"Duplicate profiles in {name}")
         for entry in pool:
-            profile(config, entry["profile"])
+            item = profile(config, entry["profile"])
+            require(name not in BURN_PROVIDERS or item["provider"] == BURN_PROVIDERS[name],
+                    f"{name} requires {BURN_PROVIDERS.get(name)} profiles only")
             require(set(entry.get("roles", config["roles"])) <= set(config["roles"]), f"Unknown role in {name}")
-            for flag in ("one_off_only", "ongoing_thread_only", "final_only", "specialist"):
+            for flag in ("one_off_only", "ongoing_thread_only", "final_only", "specialist", "independent_review", "escalation"):
                 require(flag not in entry or type(entry[flag]) is bool, f"Invalid {flag} in {name}")
     codex = config["codex"]
     require(all(value in {"read-only", "workspace-write", "danger-full-access"} for value in codex["sandbox_by_role"].values()), "Invalid Codex sandbox")
@@ -128,21 +159,35 @@ def eligible(entry, role, assignment_kind, ongoing, final):
 
 def resolve(config, *, mode=None, code=None, role="implementation", design=None,
             assignment_kind="bounded", ongoing=False, final=False,
-            allow_out_of_pool=False, role_override=False, claude_mode=None):
+            allow_out_of_pool=False, role_override=False, claude_mode=None,
+            burn_account=None, burn_endpoint=None, variant=None, bias=None):
+    explicit_mode = mode is not None
     mode = mode or config["default_mode"]
+    check_mode(mode)
     design = design or config["controller_design"]
-    require(mode in config["modes"], f"Unknown routing mode: {mode}")
+    variant = variant or config.get("default_variant")
+    pools = mode_pools(config, variant)
+    bias = bias or config["selection"]["bias"]
+    require(bias in config["selection"]["bias_options"], "Invalid selection bias")
+    require(mode in pools, f"Unknown routing mode: {mode}")
     require(design in config["designs"], f"Unknown controller design: {design}")
     require(role in config["roles"], f"Unknown task role: {role}")
     require(assignment_kind in {"bounded", "controller"}, "Invalid assignment kind")
     require(not final or role in {"qa", "spec-review"}, "Final review must have a review role")
-    pool = config["modes"][mode]
+    burn_provider = BURN_PROVIDERS.get(mode)
+    if burn_provider:
+        require(explicit_mode, "Burn modes require explicit invocation with --mode")
+        require(isinstance(burn_account, str) and burn_account.strip(), "Burn modes require an identified --burn-account")
+        require(isinstance(burn_endpoint, str) and burn_endpoint.strip(), "Burn modes require an identified reset/deadline or queue endpoint with --burn-endpoint")
+    else:
+        require(burn_account is None and burn_endpoint is None, "Burn account and endpoint apply only to burn modes")
+    pool = pools[mode]
     if code:
         requested = profile(config, code)
         matches = [entry for entry in pool if profile(config, entry["profile"]) == requested]
         require(matches or allow_out_of_pool, "Profile is outside the active pool; explicit out-of-pool authorization is required")
-        entries = matches or [{"profile": code}]
-        require(role_override or any(eligible(entry, role, assignment_kind, ongoing, final) for entry in entries), "Profile violates role/lifecycle restrictions; explicit override required")
+        require(matches or role_override, "Out-of-pool profile has no role/lifecycle eligibility in the active pool. Explicit --role-override required.")
+        require(role_override or any(eligible(entry, role, assignment_kind, ongoing, final) for entry in matches), "Profile violates role/lifecycle restrictions; explicit override required")
         codes = [code]
     else:
         require(not role_override, "Role override requires an explicit profile")
@@ -155,6 +200,10 @@ def resolve(config, *, mode=None, code=None, role="implementation", design=None,
         item = profile(config, candidate)
         native = item["provider"] == config["designs"][design]["controller"]
         choice = {"code": candidate, **item, "dispatch": ("native-" if native else "external-") + item["provider"]}
+        matching_entries = [entry for entry in pool if profile(config, entry["profile"]) == item]
+        for flag in ("specialist", "independent_review", "escalation"):
+            if any(entry.get(flag) for entry in matching_entries):
+                choice[flag] = True
         if item["provider"] == "claude":
             selected_mode = claude_mode or ("consultation" if role in {"research", "planning", "qa", "spec-review"} else "implementation")
             require(selected_mode in config["claude"]["modes"], "Unknown Claude mode")
@@ -166,17 +215,24 @@ def resolve(config, *, mode=None, code=None, role="implementation", design=None,
         else:
             choice["execution"] = deepcopy(config["codex"])
         choices.append(choice)
-    return {"controller_design": design, "controller": config["designs"][design]["controller"],
-            "routing_mode": mode, "role": role, "selection_bias": config["selection"]["bias"],
+    result = {"controller_design": design, "controller": config["designs"][design]["controller"],
+            "routing_variant": variant, "routing_mode": mode, "role": role, "selection_bias": bias,
             "execution_style": config["execution_style"], "choices": choices,
             "overrides": {"out_of_pool": allow_out_of_pool, "role_or_lifecycle": role_override},
             "limits": {key: config[key] for key in ("max_parallel_workers", "max_external_sessions_per_assignment")},
             "notice": "Eligibility only, not measured suitability, account access, or dispatch verification."}
+    if burn_provider:
+        result["burn"] = {"provider": burn_provider, "account": burn_account, "endpoint": burn_endpoint}
+        if any(choice["provider"] != burn_provider for choice in choices):
+            result["burn"]["out_of_provider_exception"] = True
+            result["notice"] += " Explicit cross-provider exception. The selected burn account does not apply to this worker."
+    return result
 
 
 def launch_plan(resolved, cwd, prompt_file, artifacts, resume=None):
     require(len(resolved["choices"]) == 1, "Select one explicit --profile for a launch plan")
     choice = resolved["choices"][0]
+    require(choice["dispatch"].startswith("external-"), "Native routes require the host's worker controls, not an external CLI launch plan")
     cwd, prompt_file, artifacts = (str(Path(path).expanduser().resolve()) for path in (cwd, prompt_file, artifacts))
     require(Path(cwd).is_dir(), "cwd must be an existing directory")
     require(Path(prompt_file).is_file(), "prompt file must exist")
@@ -186,9 +242,14 @@ def launch_plan(resolved, cwd, prompt_file, artifacts, resume=None):
             "stdout_file": str(Path(artifacts) / "result.json"), "stderr_file": str(Path(artifacts) / "stderr.log"),
             "required_checks": ["signed-in subscription route", "exact returned model", "requested effort versus effective effort", "exit status and complete result", "owned-process lifecycle"],
             "environment_unset": [], "timeout_seconds": None}
+    if "burn" in resolved:
+        plan["burn"] = deepcopy(resolved["burn"])
+        plan["required_checks"].append("explicit burn authorization, identified provider account and endpoint, authorized queue, and prior mode")
+        if resolved["burn"].get("out_of_provider_exception"):
+            plan["required_checks"].append("explicit cross-provider exception uses a separate account route, not the selected burn account")
     if choice["provider"] == "codex":
         require(not resume, "Codex resume planning is not implemented; use the documented exact-session CLI route")
-        require(choice.get("service_tier") != "fast", "This external Codex adapter does not enforce Fast; use a verified native route or explicitly choose Standard")
+        require(choice.get("service_tier", "standard") == "standard", "Only Standard service tier is supported")
         settings = choice["execution"]
         sandbox = settings["sandbox_by_role"].get(resolved["role"], settings["sandbox_by_role"]["default"])
         args = ["codex", "exec", "--model", choice["model"], "-c", "model_reasoning_effort=" + json.dumps(choice["effort"]),
@@ -201,7 +262,7 @@ def launch_plan(resolved, cwd, prompt_file, artifacts, resume=None):
         args += ["-"]
         plan["timeout_seconds"] = settings["timeout_seconds"]
         plan["stdout_file"] = str(Path(artifacts) / "events.jsonl")
-        plan["required_checks"] += ["configured approval policy supported by unattended route", "sandbox does not constrain connector side effects", "no recursive controller launches", "caller-supplied deadline if required"]
+        plan["required_checks"] += ["Standard service tier on the actual route", "configured approval policy supported by unattended route", "sandbox does not constrain connector side effects", "no recursive controller launches", "caller-supplied deadline if required"]
     else:
         settings = choice["execution"]
         plan["timeout_seconds"] = settings["timeout_seconds"]
@@ -276,6 +337,10 @@ def main(argv=None):
     parser.add_argument("--preset", action="append", default=[])
     parser.add_argument("--overlay", type=Path, action="append", default=[])
     parser.add_argument("--mode")
+    parser.add_argument("--variant", help="Pool preference only, independent of controller design")
+    parser.add_argument("--bias", choices=["low", "default", "high"], help="Selection preference, never a reasoning-effort override")
+    parser.add_argument("--burn-account", help="Non-secret account identifier for the selected burn provider")
+    parser.add_argument("--burn-endpoint", help="Identified reset/deadline or authorized queue endpoint")
     parser.add_argument("--profile")
     parser.add_argument("--role")
     parser.add_argument("--design")
@@ -295,7 +360,8 @@ def main(argv=None):
         config = load_config(args.config, args.preset, args.overlay)
         require(not args.direct or args.action == "claude-plan", "--direct applies only to claude-plan")
         if args.action == "validate":
-            output = {"valid": True, "profiles": len(config["profiles"]), "modes": list(config["modes"])}
+            output = {"valid": True, "profiles": len(config["profiles"]), "variant": args.variant or config.get("default_variant"),
+                      "modes": list(mode_pools(config, args.variant))}
         else:
             role = args.role or ("qa" if args.action == "claude-plan" else "implementation")
             code = args.profile or (config["claude"]["default_profile"] if args.action == "claude-plan" else None)
@@ -310,7 +376,8 @@ def main(argv=None):
                     claude_mode = config["claude"]["default_mode"]
             output = resolve(config, mode=mode, code=code, role=role, design=args.design,
                              assignment_kind=args.assignment_kind, ongoing=args.ongoing_thread, final=args.final_review,
-                             allow_out_of_pool=args.allow_out_of_pool, role_override=args.role_override, claude_mode=claude_mode)
+                             allow_out_of_pool=args.allow_out_of_pool, role_override=args.role_override, claude_mode=claude_mode,
+                             burn_account=args.burn_account, burn_endpoint=args.burn_endpoint, variant=args.variant, bias=args.bias)
             if args.action.endswith("-plan"):
                 require(args.cwd and args.prompt_file and args.artifacts, "Launch planning requires --cwd, --prompt-file, and --artifacts")
                 require(len(output["choices"]) == 1 and output["choices"][0]["provider"] == args.action.split("-")[0], "Profile provider does not match the requested adapter")

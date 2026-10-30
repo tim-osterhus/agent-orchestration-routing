@@ -7,6 +7,8 @@ description: Explicit-only headless Claude Code consultation, implementation, or
 
 Use only when the user requests Claude involvement, directly or through an explicitly invoked router configuration that permits it. Use native Claude Code subscription login, not an API wrapper or browser project. Default to Consultation. A request to implement/build/fix selects Implementation. Permission-bypass Orchestration requires an explicit request, not merely a model name.
 
+Router-driven work retains the selected provider-primary variant and mode. Read [routing policy](../agent-orch-router/references/routing-policy.md) for burn gating or an explicit on-call trial. Before burn launch, establish the intended account, endpoint, and authorized backlog from available evidence. Ask only for missing required inputs. Burn eligibility does not enable Orchestration or bypass. Preserve the parent-owned external-session limit across descendants. Native Claude workers under Claude-first do not require a second CLI controller.
+
 Read [the launch contract](references/headless-cli.md). Resolve model, effort, tools, timeouts, turn limits, and worker settings from [shared configuration](../../config/routing.json) plus the selected preset. Default profile: OH. Consultation/Implementation default to 3600 seconds; Orchestration has no default timeout. No mode has a default turn cap. Do not duplicate deadline constants in the router or silently add them to workers/resumes.
 
 - **Consultation defaults:** Read/Glob/Grep with optional reviewers using the same read tools. Configure reviewer tools, model, prompt, and permission mode independently. Authorized test execution can use an explicit tool/approval override rather than a mandatory role change.

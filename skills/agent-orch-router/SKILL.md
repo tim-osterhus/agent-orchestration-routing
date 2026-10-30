@@ -5,15 +5,21 @@ description: Explicit-only configurable routing for delegated research, implemen
 
 # Agent Orchestration Router
 
-Activate only when the user invokes this skill for the current assignment. Keep the active mode in conversation/compaction context. Do not change the parent model or other chats. Default to pure orchestration: delegate substantive work while the controller decomposes, integrates, verifies, and communicates. The user can select supporting delegation instead.
+Activate only when the user invokes this skill for the current assignment. Keep the active variant, mode, and bias in conversation/compaction context. Do not change the parent model or other chats. Default to pure orchestration: delegate substantive work while the controller decomposes, integrates, verifies, and communicates. The user can select supporting delegation instead.
 
-Resolve the physical bundle root from this skill's directory. Read [the shared configuration](../../config/routing.json) and [execution contract](references/execution.md). Apply an explicitly selected configuration/preset. Use `scripts/bundle.py resolve` at the bundle root to inspect eligible profiles; it does not dispatch work or choose suitability for you.
+Resolve the physical bundle root from this skill's directory. Read [the shared configuration](../../config/routing.json), [routing policy](references/routing-policy.md), and [execution contract](references/execution.md). Apply the selected configuration/preset. `scripts/bundle.py resolve` inspects eligibility without dispatching work. Read a profile's central catalog description when considering it, not a second model-policy list.
 
-Choose the earliest suitable eligible profile from the selected mode. Low/default/high selection bias never changes a profile's configured effort. An explicit profile can select outside the mode's pool, but does not waive role or lifecycle restrictions. Role exceptions need explicit user authorization. Never silently change an exact model, effort, provider, service tier, or workflow.
+Choose the earliest suitable eligible profile from the selected mode. Low/default/high selection bias never changes a profile's configured effort. Never silently change an exact model, effort, provider, service tier, or workflow.
 
-The configuration supplies Efficient, Fast, Performance, Balanced, and Tokenburn pools adapted from the source router. Balanced is the default. Tokenburn requires an explicit request and an identified account/reset endpoint. Return to the prior mode when its endpoint or authorized queue ends. Do not invent work to spend allowance.
+An out-of-pool profile requires both `--allow-out-of-pool` and `--role-override`. Its role/lifecycle eligibility is unspecified without an active-pool entry. Do not infer global model restrictions from other modes. Role exceptions need explicit user authorization.
 
-Separate implementation, QA, spec review, frontend work, and final independent review. Review existing work without authoring its replacement. Reviewers must not implement their own fixes unless the user changes the assignment. Use fresh reviewer context after authorship.
+One catalog serves `codex-primary` and `claude-primary`. `--variant` selects pool preference, not the running host. Both have Efficient, Balanced, Performance, and identical shared Codex-burn/Claude-burn modes. Defaults are Codex-primary and Balanced. Selection bias changes preference within the same pool, never configured effort. Retired Fast codes, `fast`, `tokenburn`, and `CMAX` fail instead of redirecting.
+
+Bundled Codex profiles target Standard tier without enforcing it. Launch plans do not set a tier and may inherit runtime settings. Verify and report the effective or inherited tier, or disclose unavailable verification. Do not change global speed settings.
+
+Before burn work, establish explicit invocation, the intended account, reset/deadline or queue endpoint, and authorized backlog from available instructions or evidence. Ask only for missing required inputs. Pass `--mode`, `--burn-account`, and `--burn-endpoint` to the inspector. These are offline metadata, not quota verification. Restore the prior mode at the endpoint. Do not invent work, enable paid extra usage, or switch authentication.
+
+Separate implementation, QA, spec review, frontend work, and independent acceptance. An author cannot be the sole acceptance check. Cross-provider review is optional. Reviewers must not implement their own fixes unless the user changes the assignment. Use fresh reviewer context after authorship.
 
 Model eligibility and task roles do not assign permissions. Resolve tool access, approval rules, prompt handling, and sandbox settings independently from configuration. Mode defaults are examples, not mandatory security policies. Do not silently escalate after a denial or treat broad tools as authority to exceed the task.
 

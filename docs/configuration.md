@@ -17,8 +17,9 @@ For Claude Code, invoke the router explicitly and do not add it to always-loaded
 | Field | Effect |
 | --- | --- |
 | `controller_design` | Chooses `codex-first` or `claude-first` routing labels. It does not change the current app/model. |
-| `profiles` | Exact model, provider, effort, service tier, and soft context target. Aliases use `alias_of`. |
-| `modes` | Ordered pools with role, one-off, ongoing-thread, specialist, and final-review eligibility. |
+| `profiles` | One master catalog of exact model, provider, effort, target tier, soft context target, and descriptions. Aliases use `alias_of`. |
+| `default_variant`, `variants` | Select `codex-primary` or `claude-primary` pools for Efficient, Balanced, and Performance. |
+| `modes` | Shared burn pools and custom/preset pools. Entries carry role/lifecycle, specialist, independent-review, and escalation markers. |
 | `selection.bias` | Low/default/high selection preference. It never changes model effort or sorts unknown benchmark values. |
 | `execution_style` | Pure orchestration or supporting delegation. |
 | `max_parallel_workers` | Scheduling ceiling, further limited by the actual runtime. |
@@ -28,7 +29,15 @@ For Claude Code, invoke the router explicitly and do not add it to always-loaded
 
 Keep your edits in an ignored `config/local.json` and pass `--overlay config/local.json`, or pass a complete replacement with `--config`. Recursive object merge preserves unspecified fields. Arrays replace rather than append. Later presets/overlays win. Presets load before overlays, so local policy can narrow a preset. Validate the final merged configuration.
 
-The initial mode structure retains the source router's eligibility boundaries. Personal names, local helper paths, account prices, and the required private helper were removed. Sol Max and Sonnet Max examples extend the Balanced pool to reflect the supplied frontier chart. Unsupported Ultracode-specific profiles were omitted instead of advertised as working integrations. All model IDs require account/runtime verification.
+`--variant` selects pool preference independently of controller design, permissions, and bias. Codex-primary is the default. `variants.NAME.modes` defines each variant's normal pools. Top-level `modes` supplies shared burns and custom/preset pools. A legacy top-level normal-mode override takes precedence for every variant. Prefer a variant-specific overlay when only one variant should change. Complete legacy configs without `variants` still use their top-level modes.
+
+Both variants have five base modes with one shared catalog. See [routing policy](../skills/agent-orch-router/references/routing-policy.md) for mode objectives, selection bias, and on-call use. Exact pool order and profile descriptions live in configuration. Pool sizes are bundled choices, not hard limits on custom configuration. Fable `FH`/`FX` are explicit on-call trials only, absent from automatic modes and the Opus/Haiku preset. Ultracode is not supported. All model IDs require account/runtime verification.
+
+Bundled Codex profiles target Standard tier without enforcing it. Launch plans do not set a tier and may inherit runtime settings. Verify and report the effective or inherited tier, or disclose unavailable verification. Do not change global speed settings.
+
+`fast` and `tokenburn` are retired modes, not aliases. Select `efficient`, `performance`, or `balanced` explicitly, or select the relevant provider burn mode. Retired Fast codes (`LF`, `SF`, `SMF`, `SHF`, `SXF`, `ALF`, `AMF`, `AHF`, `AXF`, `AUF`) fail with migration guidance. Their Standard counterparts retain model and effort.
+
+`CMAX` is retired. Select `SNX` explicitly to change Sonnet from Max to XHigh. Remove retired entries from complete configs and overlays before validation.
 
 ## Approvals are a separate choice
 
@@ -65,15 +74,27 @@ python3 scripts/bundle.py resolve --mode efficient --role research
 python3 scripts/bundle.py resolve --mode performance --role browser
 python3 scripts/bundle.py resolve --mode balanced --profile OH --role qa
 python3 scripts/bundle.py resolve --mode balanced --profile SM --role implementation --design claude-first
+python3 scripts/bundle.py resolve --variant claude-primary --design claude-first --mode balanced --profile OH --role implementation --bias high
+python3 scripts/bundle.py resolve --mode codex-burn --role browser --burn-account codex-work --burn-endpoint "next account reset"
+python3 scripts/bundle.py resolve --mode claude-burn --profile HMAX --design claude-first --burn-account claude-work --burn-endpoint "authorized queue exhausted"
+python3 scripts/bundle.py resolve --mode codex-burn --profile OH --role qa --allow-out-of-pool --role-override --burn-account codex-work --burn-endpoint "next account reset"
 python3 scripts/bundle.py validate --preset opus-haiku
 python3 scripts/bundle.py resolve --preset opus-haiku --mode opus-haiku --profile OH --role implementation --claude-mode orchestration
 ```
 
 `resolve` returns eligible candidates, not the final suitability decision. The agent evaluates task complexity and tool fit before choosing one. Specialist entries take precedence for their stated roles. Unknown profiles, alias cycles, ineligible roles, and disabled orchestration fail rather than silently selecting something else. An empty eligible set is a blocker.
 
-An explicit out-of-pool profile requires `--allow-out-of-pool`. A role/lifecycle exception requires `--role-override` with an explicit profile. These switches record an exception; they do not obtain user authorization or expand task scope. Use them only for the user's explicit request.
+An explicit out-of-pool profile requires both `--allow-out-of-pool` and `--role-override`. The active pool has no entry defining that profile's role/lifecycle eligibility. The second flag acknowledges this unspecified eligibility, not a global model restriction inferred from another mode.
 
-Tokenburn also requires the controller to establish the relevant account, reset/deadline, authorized queue, and prior mode. The offline inspector cannot verify a reset. It never reads quotas, pools accounts, or changes authentication.
+An in-pool role/lifecycle exception requires only `--role-override` with an explicit profile. These switches record an exception. They do not obtain user authorization or expand task scope. Use them only for the user's explicit request.
+
+`codex-burn` and `claude-burn` require explicit `--mode`, a non-secret `--burn-account`, and `--burn-endpoint`. The mode identifies the worker provider, not the parent host. Before launch, establish the intended account, reset/deadline or queue endpoint, and authorized backlog/scope from available instructions or evidence. Ask only for missing required inputs. Preserve the prior mode and restore it at the endpoint or queue end. Do not invent work to consume allowance.
+
+The offline inspector records these identifiers but cannot verify account access or resets. It never reads quotas, pools accounts, or changes authentication.
+
+The same two six-profile burn pools serve both variants. Automatic burn choices use only the selected provider. General-purpose Opus entries permit implementation. Native bounded Haiku workers are available under Claude-first without enabling Orchestration. Unknown remaining allowance stays unknown. No numeric quota prerequisite or tracking infrastructure is imposed. Never switch authentication or enable paid extra usage automatically.
+
+Existing out-of-pool and role/lifecycle override controls remain available for explicit user-authorized exceptions. The inspector marks cross-provider exceptions. These exceptions do not consume the selected provider's allowance. Verify their own account route separately.
 
 ## Claude plans and the optional preset
 
@@ -81,6 +102,7 @@ Use an actual self-contained task file and existing workspace. For example, if a
 
 ```sh
 python3 scripts/bundle.py claude-plan --profile OH --role qa --cwd . --prompt-file task.txt --artifacts .runs/review
+python3 scripts/bundle.py claude-plan --variant claude-primary --profile OH --role implementation --cwd . --prompt-file task.txt --artifacts .runs/implementation
 python3 scripts/bundle.py claude-plan --direct --role implementation --cwd . --prompt-file task.txt --artifacts .runs/implementation
 python3 scripts/bundle.py claude-plan --preset opus-haiku --mode opus-haiku --profile OH --role implementation --claude-mode orchestration --cwd . --prompt-file task.txt --artifacts .runs/team
 ```
@@ -89,7 +111,9 @@ The optional preset defaults to permission bypass and full tools. Its approvals 
 
 Consultation and Implementation default to 60 minutes with no turn limit. Orchestration defaults to no timeout and no turn limit. `null` is deliberate, not a missing value. A plan's timeout is metadata: the caller must enforce a non-null deadline across its owned process tree. Actual execution limits and account errors still apply. Resumes share the original assignment deadline if one exists.
 
-Without `--direct`, an Implementation plan under Balanced uses an eligible profile such as HM. OH Implementation needs the selected `opus-haiku` pool or a user-approved role exception. Standalone `--direct` calls have no router pool. They use the companion's configured default model and the user's assigned role, not an exception to an active router. Do not add `--direct` to evade restrictions while the router remains active.
+Balanced under Claude-primary permits general-purpose Opus implementation. Under Codex-primary, Balanced's OH entry is an optional independent-review route. An authored OH assignment there needs an explicit role exception. Standalone `--direct` calls have no router pool. They use the companion's configured default model and the user's assigned role, not an exception to an active router. Do not add `--direct` to evade restrictions while the router remains active.
+
+CLI plans apply only to external routes. A native dispatch label now fails launch planning instead of producing a second CLI controller. Use the host's native worker controls. `--design` must describe the actual controller host, not serve as a way to evade this check.
 
 ## Checks and publication
 
@@ -97,4 +121,4 @@ Without `--direct`, an Implementation plan under Balanced uses an eligible profi
 python3 -m unittest discover -s tests -v
 ```
 
-The tests are offline and spend no model usage. Launch plans do not prove model access, effective effort, Fast support, timeout cleanup, or successful cross-provider execution. Run bounded, authorized live tests before making those claims publicly. This bundle is available under the [MIT License](../LICENSE).
+The tests are offline and spend no model usage. Launch plans do not prove model access, effective effort, Standard tier enforcement, timeout cleanup, or successful cross-provider execution. Report requested versus observed or inherited tier without changing global speed settings. Disclose unavailable tier controls or verification. Run bounded, authorized live tests before making execution claims publicly. This bundle is available under the [MIT License](../LICENSE).
