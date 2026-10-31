@@ -2,7 +2,7 @@
 
 Both designs share the master catalog, variants, work-order contract, and evidence checks. `--variant` chooses pool preference. `--design` describes the actual controller host and determines dispatch. Neither changes an already running conversation. Permissions and bias are independent controls.
 
-Shared High-qual also permits Muse investigation through a separately verified provider adapter, including a configured durable adapter. Muse is external under both designs. The bundled planner cannot launch it. Use the conditional [Muse provider checks](../skills/agent-orch-router/references/muse.md).
+Shared High-qual also permits Muse investigation or authorized implementation through a separately verified provider adapter, including a configured durable adapter. Muse is external under both designs. The bundled planner cannot launch it. Use the conditional [Muse provider checks](../skills/agent-orch-router/references/muse.md).
 
 | Responsibility | Codex-first | Claude-first |
 | --- | --- | --- |

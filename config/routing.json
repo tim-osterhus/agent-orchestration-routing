@@ -51,8 +51,8 @@
     "OMAX": {"provider": "claude", "model": "claude-opus-5-5", "effort": "max", "context_target_tokens": null, "description": "Candidate for demanding Claude-primary work or a justified Codex-primary Performance escalation."},
     "FH": {"provider": "claude", "model": "claude-fable-5-1", "effort": "high", "context_target_tokens": null, "description": "Opt-in trial for writing, prose, UI copy, alternative hypotheses, or security-sensitive implementation with concrete acceptance checks. No proven vulnerability-review or general UI-visual advantage is implied."},
     "FX": {"provider": "claude", "model": "claude-fable-5-1", "effort": "xhigh", "context_target_tokens": null, "description": "Optional deeper-analysis trial for prose, UI copy, alternative hypotheses, or security-sensitive implementation with concrete checks, not routine escalation. A lower composite AAI score does not settle every task's fit."},
-    "MFH": {"provider": "muse", "model": "muse-wonder-full-1.0", "effort": "high", "description": "Investigate repository structure, existing fixes, and root causes using source evidence. Return a diagnosis and focused next checks, not authored changes."},
-    "MFX": {"provider": "muse", "model": "muse-wonder-full-1.0", "effort": "xhigh", "description": "Examine cross-system failures with competing hypotheses and challenge a proposed plan against evidence. Return discriminating checks, not a second dispatcher or authored changes."}
+    "MFH": {"provider": "muse", "model": "muse-wonder-full-1.0", "effort": "high", "description": "Investigate repository structure, existing fixes, and root causes using source evidence. Default to diagnosis and focused checks. Implement when the work order authorizes edits."},
+    "MFX": {"provider": "muse", "model": "muse-wonder-full-1.0", "effort": "xhigh", "description": "Examine cross-system failures with competing hypotheses and challenge a proposed plan against evidence. Default to discriminating checks, not a second dispatcher. Implement when the work order authorizes edits."}
   },
   "variants": {
     "codex-primary": {
@@ -101,8 +101,8 @@
       {"profile": "OX", "roles": ["planning", "qa", "spec-review"], "independent_review": true},
       {"profile": "AX", "roles": ["qa", "browser"], "independent_review": true},
       {"profile": "FX", "roles": ["spec-review"], "independent_review": true},
-      {"profile": "MFH", "roles": ["research", "planning", "qa"]},
-      {"profile": "MFX", "roles": ["research", "planning", "qa"]}
+      {"profile": "MFH", "roles": ["research", "planning", "qa", "implementation"]},
+      {"profile": "MFX", "roles": ["research", "planning", "qa", "implementation"]}
     ],
     "codex-burn": [
       {"profile": "AL"}, {"profile": "SM"}, {"profile": "SH"}, {"profile": "SX"},

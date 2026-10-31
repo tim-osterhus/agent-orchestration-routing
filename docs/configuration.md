@@ -35,9 +35,9 @@ Both variants have six base modes with one shared catalog. The [router entrypoin
 
 Fable `FH`/`FX` remain on-call trials except High-qual's selective `FX` specification-review route. Neither appears in the Opus/Haiku preset. Ultracode is not supported. All model IDs require account/runtime verification.
 
-High-qual is shared and opt-in. Its eight profiles are eligible choices, not required pipeline stages. Muse `MFH`/`MFX` are investigation-only routes with explicit `high`/`xhigh` effort. Read [Muse provider checks](../skills/agent-orch-router/references/muse.md) only when selecting them.
+High-qual is shared and opt-in. Its eight profiles are eligible choices, not required pipeline stages. Muse `MFH`/`MFX` default to investigation and allow implementation when the work order authorizes edits. Their exact efforts remain `high`/`xhigh`. Read [Muse provider checks](../skills/agent-orch-router/references/muse.md) only when selecting them.
 
-`resolve` returns `external-muse` with adapter-required metadata. Bundled launch plans reject Muse. Use a separately verified adapter rather than substituting Codex or Claude settings.
+`resolve` returns `external-muse` with adapter-required metadata. Bundled launch plans reject Muse. Use a separately verified adapter rather than substituting Codex or Claude settings. Configure Muse permissions through that adapter independently of model and role. Honor and read back the selected profile. This bundle imposes neither read-only nor maximum access.
 
 Bundled Codex profiles target Standard tier without enforcing it. Launch plans do not set a tier and may inherit runtime settings. Verify and report the effective or inherited tier, or disclose unavailable verification. Do not change global speed settings.
 

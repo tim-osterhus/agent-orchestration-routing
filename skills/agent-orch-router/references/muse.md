@@ -8,7 +8,9 @@ T3 Code's [versioned catalog adapter](https://github.com/pingdotgg/t3code/blob/v
 
 Before dispatch, verify the intended account route, exact model, requested effort, tools, and result metadata through the selected adapter. Set MFH to `high` and MFX to `xhigh` explicitly. Do not accept a default, fallback model, or unverified effort as an exact match. Stop if the adapter cannot establish the required route.
 
-MFH/MFX assignments are read-only investigation or review, not implementation. Verify the adapter's effective write restrictions cover the assigned checks and tools. A read-only prompt alone does not enforce this boundary. Stop if effective read-only controls cannot be established.
+MFH/MFX default to investigation. Implementation is eligible when the work order authorizes edits. Reviewers do not author fixes without reassignment.
+
+Permissions are independent of model and role. Honor the selected permission profile and verify its effective tools and controls through the adapter. No read-only or maximum-access profile is required. Tool access does not expand work-order authority.
 
 Before sending private repository inputs, verify effective Contributor mode is off and confirm the route's data-handling terms permit the work. [Meta's subscription documentation](https://dev.meta.ai/docs/muse-code/subscriptions) describes training use when Contributor mode is on and host-specific saved settings. A catalog check does not establish this privacy setting. Contributor mode off does not establish zero retention. Do not change global settings without authorization. Stop confidential work if effective data handling remains unknown.
 

@@ -86,6 +86,18 @@ class RouterDocumentTests(unittest.TestCase):
             self.assertIn("installed Claude Delegation skill", mode)
             self.assertLess(len((entrypoint + mode).split()), 1200)
 
+    def test_muse_task_fit_matches_catalog(self):
+        fits = {code: task_fit for code, _, task_fit in rows(SKILL / "modes/high-qual.md")[1:]}
+        for code in ("MFH", "MFX"):
+            self.assertEqual(fits[code], self.config["profiles"][code]["description"])
+
+    def test_muse_checks_keep_permission_choice_separate_from_privacy(self):
+        checks = (SKILL / "references/muse.md").read_text()
+        self.assertIn("Honor the selected permission profile", checks)
+        self.assertIn("No read-only or maximum-access profile is required.", checks)
+        self.assertIn("verify effective Contributor mode is off", checks)
+        self.assertIn("Stop confidential work if effective data handling remains unknown.", checks)
+
 
 if __name__ == "__main__":
     unittest.main()

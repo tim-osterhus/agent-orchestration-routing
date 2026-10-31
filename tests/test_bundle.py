@@ -353,7 +353,7 @@ class VariantTests(unittest.TestCase):
             self.assertNotIn("high-qual", self.config["variants"][variant]["modes"])
             self.assertFalse(any(entry.get("specialist") for entry in pool))
             for role, codes in {
-                "implementation": ["SM", "SX", "OM"],
+                "implementation": ["SM", "SX", "OM", "MFH", "MFX"],
                 "research": ["SM", "SX", "OM", "MFH", "MFX"],
                 "planning": ["SM", "SX", "OM", "OX", "MFH", "MFX"],
                 "qa": ["SM", "SX", "OM", "OX", "AX", "MFH", "MFX"],
@@ -362,7 +362,7 @@ class VariantTests(unittest.TestCase):
                 result = bundle.resolve(self.config, mode="high-qual", variant=variant, role=role)
                 self.assertEqual([choice["code"] for choice in result["choices"]], codes)
                 self.assertNotIn("burn", result)
-        for code in ("OX", "AX", "FX", "MFH", "MFX"):
+        for code in ("OX", "AX", "FX"):
             with self.assertRaisesRegex(ValueError, "role/lifecycle"):
                 bundle.resolve(self.config, mode="high-qual", code=code, role="implementation")
         with self.assertRaisesRegex(ValueError, "only to burn"):
@@ -371,15 +371,32 @@ class VariantTests(unittest.TestCase):
     def test_muse_is_external_without_codex_or_claude_execution_settings(self):
         for code, effort in (("MFH", "high"), ("MFX", "xhigh")):
             for design in self.config["designs"]:
-                choice = bundle.resolve(self.config, mode="high-qual", code=code, role="research", design=design)["choices"][0]
-                self.assertEqual((choice["provider"], choice["model"], choice["effort"], choice["dispatch"]),
-                                 ("muse", "muse-wonder-full-1.0", effort, "external-muse"))
-                self.assertEqual(set(choice["execution"]), {"launch_plan_supported", "adapter_required", "notice"})
-                self.assertFalse(choice["execution"]["launch_plan_supported"])
-                self.assertTrue(choice["execution"]["adapter_required"])
-                self.assertNotIn("claude_mode", choice)
+                for role in ("research", "implementation"):
+                    result = bundle.resolve(self.config, mode="high-qual", code=code, role=role, design=design)
+                    choice = result["choices"][0]
+                    self.assertEqual((choice["provider"], choice["model"], choice["effort"], choice["dispatch"]),
+                                     ("muse", "muse-wonder-full-1.0", effort, "external-muse"))
+                    self.assertEqual(set(choice["execution"]), {"launch_plan_supported", "adapter_required", "notice"})
+                    self.assertFalse(choice["execution"]["launch_plan_supported"])
+                    self.assertTrue(choice["execution"]["adapter_required"])
+                    self.assertNotIn("claude_mode", choice)
+                    self.assertEqual(result["overrides"], {"out_of_pool": False, "role_or_lifecycle": False})
         with self.assertRaisesRegex(ValueError, "Unknown provider"):
             bundle.validate(bundle.merge(self.config, {"profiles": {"MFH": {"provider": "unknown"}}}))
+
+    def test_muse_resolution_does_not_impose_other_provider_permissions(self):
+        for sandbox, permission_mode in (("read-only", "manual"), ("danger-full-access", "bypassPermissions")):
+            config = bundle.merge(self.config, {
+                "codex": {"sandbox_by_role": {"implementation": sandbox}},
+                "claude": {"modes": {"implementation": {"permission_mode": permission_mode}}}})
+            bundle.validate(config)
+            before = deepcopy(config)
+            for code in ("MFH", "MFX"):
+                for variant in config["variants"]:
+                    result = bundle.resolve(config, mode="high-qual", code=code, role="implementation", variant=variant)
+                    expected = bundle.resolve(self.config, mode="high-qual", code=code, role="implementation", variant=variant)
+                    self.assertEqual(result, expected)
+            self.assertEqual(config, before)
 
 
 class PlanTests(unittest.TestCase):
