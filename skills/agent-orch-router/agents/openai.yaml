@@ -1,6 +1,6 @@
 interface:
   display_name: "Agent Orchestration Router"
   short_description: "Route bounded work across configured agent profiles."
-  default_prompt: "Use $agent-orch-router with the bundle configuration to delegate this assignment, preserving role boundaries and exact model settings."
+  default_prompt: "Use $agent-orch-router to delegate this assignment using the selected mode and exact model settings."
 policy:
   allow_implicit_invocation: false

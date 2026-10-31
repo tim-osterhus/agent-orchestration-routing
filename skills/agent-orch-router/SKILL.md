@@ -1,30 +1,57 @@
 ---
 name: agent-orch-router
-description: Explicit-only configurable routing for delegated research, implementation, and review across Codex and Claude Code. Use ordered profile pools with task-role and lifecycle constraints.
+description: Explicit-only routing for delegated work across Codex and Claude Code. Select exact model/effort profiles from ordered, role-aware mode pools.
 ---
 
 # Agent Orchestration Router
 
-Activate only when the user invokes this skill for the current assignment. Keep the active variant, mode, and bias in conversation/compaction context. Do not change the parent model or other chats. Default to pure orchestration: delegate substantive work while the controller decomposes, integrates, verifies, and communicates. The user can select supporting delegation instead.
+Activate only on explicit invocation for this assignment. Default to **codex-primary / balanced / default bias** and **pure orchestration**: delegate substantive work, then integrate and accept results. Use supporting delegation when requested. Retain these choices through compaction.
 
-Resolve the physical bundle root from this skill's directory. Read [the shared configuration](../../config/routing.json), [routing policy](references/routing-policy.md), and [execution contract](references/execution.md). Apply the selected configuration/preset. `scripts/bundle.py resolve` inspects eligibility without dispatching work. Read a profile's central catalog description when considering it, not a second model-policy list.
+Read this file and **only the selected mode document**:
 
-Choose the earliest suitable eligible profile from the selected mode. Low/default/high selection bias never changes a profile's configured effort. Never silently change an exact model, effort, provider, service tier, or workflow.
+| Variant | Efficient | Balanced | Performance |
+| --- | --- | --- | --- |
+| codex-primary | [Efficient](modes/codex-primary-efficient.md) | [Balanced](modes/codex-primary-balanced.md) | [Performance](modes/codex-primary-performance.md) |
+| claude-primary | [Efficient](modes/claude-primary-efficient.md) | [Balanced](modes/claude-primary-balanced.md) | [Performance](modes/claude-primary-performance.md) |
 
-An out-of-pool profile requires both `--allow-out-of-pool` and `--role-override`. Its role/lifecycle eligibility is unspecified without an active-pool entry. Do not infer global model restrictions from other modes. Role exceptions need explicit user authorization.
+Shared across variants: [Codex-burn](modes/codex-burn.md) · [Claude-burn](modes/claude-burn.md).
 
-One catalog serves `codex-primary` and `claude-primary`. `--variant` selects pool preference, not the running host. Both have Efficient, Balanced, Performance, and identical shared Codex-burn/Claude-burn modes. Defaults are Codex-primary and Balanced. Selection bias changes preference within the same pool, never configured effort. Retired Fast codes, `fast`, `tokenburn`, and `CMAX` fail instead of redirecting.
+Variant selects pool preference, not the running host. Never change the parent model. Shorthand selects the exact model and effort below, not an automatic pool exception. Retired Fast codes, `fast`, `tokenburn`, and `CMAX` fail without substitution.
 
-Bundled Codex profiles target Standard tier without enforcing it. Launch plans do not set a tier and may inherit runtime settings. Verify and report the effective or inherited tier, or disclose unavailable verification. Do not change global speed settings.
+## Exact catalog
 
-Before burn work, establish explicit invocation, the intended account, reset/deadline or queue endpoint, and authorized backlog from available instructions or evidence. Ask only for missing required inputs. Pass `--mode`, `--burn-account`, and `--burn-endpoint` to the inspector. These are offline metadata, not quota verification. Restore the prior mode at the endpoint. Do not invent work, enable paid extra usage, or switch authentication.
+| Code | Model | Effort |
+| --- | --- | --- |
+| LM | gpt-6-luna | medium |
+| L | gpt-6-luna | max |
+| TL | gpt-6.1-terra | low |
+| TM | gpt-6.1-terra | medium |
+| TH | gpt-6.1-terra | high |
+| SL | gpt-6.1-sol | low |
+| SM | gpt-6.1-sol | medium |
+| SH | gpt-6.1-sol | high |
+| SX | gpt-6.1-sol | xhigh |
+| SMAX | gpt-6.1-sol | max |
+| AL | gpt-6-astra | low |
+| AM | gpt-6-astra | medium |
+| AH | gpt-6-astra | high |
+| AX | gpt-6-astra | xhigh |
+| AMAX | gpt-6-astra | max |
+| AU | gpt-6-astra | ultra |
+| HMED | claude-haiku-5-5 | medium |
+| HH | claude-haiku-5-5 | high |
+| HM | claude-haiku-5-5 | xhigh |
+| HK | claude-haiku-5-5 | xhigh |
+| HMAX | claude-haiku-5-5 | max |
+| SNH | claude-sonnet-5-5 | high |
+| SNX | claude-sonnet-5-5 | xhigh |
+| OM | claude-opus-5-5 | medium |
+| OH | claude-opus-5-5 | high |
+| OX | claude-opus-5-5 | xhigh |
+| OMAX | claude-opus-5-5 | max |
+| FH | claude-fable-5-1 | high |
+| FX | claude-fable-5-1 | xhigh |
 
-Separate implementation, QA, spec review, frontend work, and independent acceptance. An author cannot be the sole acceptance check. Cross-provider review is optional. Reviewers must not implement their own fixes unless the user changes the assignment. Use fresh reviewer context after authorship.
+Codex profiles target Standard tier. HK has a soft 100K context target. HM does not. Catalog entries outside the selected pool are on-call only. FH/FX are opt-in trials for prose, UI copy, alternative hypotheses, or security-sensitive implementation, not proven specialist advantages.
 
-Model eligibility and task roles do not assign permissions. Resolve tool access, approval rules, prompt handling, and sandbox settings independently from configuration. Mode defaults are examples, not mandatory security policies. Do not silently escalate after a denial or treat broad tools as authority to exceed the task.
-
-Follow the configured controller design. Codex-first uses native Codex workers and the optional [Claude companion](../claude-delegation/SKILL.md). Claude-first uses native Claude workers and the external Codex contract in [controller designs](../../docs/controller-designs.md). A design setting does not switch a running chat's host or grant its missing tools.
-
-Use the optional `opus-haiku` preset only when requested. Its permission-bypass orchestration requires explicit user approval for the assignment. Selecting a model code or the generic router alone does not grant bypass. The preset has no default orchestration timeout; Consultation and Implementation retain their configured deadlines.
-
-Read [selection evidence](references/evidence.md) only for a requested profile refresh or rationale. Profile availability and suitability must be checked at dispatch. These files are instructions and configuration, not a scheduler or security sandbox.
+Optional: [configuration and installation](../../docs/configuration.md), [selection evidence](references/evidence.md). Neither is required for ordinary routing. Custom configuration or the Opus/Haiku preset applies only when selected.

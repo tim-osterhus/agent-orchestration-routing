@@ -2,17 +2,17 @@
 
 Python 3.10+ is required for offline inspection. Dispatch requires the selected host, native subagent support, and an already authorized CLI account. No API key is required by these scripts because they never call a model.
 
-## Keep the bundle together
+## Install only what you use
 
 Retain this checkout as the canonical source. Expose `skills/agent-orch-router` and optionally `skills/claude-delegation` through your host's skill installation mechanism. Codex discovers user skills under `~/.agents/skills`; Claude Code supports `.claude/skills` for project-local skills. Use directory links to the source folders where supported. On Windows, use a directory junction or the host's installer rather than copying only a link file.
 
-These skills reference the shared configuration by physical source path. Copying an individual skill without its sibling configuration, scripts, and docs is not a complete installation. Do not overwrite an existing installation without reviewing it. This initial version does not install itself or modify global settings.
+Ordinary native routing reads only `agent-orch-router/SKILL.md` and one selected `modes/*.md` file. Copying that skill folder intact supports this path. Keep the full checkout for optional configuration, offline scripts, controller adapters, or the Claude companion, whose external tooling uses shared files. Do not overwrite an existing installation without reviewing it. This package does not install itself or modify global settings.
 
 For Claude Code, invoke the router explicitly and do not add it to always-loaded instructions. This package does not silently create Claude-specific frontmatter or preload the skill. Set `disable-model-invocation: true` in a host-specific installed copy if automatic Claude invocation must be technically disabled. Codex's `agents/openai.yaml` already keeps both skills explicit-only.
 
 ## Editable controls
 
-`config/routing.json` is the source of truth:
+`config/routing.json` drives the optional offline inspector and external CLI plans. Its bundled catalog and pools match the router's Markdown tables. When editing bundled defaults, update both and run the tests. Custom configurations need only be loaded when selected.
 
 | Field | Effect |
 | --- | --- |
@@ -31,7 +31,7 @@ Keep your edits in an ignored `config/local.json` and pass `--overlay config/loc
 
 `--variant` selects pool preference independently of controller design, permissions, and bias. Codex-primary is the default. `variants.NAME.modes` defines each variant's normal pools. Top-level `modes` supplies shared burns and custom/preset pools. A legacy top-level normal-mode override takes precedence for every variant. Prefer a variant-specific overlay when only one variant should change. Complete legacy configs without `variants` still use their top-level modes.
 
-Both variants have five base modes with one shared catalog. See [routing policy](../skills/agent-orch-router/references/routing-policy.md) for mode objectives, selection bias, and on-call use. Exact pool order and profile descriptions live in configuration. Pool sizes are bundled choices, not hard limits on custom configuration. Fable `FH`/`FX` are explicit on-call trials only, absent from automatic modes and the Opus/Haiku preset. Ultracode is not supported. All model IDs require account/runtime verification.
+Both variants have five base modes with one shared catalog. The [router entrypoint](../skills/agent-orch-router/SKILL.md) links each self-contained mode. Bundled pool order and task-fit guidance are available there without reading JSON. Pool sizes are bundled choices, not hard limits on custom configuration. Fable `FH`/`FX` are explicit on-call trials only, absent from automatic modes and the Opus/Haiku preset. Ultracode is not supported. All model IDs require account/runtime verification.
 
 Bundled Codex profiles target Standard tier without enforcing it. Launch plans do not set a tier and may inherit runtime settings. Verify and report the effective or inherited tier, or disclose unavailable verification. Do not change global speed settings.
 
