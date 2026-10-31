@@ -4,6 +4,6 @@ The [router entrypoint](../SKILL.md) and its selected mode document contain the 
 
 For a burn assignment, retain the selected mode's account, endpoint, backlog, provider pool, and external-session ownership. Burn does not enable Orchestration or bypass.
 
-For an explicit on-call trial, select the exact catalog profile with user-authorized pool and role/lifecycle exceptions. The optional inspector records these as `--allow-out-of-pool --role-override`. FH/FX remain outside automatic pools. Do not use standalone `--direct` calls to evade an active router.
+For an explicit on-call trial, select the exact catalog profile with user-authorized pool and role/lifecycle exceptions. The optional inspector records these as `--allow-out-of-pool --role-override`. FH/FX remain outside other bundled pools. High-qual permits selective FX specification review. Do not use standalone `--direct` calls to evade an active router.
 
 Custom pools and the optional Opus/Haiku preset are documented in [configuration](../../../docs/configuration.md).

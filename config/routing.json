@@ -35,7 +35,7 @@
     "AL": {"provider": "codex", "model": "gpt-6-astra", "effort": "low", "service_tier": "standard", "description": "Browser-specialist candidate in Codex-primary Balanced and a general candidate in Codex-burn. Verify the actual worker has required tools."},
     "AM": {"provider": "codex", "model": "gpt-6-astra", "effort": "medium", "service_tier": "standard", "description": "Retained Astra Medium profile for explicit selection or custom pools."},
     "AH": {"provider": "codex", "model": "gpt-6-astra", "effort": "high", "service_tier": "standard", "description": "Browser-specialist candidate in Codex-primary Performance and a general candidate in Codex-burn. Verify required tools before dispatch."},
-    "AX": {"provider": "codex", "model": "gpt-6-astra", "effort": "xhigh", "service_tier": "standard", "description": "Retained Astra XHigh profile for explicit selection or custom pools."},
+    "AX": {"provider": "codex", "model": "gpt-6-astra", "effort": "xhigh", "service_tier": "standard", "description": "Independent QA/browser candidate in High-qual, also available for explicit selection or custom pools. Verify required tools and observed behavior, not clean-code authority."},
     "AMAX": {"provider": "codex", "model": "gpt-6-astra", "effort": "max", "service_tier": "standard", "description": "Candidate for demanding work or specialist verification where its tools and task fit justify the route."},
     "AU": {"provider": "codex", "model": "gpt-6-astra", "effort": "ultra", "service_tier": "standard", "description": "Retained Astra Ultra profile for explicit selection or custom pools, not an automatic burn escalation."},
     "HMED": {"provider": "claude", "model": "claude-haiku-5-5", "effort": "medium", "context_target_tokens": null, "description": "Candidate for small, well-scoped worker assignments with concrete checks."},
@@ -50,7 +50,9 @@
     "OX": {"provider": "claude", "model": "claude-opus-5-5", "effort": "xhigh", "context_target_tokens": null, "description": "General-purpose Claude-primary candidate or independent review candidate in Codex-primary Performance. Role restrictions come from the active pool."},
     "OMAX": {"provider": "claude", "model": "claude-opus-5-5", "effort": "max", "context_target_tokens": null, "description": "Candidate for demanding Claude-primary work or a justified Codex-primary Performance escalation."},
     "FH": {"provider": "claude", "model": "claude-fable-5-1", "effort": "high", "context_target_tokens": null, "description": "Opt-in trial for writing, prose, UI copy, alternative hypotheses, or security-sensitive implementation with concrete acceptance checks. No proven vulnerability-review or general UI-visual advantage is implied."},
-    "FX": {"provider": "claude", "model": "claude-fable-5-1", "effort": "xhigh", "context_target_tokens": null, "description": "Optional deeper-analysis trial for prose, UI copy, alternative hypotheses, or security-sensitive implementation with concrete checks, not routine escalation. A lower composite AAI score does not settle every task's fit."}
+    "FX": {"provider": "claude", "model": "claude-fable-5-1", "effort": "xhigh", "context_target_tokens": null, "description": "Optional deeper-analysis trial for prose, UI copy, alternative hypotheses, or security-sensitive implementation with concrete checks, not routine escalation. A lower composite AAI score does not settle every task's fit."},
+    "MFH": {"provider": "muse", "model": "muse-wonder-full-1.0", "effort": "high", "description": "Investigate repository structure, existing fixes, and root causes using source evidence. Return a diagnosis and focused next checks, not authored changes."},
+    "MFX": {"provider": "muse", "model": "muse-wonder-full-1.0", "effort": "xhigh", "description": "Examine cross-system failures with competing hypotheses and challenge a proposed plan against evidence. Return discriminating checks, not a second dispatcher or authored changes."}
   },
   "variants": {
     "codex-primary": {
@@ -94,6 +96,14 @@
     }
   },
   "modes": {
+    "high-qual": [
+      {"profile": "SM"}, {"profile": "SX"}, {"profile": "OM"},
+      {"profile": "OX", "roles": ["planning", "qa", "spec-review"], "independent_review": true},
+      {"profile": "AX", "roles": ["qa", "browser"], "independent_review": true},
+      {"profile": "FX", "roles": ["spec-review"], "independent_review": true},
+      {"profile": "MFH", "roles": ["research", "planning", "qa"]},
+      {"profile": "MFX", "roles": ["research", "planning", "qa"]}
+    ],
     "codex-burn": [
       {"profile": "AL"}, {"profile": "SM"}, {"profile": "SH"}, {"profile": "SX"},
       {"profile": "AH"}, {"profile": "AMAX"}

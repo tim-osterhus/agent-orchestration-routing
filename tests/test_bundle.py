@@ -233,7 +233,7 @@ class VariantTests(unittest.TestCase):
                 "performance": ["OM", "OH", "OX", "OMAX", "SMAX", "AMAX"]}}
         for variant, modes in expected.items():
             actual = bundle.mode_pools(self.config, variant)
-            self.assertEqual(set(actual), {"efficient", "balanced", "performance", "codex-burn", "claude-burn"})
+            self.assertEqual(set(actual), {"efficient", "balanced", "performance", "high-qual", "codex-burn", "claude-burn"})
             for mode, codes in modes.items():
                 self.assertEqual([entry["profile"] for entry in actual[mode]], codes)
         for mode in bundle.BURN_PROVIDERS:
@@ -250,13 +250,15 @@ class VariantTests(unittest.TestCase):
             "claude-haiku-5-5": {"HMED": "medium", "HH": "high", "HM": "xhigh", "HK": "xhigh", "HMAX": "max"},
             "claude-sonnet-5-5": {"SNH": "high", "SNX": "xhigh"},
             "claude-opus-5-5": {"OM": "medium", "OH": "high", "OX": "xhigh", "OMAX": "max"},
-            "claude-fable-5-1": {"FH": "high", "FX": "xhigh"}}
+            "claude-fable-5-1": {"FH": "high", "FX": "xhigh"},
+            "muse-wonder-full-1.0": {"MFH": "high", "MFX": "xhigh"}}
         self.assertEqual(set(self.config["profiles"]), {code for efforts in families.values() for code in efforts})
         for model, efforts in families.items():
             for code, effort in efforts.items():
                 item = bundle.profile(self.config, code)
                 self.assertEqual((item["model"], item["effort"]), (model, effort))
-                self.assertEqual(item["provider"], "codex" if model.startswith("gpt-") else "claude")
+                expected_provider = "codex" if model.startswith("gpt-") else "muse" if model.startswith("muse-") else "claude"
+                self.assertEqual(item["provider"], expected_provider)
                 self.assertTrue(item["description"].strip())
         self.assertEqual(bundle.profile(self.config, "HK")["context_target_tokens"], 100000)
         self.assertIsNone(bundle.profile(self.config, "HM")["context_target_tokens"])
@@ -329,11 +331,12 @@ class VariantTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "shared top-level"):
             bundle.validate(bundle.merge(self.config, {"variants": {"codex-primary": {"modes": {"codex-burn": [{"profile": "SH"}]}}}}))
 
-    def test_fable_absent_from_automatic_pools_and_preset(self):
+    def test_fable_outside_other_pools_and_preset(self):
         config = bundle.load_config(presets=["opus-haiku"])
         for variant in config["variants"]:
-            for pool in bundle.mode_pools(config, variant).values():
-                self.assertFalse({"FH", "FX"} & {entry["profile"] for entry in pool})
+            for mode, pool in bundle.mode_pools(config, variant).items():
+                self.assertEqual({"FH", "FX"} & {entry["profile"] for entry in pool},
+                                 {"FX"} if mode == "high-qual" else set())
             for code in ("FH", "FX"):
                 with self.assertRaisesRegex(ValueError, "outside"):
                     bundle.resolve(config, variant=variant, code=code)
@@ -341,6 +344,42 @@ class VariantTests(unittest.TestCase):
                     bundle.resolve(config, variant=variant, code=code, allow_out_of_pool=True)
                 result = bundle.resolve(config, variant=variant, code=code, allow_out_of_pool=True, role_override=True)
                 self.assertEqual(result["choices"][0]["model"], "claude-fable-5-1")
+
+    def test_high_qual_is_shared_non_burn_with_nonpreemptive_role_fences(self):
+        expected = ["SM", "SX", "OM", "OX", "AX", "FX", "MFH", "MFX"]
+        for variant in self.config["variants"]:
+            pool = bundle.mode_pools(self.config, variant)["high-qual"]
+            self.assertEqual([entry["profile"] for entry in pool], expected)
+            self.assertNotIn("high-qual", self.config["variants"][variant]["modes"])
+            self.assertFalse(any(entry.get("specialist") for entry in pool))
+            for role, codes in {
+                "implementation": ["SM", "SX", "OM"],
+                "research": ["SM", "SX", "OM", "MFH", "MFX"],
+                "planning": ["SM", "SX", "OM", "OX", "MFH", "MFX"],
+                "qa": ["SM", "SX", "OM", "OX", "AX", "MFH", "MFX"],
+                "spec-review": ["SM", "SX", "OM", "OX", "FX"],
+                "browser": ["SM", "SX", "OM", "AX"]}.items():
+                result = bundle.resolve(self.config, mode="high-qual", variant=variant, role=role)
+                self.assertEqual([choice["code"] for choice in result["choices"]], codes)
+                self.assertNotIn("burn", result)
+        for code in ("OX", "AX", "FX", "MFH", "MFX"):
+            with self.assertRaisesRegex(ValueError, "role/lifecycle"):
+                bundle.resolve(self.config, mode="high-qual", code=code, role="implementation")
+        with self.assertRaisesRegex(ValueError, "only to burn"):
+            bundle.resolve(self.config, mode="high-qual", burn_account="work", burn_endpoint="reset")
+
+    def test_muse_is_external_without_codex_or_claude_execution_settings(self):
+        for code, effort in (("MFH", "high"), ("MFX", "xhigh")):
+            for design in self.config["designs"]:
+                choice = bundle.resolve(self.config, mode="high-qual", code=code, role="research", design=design)["choices"][0]
+                self.assertEqual((choice["provider"], choice["model"], choice["effort"], choice["dispatch"]),
+                                 ("muse", "muse-wonder-full-1.0", effort, "external-muse"))
+                self.assertEqual(set(choice["execution"]), {"launch_plan_supported", "adapter_required", "notice"})
+                self.assertFalse(choice["execution"]["launch_plan_supported"])
+                self.assertTrue(choice["execution"]["adapter_required"])
+                self.assertNotIn("claude_mode", choice)
+        with self.assertRaisesRegex(ValueError, "Unknown provider"):
+            bundle.validate(bundle.merge(self.config, {"profiles": {"MFH": {"provider": "unknown"}}}))
 
 
 class PlanTests(unittest.TestCase):
@@ -551,6 +590,20 @@ class PlanTests(unittest.TestCase):
                                        ("claude-primary", "claude-first", "OH")]:
             with self.assertRaisesRegex(ValueError, "Native routes require"):
                 self.plan(variant=variant, design=design, code=code)
+
+    def test_muse_launch_plans_fail_closed_for_both_controller_designs(self):
+        for code in ("MFH", "MFX"):
+            for design in self.config["designs"]:
+                with self.assertRaisesRegex(ValueError, "No bundled launch adapter for provider muse"):
+                    self.plan(mode="high-qual", code=code, role="research", design=design)
+        for action in ("codex-plan", "claude-plan"):
+            result = subprocess.run([sys.executable, str(ROOT / "scripts/bundle.py"), action,
+                                     "--mode", "high-qual", "--profile", "MFH", "--role", "research",
+                                     "--cwd", self.cwd, "--prompt-file", self.prompt, "--artifacts", self.artifacts],
+                                    capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Profile provider does not match", result.stderr)
+            self.assertEqual(result.stdout, "")
 
     def test_fable_explicit_launch_uses_exact_profile_and_existing_permissions(self):
         for variant in self.config["variants"]:

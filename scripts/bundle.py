@@ -72,7 +72,7 @@ def validate(config):
         require(design["external_workers"] in {"codex", "claude"} - {design["controller"]}, f"Invalid external provider in {name}")
     for code in config["profiles"]:
         item = profile(config, code)
-        require(item["provider"] in {"codex", "claude"}, f"Unknown provider in {code}")
+        require(item["provider"] in {"codex", "claude", "muse"}, f"Unknown provider in {code}")
         require(isinstance(item["model"], str) and item["model"].strip(), f"Missing model in {code}")
         require(item["effort"] in EFFORTS, f"Invalid effort in {code}")
         require(item["provider"] != "claude" or item["effort"] != "ultra", f"Claude does not use the Codex ultra effort in {code}")
@@ -212,8 +212,11 @@ def resolve(config, *, mode=None, code=None, role="implementation", design=None,
                 require(settings.get("enabled"), "Orchestration is disabled; select an opt-in preset")
                 require(candidate in settings["controller_profiles"], "Profile cannot control this orchestration preset")
             choice.update(claude_mode=selected_mode, execution=settings)
-        else:
+        elif item["provider"] == "codex":
             choice["execution"] = deepcopy(config["codex"])
+        else:
+            choice["execution"] = {"launch_plan_supported": False, "adapter_required": True,
+                                   "notice": "External Muse requires a separately verified provider adapter; no bundled launcher or dispatch guarantee."}
         choices.append(choice)
     result = {"controller_design": design, "controller": config["designs"][design]["controller"],
             "routing_variant": variant, "routing_mode": mode, "role": role, "selection_bias": bias,
@@ -232,6 +235,8 @@ def resolve(config, *, mode=None, code=None, role="implementation", design=None,
 def launch_plan(resolved, cwd, prompt_file, artifacts, resume=None):
     require(len(resolved["choices"]) == 1, "Select one explicit --profile for a launch plan")
     choice = resolved["choices"][0]
+    require(choice["provider"] in {"codex", "claude"},
+            f"No bundled launch adapter for provider {choice['provider']}; use a separately verified provider adapter")
     require(choice["dispatch"].startswith("external-"), "Native routes require the host's worker controls, not an external CLI launch plan")
     cwd, prompt_file, artifacts = (str(Path(path).expanduser().resolve()) for path in (cwd, prompt_file, artifacts))
     require(Path(cwd).is_dir(), "cwd must be an existing directory")

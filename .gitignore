@@ -6,3 +6,7 @@ config/local.json
 .env
 .env.*
 !.env.example
+
+# Unpublished Plus research and companion checks, pending further evaluation.
+/skills/codex-plus-efficiency/
+/tests/test_plus_skill.py

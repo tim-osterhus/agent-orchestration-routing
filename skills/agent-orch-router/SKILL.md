@@ -1,6 +1,6 @@
 ---
 name: agent-orch-router
-description: Explicit-only routing for delegated work across Codex and Claude Code. Select exact model/effort profiles from ordered, role-aware mode pools.
+description: Explicit-only routing for delegated work across Codex, Claude Code, and configured Muse adapters. Select exact model/effort profiles from ordered, role-aware mode pools.
 ---
 
 # Agent Orchestration Router
@@ -14,7 +14,7 @@ Read this file and **only the selected mode document**:
 | codex-primary | [Efficient](modes/codex-primary-efficient.md) | [Balanced](modes/codex-primary-balanced.md) | [Performance](modes/codex-primary-performance.md) |
 | claude-primary | [Efficient](modes/claude-primary-efficient.md) | [Balanced](modes/claude-primary-balanced.md) | [Performance](modes/claude-primary-performance.md) |
 
-Shared across variants: [Codex-burn](modes/codex-burn.md) · [Claude-burn](modes/claude-burn.md).
+Shared across variants: [High-qual](modes/high-qual.md) · [Codex-burn](modes/codex-burn.md) · [Claude-burn](modes/claude-burn.md).
 
 Variant selects pool preference, not the running host. Never change the parent model. Shorthand selects the exact model and effort below, not an automatic pool exception. Retired Fast codes, `fast`, `tokenburn`, and `CMAX` fail without substitution.
 
@@ -51,7 +51,11 @@ Variant selects pool preference, not the running host. Never change the parent m
 | OMAX | claude-opus-5-5 | max |
 | FH | claude-fable-5-1 | high |
 | FX | claude-fable-5-1 | xhigh |
+| MFH | muse-wonder-full-1.0 | high |
+| MFX | muse-wonder-full-1.0 | xhigh |
 
-Codex profiles target Standard tier. HK has a soft 100K context target. HM does not. Catalog entries outside the selected pool are on-call only. FH/FX are opt-in trials for prose, UI copy, alternative hypotheses, or security-sensitive implementation, not proven specialist advantages.
+Codex profiles target Standard tier. HK has a soft 100K context target. HM does not. Catalog entries outside the selected pool are on-call only. FH/FX are opt-in trials for prose, UI copy, alternative hypotheses, or security-sensitive implementation, not proven specialist advantages. High-qual additionally permits selective FX specification review.
+
+For selected Muse work only, read [Muse provider checks](references/muse.md). Exact catalog entries do not establish account access or an available dispatcher.
 
 Optional: [configuration and installation](../../docs/configuration.md), [selection evidence](references/evidence.md). Neither is required for ordinary routing. Custom configuration or the Opus/Haiku preset applies only when selected.

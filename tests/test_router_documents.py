@@ -31,6 +31,8 @@ def documented_pool(path):
             roles, marker = eligibility.split("; ")
             entry["roles"] = roles.split(", ")
             entry[{"specialist": "specialist", "independent review": "independent_review"}[marker]] = True
+        elif ", " in eligibility:
+            entry["roles"] = eligibility.split(", ")
         elif eligibility != "general":
             raise AssertionError("Unknown eligibility: " + eligibility)
         if len(task_fit.split()) < 8:
@@ -53,7 +55,7 @@ class RouterDocumentTests(unittest.TestCase):
         seen = set()
         for variant in self.config["variants"]:
             for mode, expected in bundle.mode_pools(self.config, variant).items():
-                name = mode if mode in bundle.BURN_PROVIDERS else variant + "-" + mode
+                name = mode if mode in self.config["modes"] else variant + "-" + mode
                 path = SKILL / "modes" / (name + ".md")
                 self.assertEqual(documented_pool(path), expected, name)
                 seen.add(path)
@@ -62,7 +64,7 @@ class RouterDocumentTests(unittest.TestCase):
     def test_documented_fences_produce_identical_role_and_lifecycle_decisions(self):
         for variant in self.config["variants"]:
             for mode in bundle.mode_pools(self.config, variant):
-                name = mode if mode in bundle.BURN_PROVIDERS else variant + "-" + mode
+                name = mode if mode in self.config["modes"] else variant + "-" + mode
                 documented = deepcopy(self.config)
                 documented["modes"][mode] = documented_pool(SKILL / "modes" / (name + ".md"))
                 for role in self.config["roles"]:
@@ -76,7 +78,7 @@ class RouterDocumentTests(unittest.TestCase):
     def test_required_native_path_is_entrypoint_and_one_self_contained_mode(self):
         entrypoint = (SKILL / "SKILL.md").read_text()
         targets = re.findall(r"\[[^\]]*\]\((modes/[^)]+)\)", entrypoint)
-        self.assertEqual(len(targets), 8)
+        self.assertEqual(len(targets), 9)
         for target in targets:
             mode = (SKILL / target).read_text()
             self.assertNotRegex(mode, r"\]\([^)]*modes/|\]\([^)]*routing\.json|references/(execution|routing-policy)")
