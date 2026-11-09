@@ -96,6 +96,13 @@
     }
   },
   "modes": {
+    "full-council": [
+      {"profile": "SMAX", "roles": ["research", "planning", "qa", "spec-review"]},
+      {"profile": "OX", "roles": ["research", "planning", "qa", "spec-review"]},
+      {"profile": "MFX", "roles": ["research", "planning", "qa", "spec-review"]},
+      {"profile": "AMAX", "roles": ["research", "planning", "qa", "spec-review"]},
+      {"profile": "FX", "roles": ["research", "planning", "spec-review"]}
+    ],
     "high-qual": [
       {"profile": "SM"}, {"profile": "SX"}, {"profile": "OM"},
       {"profile": "OX", "roles": ["planning", "qa", "spec-review"], "independent_review": true},
