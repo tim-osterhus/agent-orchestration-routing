@@ -19,7 +19,7 @@ For Claude Code, invoke the router explicitly and do not add it to always-loaded
 | `controller_design` | Chooses `codex-first` or `claude-first` routing labels. It does not change the current app/model. |
 | `profiles` | One master catalog of exact model, provider, effort, target tier, soft context target, and descriptions. Aliases use `alias_of`. |
 | `default_variant`, `variants` | Select `codex-primary` or `claude-primary` pools for Efficient, Balanced, and Performance. |
-| `modes` | Shared High-qual, Full-Council, and burn pools, plus custom/preset pools. Entries carry role/lifecycle, specialist, independent-review, and escalation markers. |
+| `modes` | Shared HiQ, Council, and burn pools, plus custom/preset pools. Entries carry role/lifecycle, specialist, independent-review, and escalation markers. |
 | `selection.bias` | Low/default/high selection preference. It never changes model effort or sorts unknown benchmark values. |
 | `execution_style` | Pure orchestration or supporting delegation. |
 | `max_parallel_workers` | Scheduling ceiling, further limited by the actual runtime. |
@@ -29,17 +29,17 @@ For Claude Code, invoke the router explicitly and do not add it to always-loaded
 
 Keep your edits in an ignored `config/local.json` and pass `--overlay config/local.json`, or pass a complete replacement with `--config`. Recursive object merge preserves unspecified fields. Arrays replace rather than append. Later presets/overlays win. Presets load before overlays, so local policy can narrow a preset. Validate the final merged configuration.
 
-`--variant` selects pool preference independently of controller design, permissions, and bias. Codex-primary is the default. `variants.NAME.modes` defines each variant's normal pools. Top-level `modes` supplies shared High-qual, Full-Council, burns, and custom/preset pools. A legacy top-level normal-mode override takes precedence for every variant. Prefer a variant-specific overlay when only one variant should change. Complete legacy configs without `variants` still use their top-level modes.
+`--variant` selects pool preference independently of controller design, permissions, and bias. Codex-primary is the default. `variants.NAME.modes` defines each variant's normal pools. Top-level `modes` supplies shared HiQ, Council, burns, and custom/preset pools. A legacy top-level normal-mode override takes precedence for every variant. Prefer a variant-specific overlay when only one variant should change. Complete legacy configs without `variants` still use their top-level modes.
 
 Both variants have seven base modes with one shared catalog. The [router entrypoint](../skills/agent-orch-router/SKILL.md) links each self-contained mode. Bundled pool order and task-fit guidance are available there without reading JSON. Pool sizes are bundled choices, not hard limits on custom configuration.
 
-Fable `FH`/`FX` remain on-call trials except High-qual's selective `FX` specification-review route and Full-Council's on-call `FX` adviser. Neither appears in the Opus/Haiku preset. Ultracode is not supported. All model IDs require account/runtime verification.
+Fable `FH`/`FX` remain on-call trials except HiQ's selective `FX` specification-review route and Council's on-call `FX` adviser. Neither appears in the Opus/Haiku preset. Ultracode is not supported. All model IDs require account/runtime verification.
 
-[Full-Council](../skills/agent-orch-router/modes/full-council.md) is shared and opt-in for decision deliberation. Required members default to SMAX, OX, and MFX. AMAX is optional. FX advises without a vote unless explicitly appointed.
+[Council](../skills/agent-orch-router/modes/council.md) is shared and opt-in for decision deliberation. Required members default to SMAX, OX, and MFX. AMAX is optional. FX advises without a vote unless explicitly appointed.
 
 Its five-profile pool describes eligibility, not required membership or simultaneous workers. The inspector does not run a council or establish consensus. Implementation, frontend, integration, and browser roles have no automatic eligibility. Existing concurrency, provider checks, permissions, and assignment budgets still apply.
 
-High-qual is shared and opt-in. Its eight profiles are eligible choices, not required pipeline stages. Muse `MFH`/`MFX` default to investigation and allow implementation when the work order authorizes edits. Their exact efforts remain `high`/`xhigh`. Read [Muse provider checks](../skills/agent-orch-router/references/muse.md) only when selecting them.
+HiQ is shared and opt-in. Its eight profiles are eligible choices, not required pipeline stages. Muse `MFH`/`MFX` default to investigation and allow implementation when the work order authorizes edits. Their exact efforts remain `high`/`xhigh`. Read [Muse provider checks](../skills/agent-orch-router/references/muse.md) only when selecting them.
 
 `resolve` returns `external-muse` with adapter-required metadata. Bundled launch plans reject Muse. Use a separately verified adapter rather than substituting Codex or Claude settings. Configure Muse permissions through that adapter independently of model and role. Honor and read back the selected profile. This bundle imposes neither read-only nor maximum access.
 
@@ -82,8 +82,8 @@ Codex separately configures `sandbox_by_role`, `approval_policy`, `bypass_approv
 python3 scripts/bundle.py validate
 python3 scripts/bundle.py resolve --mode efficient --role research
 python3 scripts/bundle.py resolve --mode performance --role browser
-python3 scripts/bundle.py resolve --mode high-qual --profile MFH --role research
-python3 scripts/bundle.py resolve --mode full-council --profile MFX --role planning
+python3 scripts/bundle.py resolve --mode hiq --profile MFH --role research
+python3 scripts/bundle.py resolve --mode council --profile MFX --role planning
 python3 scripts/bundle.py resolve --mode balanced --profile OH --role qa
 python3 scripts/bundle.py resolve --mode balanced --profile SM --role implementation --design claude-first
 python3 scripts/bundle.py resolve --variant claude-primary --design claude-first --mode balanced --profile OH --role implementation --bias high
@@ -94,7 +94,7 @@ python3 scripts/bundle.py validate --preset opus-haiku
 python3 scripts/bundle.py resolve --preset opus-haiku --mode opus-haiku --profile OH --role implementation --claude-mode orchestration
 ```
 
-`resolve` returns eligible candidates, not the final suitability decision. The agent evaluates task complexity and tool fit before choosing one. Entries marked `specialist` take precedence for their stated roles. High-qual uses nonpreemptive role restrictions instead. Unknown profiles, alias cycles, ineligible roles, and disabled orchestration fail rather than silently selecting something else. An empty eligible set is a blocker.
+`resolve` returns eligible candidates, not the final suitability decision. The agent evaluates task complexity and tool fit before choosing one. Entries marked `specialist` take precedence for their stated roles. HiQ uses nonpreemptive role restrictions instead. Unknown profiles, alias cycles, ineligible roles, and disabled orchestration fail rather than silently selecting something else. An empty eligible set is a blocker.
 
 An explicit out-of-pool profile requires both `--allow-out-of-pool` and `--role-override`. The active pool has no entry defining that profile's role/lifecycle eligibility. The second flag acknowledges this unspecified eligibility, not a global model restriction inferred from another mode.
 

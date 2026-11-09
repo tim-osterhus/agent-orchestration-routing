@@ -93,10 +93,10 @@ class RouterDocumentTests(unittest.TestCase):
             self.assertIn("Use native workers", mode)
             self.assertIn("installed Claude Delegation skill", mode)
             # Council's opening/critique/ratification protocol needs more than a routing pool.
-            self.assertLess(len((entrypoint + mode).split()), 1450 if target == "modes/full-council.md" else 1200)
+            self.assertLess(len((entrypoint + mode).split()), 1450 if target == "modes/council.md" else 1200)
 
     def test_muse_task_fit_matches_catalog(self):
-        fits = {code: task_fit for code, _, task_fit in rows(SKILL / "modes/high-qual.md")[1:]}
+        fits = {code: task_fit for code, _, task_fit in rows(SKILL / "modes/hiq.md")[1:]}
         for code in ("MFH", "MFX"):
             self.assertEqual(fits[code], self.config["profiles"][code]["description"])
 

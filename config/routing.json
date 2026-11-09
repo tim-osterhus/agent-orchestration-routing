@@ -35,8 +35,8 @@
     "AL": {"provider": "codex", "model": "gpt-6-astra", "effort": "low", "service_tier": "standard", "description": "Browser-specialist candidate in Codex-primary Balanced and a general candidate in Codex-burn. Verify the actual worker has required tools."},
     "AM": {"provider": "codex", "model": "gpt-6-astra", "effort": "medium", "service_tier": "standard", "description": "Retained Astra Medium profile for explicit selection or custom pools."},
     "AH": {"provider": "codex", "model": "gpt-6-astra", "effort": "high", "service_tier": "standard", "description": "Browser-specialist candidate in Codex-primary Performance and a general candidate in Codex-burn. Verify required tools before dispatch."},
-    "AX": {"provider": "codex", "model": "gpt-6-astra", "effort": "xhigh", "service_tier": "standard", "description": "Independent QA/browser candidate in High-qual, also available for explicit selection or custom pools. Verify required tools and observed behavior, not clean-code authority."},
-    "AMAX": {"provider": "codex", "model": "gpt-6-astra", "effort": "max", "service_tier": "standard", "description": "Candidate for demanding work or specialist verification where its tools and task fit justify the route."},
+    "AX": {"provider": "codex", "model": "gpt-6-astra", "effort": "xhigh", "service_tier": "standard", "description": "Retained Astra XHigh profile for explicit selection or custom pools."},
+    "AMAX": {"provider": "codex", "model": "gpt-6-astra", "effort": "max", "service_tier": "standard", "description": "Candidate for demanding work or specialist verification where its tools and task fit justify the route. Independent QA/browser candidate in HiQ; verify required tools and observed behavior, not clean-code authority."},
     "AU": {"provider": "codex", "model": "gpt-6-astra", "effort": "ultra", "service_tier": "standard", "description": "Retained Astra Ultra profile for explicit selection or custom pools, not an automatic burn escalation."},
     "HMED": {"provider": "claude", "model": "claude-haiku-5-5", "effort": "medium", "context_target_tokens": null, "description": "Candidate for small, well-scoped worker assignments with concrete checks."},
     "HH": {"provider": "claude", "model": "claude-haiku-5-5", "effort": "high", "context_target_tokens": null, "description": "Candidate for bounded delegation when additional Haiku reasoning may reduce controller repair work."},
@@ -96,17 +96,17 @@
     }
   },
   "modes": {
-    "full-council": [
+    "council": [
       {"profile": "SMAX", "roles": ["research", "planning", "qa", "spec-review"]},
       {"profile": "OX", "roles": ["research", "planning", "qa", "spec-review"]},
       {"profile": "MFX", "roles": ["research", "planning", "qa", "spec-review"]},
       {"profile": "AMAX", "roles": ["research", "planning", "qa", "spec-review"]},
       {"profile": "FX", "roles": ["research", "planning", "spec-review"]}
     ],
-    "high-qual": [
+    "hiq": [
       {"profile": "SM"}, {"profile": "SX"}, {"profile": "OM"},
       {"profile": "OX", "roles": ["planning", "qa", "spec-review"], "independent_review": true},
-      {"profile": "AX", "roles": ["qa", "browser"], "independent_review": true},
+      {"profile": "AMAX", "roles": ["qa", "browser"], "independent_review": true},
       {"profile": "FX", "roles": ["spec-review"], "independent_review": true},
       {"profile": "MFH", "roles": ["research", "planning", "qa", "implementation"]},
       {"profile": "MFX", "roles": ["research", "planning", "qa", "implementation"]}

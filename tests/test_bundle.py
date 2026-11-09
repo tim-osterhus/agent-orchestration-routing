@@ -233,7 +233,7 @@ class VariantTests(unittest.TestCase):
                 "performance": ["OM", "OH", "OX", "OMAX", "SMAX", "AMAX"]}}
         for variant, modes in expected.items():
             actual = bundle.mode_pools(self.config, variant)
-            self.assertEqual(set(actual), {"efficient", "balanced", "performance", "high-qual", "full-council", "codex-burn", "claude-burn"})
+            self.assertEqual(set(actual), {"efficient", "balanced", "performance", "hiq", "council", "codex-burn", "claude-burn"})
             for mode, codes in modes.items():
                 self.assertEqual([entry["profile"] for entry in actual[mode]], codes)
         for mode in bundle.BURN_PROVIDERS:
@@ -269,7 +269,7 @@ class VariantTests(unittest.TestCase):
                 for role in self.config["roles"]:
                     for design in self.config["designs"]:
                         kwargs = {"burn_account": "work", "burn_endpoint": "queue end"} if mode in bundle.BURN_PROVIDERS else {}
-                        if mode == "full-council" and role in {"implementation", "frontend", "integration", "browser"}:
+                        if mode == "council" and role in {"implementation", "frontend", "integration", "browser"}:
                             with self.assertRaisesRegex(ValueError, "No eligible profile"):
                                 bundle.resolve(self.config, variant=variant, mode=mode, role=role, design=design)
                             continue
@@ -340,7 +340,7 @@ class VariantTests(unittest.TestCase):
         for variant in config["variants"]:
             for mode, pool in bundle.mode_pools(config, variant).items():
                 self.assertEqual({"FH", "FX"} & {entry["profile"] for entry in pool},
-                                 {"FX"} if mode in {"high-qual", "full-council"} else set())
+                                 {"FX"} if mode in {"hiq", "council"} else set())
             for code in ("FH", "FX"):
                 with self.assertRaisesRegex(ValueError, "outside"):
                     bundle.resolve(config, variant=variant, code=code)
@@ -349,37 +349,49 @@ class VariantTests(unittest.TestCase):
                 result = bundle.resolve(config, variant=variant, code=code, allow_out_of_pool=True, role_override=True)
                 self.assertEqual(result["choices"][0]["model"], "claude-fable-5-1")
 
-    def test_high_qual_is_shared_non_burn_with_nonpreemptive_role_fences(self):
-        expected = ["SM", "SX", "OM", "OX", "AX", "FX", "MFH", "MFX"]
+    def test_hiq_is_shared_non_burn_with_nonpreemptive_role_fences(self):
+        expected = ["SM", "SX", "OM", "OX", "AMAX", "FX", "MFH", "MFX"]
         for variant in self.config["variants"]:
-            pool = bundle.mode_pools(self.config, variant)["high-qual"]
+            pool = bundle.mode_pools(self.config, variant)["hiq"]
             self.assertEqual([entry["profile"] for entry in pool], expected)
-            self.assertNotIn("high-qual", self.config["variants"][variant]["modes"])
+            self.assertNotIn("hiq", self.config["variants"][variant]["modes"])
             self.assertFalse(any(entry.get("specialist") for entry in pool))
             for role, codes in {
                 "implementation": ["SM", "SX", "OM", "MFH", "MFX"],
                 "research": ["SM", "SX", "OM", "MFH", "MFX"],
                 "planning": ["SM", "SX", "OM", "OX", "MFH", "MFX"],
-                "qa": ["SM", "SX", "OM", "OX", "AX", "MFH", "MFX"],
+                "qa": ["SM", "SX", "OM", "OX", "AMAX", "MFH", "MFX"],
                 "spec-review": ["SM", "SX", "OM", "OX", "FX"],
-                "browser": ["SM", "SX", "OM", "AX"]}.items():
-                result = bundle.resolve(self.config, mode="high-qual", variant=variant, role=role)
+                "browser": ["SM", "SX", "OM", "AMAX"]}.items():
+                result = bundle.resolve(self.config, mode="hiq", variant=variant, role=role)
                 self.assertEqual([choice["code"] for choice in result["choices"]], codes)
                 self.assertNotIn("burn", result)
-        for code in ("OX", "AX", "FX"):
+            for role in ("qa", "browser"):
+                choice = bundle.resolve(self.config, mode="hiq", variant=variant, code="AMAX", role=role)["choices"][0]
+                self.assertEqual((choice["model"], choice["effort"]), ("gpt-6-astra", "max"))
+                self.assertTrue(choice["independent_review"])
+                with self.assertRaisesRegex(ValueError, "outside"):
+                    bundle.resolve(self.config, mode="hiq", variant=variant, code="AX", role=role)
+        for code in ("OX", "AMAX", "FX"):
             with self.assertRaisesRegex(ValueError, "role/lifecycle"):
-                bundle.resolve(self.config, mode="high-qual", code=code, role="implementation")
+                bundle.resolve(self.config, mode="hiq", code=code, role="implementation")
         with self.assertRaisesRegex(ValueError, "only to burn"):
-            bundle.resolve(self.config, mode="high-qual", burn_account="work", burn_endpoint="reset")
+            bundle.resolve(self.config, mode="hiq", burn_account="work", burn_endpoint="reset")
 
-    def test_full_council_eligibility_order_exact_routes_and_authority(self):
+    def test_canonical_mode_names_reject_prior_selectors(self):
+        for variant in self.config["variants"]:
+            for mode in ("full-council", "high-qual", "Full-Council", "Council"):
+                with self.assertRaisesRegex(ValueError, "Unknown routing mode"):
+                    bundle.resolve(self.config, variant=variant, mode=mode, role="planning")
+
+    def test_council_eligibility_order_exact_routes_and_authority(self):
         expected = ["SMAX", "OX", "MFX", "AMAX", "FX"]
         baseline = deepcopy(self.config)
         for variant in self.config["variants"]:
-            self.assertNotIn("full-council", self.config["variants"][variant]["modes"])
+            self.assertNotIn("council", self.config["variants"][variant]["modes"])
             for design in self.config["designs"]:
                 for role in ("research", "planning", "qa", "spec-review"):
-                    result = bundle.resolve(self.config, mode="full-council", role=role, variant=variant, design=design)
+                    result = bundle.resolve(self.config, mode="council", role=role, variant=variant, design=design)
                     codes = expected[:-1] if role == "qa" else expected
                     self.assertEqual([c["code"] for c in result["choices"]], codes)
                     self.assertEqual(result["limits"], {"max_parallel_workers": 3, "max_external_sessions_per_assignment": 1})
@@ -396,14 +408,14 @@ class VariantTests(unittest.TestCase):
                 for code in expected:
                     for role in ("implementation", "frontend", "integration", "browser"):
                         with self.assertRaisesRegex(ValueError, "role/lifecycle"):
-                            bundle.resolve(self.config, mode="full-council", code=code, role=role, variant=variant, design=design)
-                    result = bundle.resolve(self.config, mode="full-council", code=code, role="implementation",
+                            bundle.resolve(self.config, mode="council", code=code, role=role, variant=variant, design=design)
+                    result = bundle.resolve(self.config, mode="council", code=code, role="implementation",
                                             role_override=True, variant=variant, design=design)
                     self.assertEqual(result["overrides"], {"out_of_pool": False, "role_or_lifecycle": True})
         for overrides, error in [({}, "outside"), ({"allow_out_of_pool": True}, "--role-override")]:
             with self.assertRaisesRegex(ValueError, error):
-                bundle.resolve(self.config, mode="full-council", code="SM", role="planning", **overrides)
-        result = bundle.resolve(self.config, mode="full-council", code="SM", role="planning",
+                bundle.resolve(self.config, mode="council", code="SM", role="planning", **overrides)
+        result = bundle.resolve(self.config, mode="council", code="SM", role="planning",
                                 allow_out_of_pool=True, role_override=True)
         self.assertEqual(result["choices"][0]["code"], "SM")
         self.assertEqual(self.config, baseline)
@@ -412,7 +424,7 @@ class VariantTests(unittest.TestCase):
         for code, effort in (("MFH", "high"), ("MFX", "xhigh")):
             for design in self.config["designs"]:
                 for role in ("research", "implementation"):
-                    result = bundle.resolve(self.config, mode="high-qual", code=code, role=role, design=design)
+                    result = bundle.resolve(self.config, mode="hiq", code=code, role=role, design=design)
                     choice = result["choices"][0]
                     self.assertEqual((choice["provider"], choice["model"], choice["effort"], choice["dispatch"]),
                                      ("muse", "muse-wonder-full-1.0", effort, "external-muse"))
@@ -433,8 +445,8 @@ class VariantTests(unittest.TestCase):
             before = deepcopy(config)
             for code in ("MFH", "MFX"):
                 for variant in config["variants"]:
-                    result = bundle.resolve(config, mode="high-qual", code=code, role="implementation", variant=variant)
-                    expected = bundle.resolve(self.config, mode="high-qual", code=code, role="implementation", variant=variant)
+                    result = bundle.resolve(config, mode="hiq", code=code, role="implementation", variant=variant)
+                    expected = bundle.resolve(self.config, mode="hiq", code=code, role="implementation", variant=variant)
                     self.assertEqual(result, expected)
             self.assertEqual(config, before)
 
@@ -466,7 +478,7 @@ class PlanTests(unittest.TestCase):
         self.assertNotIn("maxTurns", definitions["review-worker"])
         self.assertEqual(plan["timeout_seconds"], 3600)
 
-    def test_full_council_plans_preserve_configurable_permissions_and_lifecycle(self):
+    def test_council_plans_preserve_configurable_permissions_and_lifecycle(self):
         config = bundle.merge(self.config, {"claude": {"modes": {"consultation": {
             "permission_mode": "auto", "restricted": False, "tools": ["Read", "Bash"],
             "timeout_seconds": 120, "reviewer": {"enabled": False}
@@ -474,18 +486,18 @@ class PlanTests(unittest.TestCase):
         bundle.validate(config)
         for code in ("OX", "FX"):
             for selected in (self.config, config):
-                plan = self.plan(config=selected, mode="full-council", code=code, role="planning")
+                plan = self.plan(config=selected, mode="council", code=code, role="planning")
                 settings = selected["claude"]["modes"]["consultation"]
                 self.assertEqual(self.value(plan["argv"], "--permission-mode"), settings["permission_mode"])
                 self.assertEqual(plan["timeout_seconds"], settings["timeout_seconds"])
                 self.assertNotIn("--dangerously-skip-permissions", plan["argv"])
                 self.assertNotIn("--max-turns", plan["argv"])
-                resumed = self.plan(config=selected, mode="full-council", code=code, role="planning",
+                resumed = self.plan(config=selected, mode="council", code=code, role="planning",
                                     resume="12345678-1234-4234-8234-123456789abc")
                 self.assertEqual(resumed["profile"]["execution"], settings)
                 self.assertNotIn("--continue", resumed["argv"])
         with self.assertRaisesRegex(ValueError, "No bundled launch adapter for provider muse"):
-            self.plan(mode="full-council", code="MFX", role="planning")
+            self.plan(mode="council", code="MFX", role="planning")
 
     def test_consultation_can_disable_reviewers(self):
         config = bundle.merge(self.config, {"claude": {"modes": {"consultation": {"reviewer": {"enabled": False}}}}})
@@ -673,10 +685,10 @@ class PlanTests(unittest.TestCase):
         for code in ("MFH", "MFX"):
             for design in self.config["designs"]:
                 with self.assertRaisesRegex(ValueError, "No bundled launch adapter for provider muse"):
-                    self.plan(mode="high-qual", code=code, role="research", design=design)
+                    self.plan(mode="hiq", code=code, role="research", design=design)
         for action in ("codex-plan", "claude-plan"):
             result = subprocess.run([sys.executable, str(ROOT / "scripts/bundle.py"), action,
-                                     "--mode", "high-qual", "--profile", "MFH", "--role", "research",
+                                     "--mode", "hiq", "--profile", "MFH", "--role", "research",
                                      "--cwd", self.cwd, "--prompt-file", self.prompt, "--artifacts", self.artifacts],
                                     capture_output=True, text=True)
             self.assertNotEqual(result.returncode, 0)

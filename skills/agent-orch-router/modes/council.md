@@ -1,4 +1,4 @@
-# Full-Council
+# Council
 
 Opt in for decision, architecture, or research tradeoffs through independent openings, shared critique, revision, and explicit consensus.
 
@@ -58,4 +58,4 @@ Preserve user-configured tools, permissions, approvals, and timeouts. Tool avail
 
 Honor `max_parallel_workers` and `max_external_sessions_per_assignment` across descendants and all external providers, including Muse. Defaults are three workers and one active external session. Native workers consume worker capacity, not external slots. Sequential dispatch is valid. An idle persistent thread is not an active session.
 
-Retain any configured Claude 60-minute assignment lifecycle unless overridden. Share remaining budgets across resumes and later rounds rather than resetting them. Full-Council adds no cap. Prefer completion events, verify exact session ownership and result delivery, and report failures instead of endorsements.
+Retain any configured Claude 60-minute assignment lifecycle unless overridden. Share remaining budgets across resumes and later rounds rather than resetting them. Council adds no cap. Prefer completion events, verify exact session ownership and result delivery, and report failures instead of endorsements.
