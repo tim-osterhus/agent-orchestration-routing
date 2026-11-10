@@ -12,7 +12,8 @@ ROOT = Path(__file__).resolve().parents[1]
 EFFORTS = {"low", "medium", "high", "xhigh", "max", "ultra"}
 PERMISSION_MODES = {"default", "manual", "dontAsk", "auto", "acceptEdits", "plan", "bypassPermissions"}
 RETIRED_PROFILES = {"LF": "L", "SF": "SM", "SMF": "SM", "SHF": "SH", "SXF": "SX",
-                    "ALF": "AL", "AMF": "AM", "AHF": "AH", "AXF": "AX", "AUF": "AU", "CMAX": "SNX"}
+                    "ALF": "AL", "AMF": "AM", "AHF": "AH", "AXF": "AX",
+                    "AUF": "a verified current Astra profile", "CMAX": "SNX"}
 BURN_PROVIDERS = {"codex-burn": "codex", "claude-burn": "claude"}
 
 

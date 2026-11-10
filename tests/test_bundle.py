@@ -226,11 +226,11 @@ class VariantTests(unittest.TestCase):
             "codex-primary": {
                 "efficient": ["LM", "TL", "SL", "TM", "TH", "SM", "SH"],
                 "balanced": ["SL", "TM", "TH", "SM", "SH", "SX", "SMAX", "AL", "OH"],
-                "performance": ["SH", "SX", "SMAX", "AMAX", "AH", "OX", "OMAX"]},
+                "performance": ["SH", "SX", "SMAX", "AMAX", "AH", "OX", "OMAX", "FH"]},
             "claude-primary": {
                 "efficient": ["HMED", "HH", "HM", "HMAX", "SNH", "OM", "OH"],
                 "balanced": ["HH", "HM", "HMAX", "SNH", "OM", "OH", "OX", "SM", "SMAX"],
-                "performance": ["OM", "OH", "OX", "OMAX", "SMAX", "AMAX"]}}
+                "performance": ["OM", "OH", "OX", "OMAX", "SMAX", "AMAX", "FH"]}}
         for variant, modes in expected.items():
             actual = bundle.mode_pools(self.config, variant)
             self.assertEqual(set(actual), {"efficient", "balanced", "performance", "hiq", "council", "codex-burn", "claude-burn"})
@@ -246,11 +246,11 @@ class VariantTests(unittest.TestCase):
             "gpt-6-luna": {"LM": "medium", "L": "max"},
             "gpt-6.1-terra": {"TL": "low", "TM": "medium", "TH": "high"},
             "gpt-6.1-sol": {"SL": "low", "SM": "medium", "SH": "high", "SX": "xhigh", "SMAX": "max"},
-            "gpt-6-astra": {"AL": "low", "AM": "medium", "AH": "high", "AX": "xhigh", "AMAX": "max", "AU": "ultra"},
+            "gpt-6-astra": {"AL": "low", "AM": "medium", "AH": "high", "AX": "xhigh", "AMAX": "max"},
             "claude-haiku-5-5": {"HMED": "medium", "HH": "high", "HM": "xhigh", "HK": "xhigh", "HMAX": "max"},
             "claude-sonnet-5-5": {"SNH": "high", "SNX": "xhigh"},
             "claude-opus-5-5": {"OM": "medium", "OH": "high", "OX": "xhigh", "OMAX": "max"},
-            "claude-fable-5-1": {"FH": "high", "FX": "xhigh"},
+            "claude-fable-5-2": {"FM": "medium", "FH": "high", "FX": "xhigh", "FMAX": "max"},
             "muse-wonder-full-1.0": {"MFH": "high", "MFX": "xhigh"}}
         self.assertEqual(set(self.config["profiles"]), {code for efforts in families.values() for code in efforts})
         for model, efforts in families.items():
@@ -335,22 +335,57 @@ class VariantTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "shared top-level"):
             bundle.validate(bundle.merge(self.config, {"variants": {"codex-primary": {"modes": {"codex-burn": [{"profile": "SH"}]}}}}))
 
+    def test_fable_performance_escalation_preserves_roles_and_leaf_lifecycle(self):
+        for variant in self.config["variants"]:
+            entry = next(e for e in bundle.mode_pools(self.config, variant)["performance"]
+                         if e["profile"] == "FH")
+            self.assertEqual(entry, {"profile": "FH",
+                                    "roles": ["research", "planning", "qa", "spec-review"],
+                                    "independent_review": True, "escalation": True, "one_off_only": True})
+            for design, dispatch in (("codex-first", "external-claude"),
+                                     ("claude-first", "native-claude")):
+                for role in entry["roles"]:
+                    result = bundle.resolve(self.config, variant=variant, mode="performance",
+                                            code="FH", role=role, design=design)
+                    self.assertEqual(result["choices"][0]["dispatch"], dispatch)
+                    self.assertEqual(result["choices"][0]["effort"], "high")
+                for role in ("implementation", "frontend", "integration", "browser"):
+                    with self.assertRaisesRegex(ValueError, "role/lifecycle"):
+                        bundle.resolve(self.config, variant=variant, mode="performance",
+                                       code="FH", role=role, design=design)
+                with self.assertRaisesRegex(ValueError, "role/lifecycle"):
+                    bundle.resolve(self.config, variant=variant, mode="performance",
+                                   code="FH", role="planning", design=design, assignment_kind="controller")
+
+    def test_removed_au_fails_without_substitution(self):
+        self.assertNotIn("AU", self.config["profiles"])
+        with self.assertRaisesRegex(ValueError, "Unknown profile: AU"):
+            bundle.profile(self.config, "AU")
+        with self.assertRaisesRegex(ValueError, "Unknown profile: AU"):
+            bundle.resolve(self.config, code="AU", allow_out_of_pool=True, role_override=True)
+        with self.assertRaisesRegex(ValueError, "Profile AUF is retired") as caught:
+            bundle.resolve(self.config, code="AUF", allow_out_of_pool=True, role_override=True)
+        self.assertIn("Select a verified current Astra profile explicitly", str(caught.exception))
+        self.assertNotIn("Select AU", str(caught.exception))
+        # A catalog removal does not ban generic dispatcher effort controls.
+        self.assertIn("ultra", bundle.EFFORTS)
+
     def test_fable_outside_other_pools_and_preset(self):
         config = bundle.load_config(presets=["opus-haiku"])
         for variant in config["variants"]:
             for mode, pool in bundle.mode_pools(config, variant).items():
-                self.assertEqual({"FH", "FX"} & {entry["profile"] for entry in pool},
-                                 {"FX"} if mode in {"hiq", "council"} else set())
-            for code in ("FH", "FX"):
+                self.assertEqual({"FM", "FH", "FX", "FMAX"} & {entry["profile"] for entry in pool},
+                                 {"FH"} if mode in {"hiq", "council", "performance"} else set())
+            for code in ("FM", "FH", "FX", "FMAX"):
                 with self.assertRaisesRegex(ValueError, "outside"):
                     bundle.resolve(config, variant=variant, code=code)
                 with self.assertRaisesRegex(ValueError, "--role-override"):
                     bundle.resolve(config, variant=variant, code=code, allow_out_of_pool=True)
                 result = bundle.resolve(config, variant=variant, code=code, allow_out_of_pool=True, role_override=True)
-                self.assertEqual(result["choices"][0]["model"], "claude-fable-5-1")
+                self.assertEqual(result["choices"][0]["model"], "claude-fable-5-2")
 
     def test_hiq_is_shared_non_burn_with_nonpreemptive_role_fences(self):
-        expected = ["SM", "SX", "OM", "OX", "AMAX", "FX", "MFH", "MFX"]
+        expected = ["SM", "SX", "OM", "OX", "AMAX", "FH", "MFH", "MFX"]
         for variant in self.config["variants"]:
             pool = bundle.mode_pools(self.config, variant)["hiq"]
             self.assertEqual([entry["profile"] for entry in pool], expected)
@@ -361,7 +396,7 @@ class VariantTests(unittest.TestCase):
                 "research": ["SM", "SX", "OM", "MFH", "MFX"],
                 "planning": ["SM", "SX", "OM", "OX", "MFH", "MFX"],
                 "qa": ["SM", "SX", "OM", "OX", "AMAX", "MFH", "MFX"],
-                "spec-review": ["SM", "SX", "OM", "OX", "FX"],
+                "spec-review": ["SM", "SX", "OM", "OX", "FH"],
                 "browser": ["SM", "SX", "OM", "AMAX"]}.items():
                 result = bundle.resolve(self.config, mode="hiq", variant=variant, role=role)
                 self.assertEqual([choice["code"] for choice in result["choices"]], codes)
@@ -372,7 +407,7 @@ class VariantTests(unittest.TestCase):
                 self.assertTrue(choice["independent_review"])
                 with self.assertRaisesRegex(ValueError, "outside"):
                     bundle.resolve(self.config, mode="hiq", variant=variant, code="AX", role=role)
-        for code in ("OX", "AMAX", "FX"):
+        for code in ("OX", "AMAX", "FH"):
             with self.assertRaisesRegex(ValueError, "role/lifecycle"):
                 bundle.resolve(self.config, mode="hiq", code=code, role="implementation")
         with self.assertRaisesRegex(ValueError, "only to burn"):
@@ -385,7 +420,7 @@ class VariantTests(unittest.TestCase):
                     bundle.resolve(self.config, variant=variant, mode=mode, role="planning")
 
     def test_council_eligibility_order_exact_routes_and_authority(self):
-        expected = ["SMAX", "OX", "MFX", "AMAX", "FX"]
+        expected = ["SMAX", "OX", "MFX", "AMAX", "FH"]
         baseline = deepcopy(self.config)
         for variant in self.config["variants"]:
             self.assertNotIn("council", self.config["variants"][variant]["modes"])
@@ -484,7 +519,7 @@ class PlanTests(unittest.TestCase):
             "timeout_seconds": 120, "reviewer": {"enabled": False}
         }}}})
         bundle.validate(config)
-        for code in ("OX", "FX"):
+        for code in ("OX", "FH"):
             for selected in (self.config, config):
                 plan = self.plan(config=selected, mode="council", code=code, role="planning")
                 settings = selected["claude"]["modes"]["consultation"]
@@ -697,9 +732,9 @@ class PlanTests(unittest.TestCase):
 
     def test_fable_explicit_launch_uses_exact_profile_and_existing_permissions(self):
         for variant in self.config["variants"]:
-            for code, effort in [("FH", "high"), ("FX", "xhigh")]:
+            for code, effort in [("FM", "medium"), ("FH", "high"), ("FX", "xhigh"), ("FMAX", "max")]:
                 plan = self.plan(variant=variant, code=code, role="frontend", allow_out_of_pool=True, role_override=True)
-                self.assertEqual(self.value(plan["argv"], "--model"), "claude-fable-5-1")
+                self.assertEqual(self.value(plan["argv"], "--model"), "claude-fable-5-2")
                 self.assertEqual(self.value(plan["argv"], "--effort"), effort)
                 self.assertEqual(self.value(plan["argv"], "--permission-mode"), "auto")
                 self.assertEqual(plan["timeout_seconds"], 3600)

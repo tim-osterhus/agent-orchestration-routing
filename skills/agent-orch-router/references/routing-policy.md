@@ -6,7 +6,7 @@ For a burn assignment, retain the selected mode's account, endpoint, backlog, pr
 
 For an explicit on-call trial outside the selected pool, select the exact catalog profile with user-authorized pool and role/lifecycle exceptions. The optional inspector records these as `--allow-out-of-pool --role-override`.
 
-FH remains outside all bundled pools. FX is in-pool for HiQ specification review and Council research, planning, and specification-review advice. Those listed roles need no pool or role overrides. Council defaults to SMAX/OX/MFX members. FX advises unless explicitly appointed as a member.
+FH is eligible for bounded Performance reasoning/review escalation, HiQ specification review, and Council research, planning, and specification-review advice. Those roles need no overrides. Council defaults to SMAX/OX/MFX members. FH advises unless explicitly appointed as a member. FM, FX, and FMAX remain on-call outside bundled pools.
 
 Other in-pool role/lifecycle exceptions require an explicit profile and user-authorized `--role-override`. Do not use standalone `--direct` calls to evade an active router.
 

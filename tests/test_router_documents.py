@@ -28,9 +28,12 @@ def documented_pool(path):
         elif eligibility == "escalation":
             entry["escalation"] = True
         elif "; " in eligibility:
-            roles, marker = eligibility.split("; ")
+            roles, *markers = eligibility.split("; ")
             entry["roles"] = roles.split(", ")
-            entry[{"specialist": "specialist", "independent review": "independent_review"}[marker]] = True
+            flags = {"specialist": "specialist", "independent review": "independent_review",
+                     "escalation": "escalation", "one-off": "one_off_only"}
+            for marker in markers:
+                entry[flags[marker]] = True
         elif ", " in eligibility:
             entry["roles"] = eligibility.split(", ")
         elif eligibility != "general":

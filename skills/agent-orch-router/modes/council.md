@@ -10,9 +10,9 @@ Opt in for decision, architecture, or research tradeoffs through independent ope
 | OX | research, planning, qa, spec-review | Challenge architectural choices against requirements, source evidence, and simpler alternatives. |
 | MFX | research, planning, qa, spec-review | Investigate competing hypotheses and identify evidence that distinguishes proposed approaches. |
 | AMAX | research, planning, qa, spec-review | Add an optional fourth perspective on assumptions, alternatives, and decision criteria. |
-| FX | research, planning, spec-review | Advise on requirements, overlooked constraints, and alternative hypotheses without an additional vote. |
+| FH | research, planning, spec-review | Advise on requirements, overlooked constraints, and alternative hypotheses without an additional vote. |
 
-Default required members: **SMAX, OX, MFX**, at their exact catalog models and efforts. AMAX is optional. If added as a member, AMAX must endorse. FX is an on-call adviser, not a member unless explicitly appointed.
+Default required members: **SMAX, OX, MFX**, at their exact catalog models and efforts. AMAX is optional. If added as a member, AMAX must endorse. FH is an on-call adviser, not a member unless explicitly appointed.
 
 Record required membership before openings. Five eligible profiles do not mean five members or concurrent workers. These task fits do not claim measured superiority.
 

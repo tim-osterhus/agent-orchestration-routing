@@ -15,8 +15,8 @@
     "method": "curated-pareto-frontier",
     "source": "https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index",
     "methodology": "https://artificialanalysis.ai/methodology",
-    "reviewed_on": "2026-10-16",
-    "status": "illustrative profiles informed by the supplied chart; exact benchmark measurements are not bundled",
+    "reviewed_on": "2026-11-09",
+    "status": "curated profiles informed by verified AAI v5.0.1 and task/provider constraints; selected dated observations are in supporting evidence, not a full machine-readable dataset",
     "automatic_refresh": false,
     "bias": "default",
     "bias_options": ["low", "default", "high"]
@@ -37,7 +37,6 @@
     "AH": {"provider": "codex", "model": "gpt-6-astra", "effort": "high", "service_tier": "standard", "description": "Browser-specialist candidate in Codex-primary Performance and a general candidate in Codex-burn. Verify required tools before dispatch."},
     "AX": {"provider": "codex", "model": "gpt-6-astra", "effort": "xhigh", "service_tier": "standard", "description": "Retained Astra XHigh profile for explicit selection or custom pools."},
     "AMAX": {"provider": "codex", "model": "gpt-6-astra", "effort": "max", "service_tier": "standard", "description": "Candidate for demanding work or specialist verification where its tools and task fit justify the route. Independent QA/browser candidate in HiQ; verify required tools and observed behavior, not clean-code authority."},
-    "AU": {"provider": "codex", "model": "gpt-6-astra", "effort": "ultra", "service_tier": "standard", "description": "Retained Astra Ultra profile for explicit selection or custom pools, not an automatic burn escalation."},
     "HMED": {"provider": "claude", "model": "claude-haiku-5-5", "effort": "medium", "context_target_tokens": null, "description": "Candidate for small, well-scoped worker assignments with concrete checks."},
     "HH": {"provider": "claude", "model": "claude-haiku-5-5", "effort": "high", "context_target_tokens": null, "description": "Candidate for bounded delegation when additional Haiku reasoning may reduce controller repair work."},
     "HM": {"provider": "claude", "model": "claude-haiku-5-5", "effort": "xhigh", "context_target_tokens": null, "description": "Bounded Haiku XHigh worker candidate, also used by the optional Opus/Haiku preset."},
@@ -49,8 +48,10 @@
     "OH": {"provider": "claude", "model": "claude-opus-5-5", "effort": "high", "context_target_tokens": null, "description": "General-purpose Claude-primary candidate or independent review candidate in Codex-primary Balanced. Role restrictions come from the active pool."},
     "OX": {"provider": "claude", "model": "claude-opus-5-5", "effort": "xhigh", "context_target_tokens": null, "description": "General-purpose Claude-primary candidate or independent review candidate in Codex-primary Performance. Role restrictions come from the active pool."},
     "OMAX": {"provider": "claude", "model": "claude-opus-5-5", "effort": "max", "context_target_tokens": null, "description": "Candidate for demanding Claude-primary work or a justified Codex-primary Performance escalation."},
-    "FH": {"provider": "claude", "model": "claude-fable-5-1", "effort": "high", "context_target_tokens": null, "description": "Opt-in trial for writing, prose, UI copy, alternative hypotheses, or security-sensitive implementation with concrete acceptance checks. No proven vulnerability-review or general UI-visual advantage is implied."},
-    "FX": {"provider": "claude", "model": "claude-fable-5-1", "effort": "xhigh", "context_target_tokens": null, "description": "Optional deeper-analysis trial for prose, UI copy, alternative hypotheses, or security-sensitive implementation with concrete checks, not routine escalation. A lower composite AAI score does not settle every task's fit."},
+    "FM": {"provider": "claude", "model": "claude-fable-5-2", "effort": "medium", "context_target_tokens": null, "description": "Selective high-capability candidate for a bounded comparison, not an automatic escalation."},
+    "FH": {"provider": "claude", "model": "claude-fable-5-2", "effort": "high", "context_target_tokens": null, "description": "Preferred Fable candidate for difficult reasoning, specification analysis, or independent review. Verify findings against source and acceptance checks."},
+    "FX": {"provider": "claude", "model": "claude-fable-5-2", "effort": "xhigh", "context_target_tokens": null, "description": "Explicit trial for the hardest long-running analysis when additional reasoning is justified, not the default Fable escalation."},
+    "FMAX": {"provider": "claude", "model": "claude-fable-5-2", "effort": "max", "context_target_tokens": null, "description": "Exceptional on-call escalation when a stronger attempt justifies additional usage, not a routine worker."},
     "MFH": {"provider": "muse", "model": "muse-wonder-full-1.0", "effort": "high", "description": "Investigate repository structure, existing fixes, and root causes using source evidence. Default to diagnosis and focused checks. Implement when the work order authorizes edits."},
     "MFX": {"provider": "muse", "model": "muse-wonder-full-1.0", "effort": "xhigh", "description": "Examine cross-system failures with competing hypotheses and challenge a proposed plan against evidence. Default to discriminating checks, not a second dispatcher. Implement when the work order authorizes edits."}
   },
@@ -70,7 +71,8 @@
           {"profile": "SH"}, {"profile": "SX"}, {"profile": "SMAX"}, {"profile": "AMAX"},
           {"profile": "AH", "roles": ["browser"], "specialist": true},
           {"profile": "OX", "roles": ["qa", "spec-review"], "independent_review": true},
-          {"profile": "OMAX", "escalation": true}
+          {"profile": "OMAX", "escalation": true},
+          {"profile": "FH", "roles": ["research", "planning", "qa", "spec-review"], "independent_review": true, "escalation": true, "one_off_only": true}
         ]
       }
     },
@@ -90,7 +92,8 @@
         "performance": [
           {"profile": "OM"}, {"profile": "OH"}, {"profile": "OX"}, {"profile": "OMAX"},
           {"profile": "SMAX", "roles": ["qa", "spec-review"], "independent_review": true},
-          {"profile": "AMAX", "roles": ["browser"], "specialist": true}
+          {"profile": "AMAX", "roles": ["browser"], "specialist": true},
+          {"profile": "FH", "roles": ["research", "planning", "qa", "spec-review"], "independent_review": true, "escalation": true, "one_off_only": true}
         ]
       }
     }
@@ -101,13 +104,13 @@
       {"profile": "OX", "roles": ["research", "planning", "qa", "spec-review"]},
       {"profile": "MFX", "roles": ["research", "planning", "qa", "spec-review"]},
       {"profile": "AMAX", "roles": ["research", "planning", "qa", "spec-review"]},
-      {"profile": "FX", "roles": ["research", "planning", "spec-review"]}
+      {"profile": "FH", "roles": ["research", "planning", "spec-review"]}
     ],
     "hiq": [
       {"profile": "SM"}, {"profile": "SX"}, {"profile": "OM"},
       {"profile": "OX", "roles": ["planning", "qa", "spec-review"], "independent_review": true},
       {"profile": "AMAX", "roles": ["qa", "browser"], "independent_review": true},
-      {"profile": "FX", "roles": ["spec-review"], "independent_review": true},
+      {"profile": "FH", "roles": ["spec-review"], "independent_review": true},
       {"profile": "MFH", "roles": ["research", "planning", "qa", "implementation"]},
       {"profile": "MFX", "roles": ["research", "planning", "qa", "implementation"]}
     ],

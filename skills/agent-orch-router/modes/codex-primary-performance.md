@@ -13,6 +13,9 @@ Prioritize task success and turnaround. Escalation is available when justified, 
 | AH | browser; specialist | Start here for difficult browser or computer-use assignments. Confirm actual tools and session access. |
 | OX | qa, spec-review; independent review | Use for optional independent QA or specification review of complex work, not authored fixes. |
 | OMAX | escalation | Use as a justified escalation for demanding analysis or implementation when earlier eligible choices do not fit. |
+| FH | research, planning, qa, spec-review; independent review; escalation; one-off | Selectively escalate difficult reasoning, specification analysis, or independent review. Use a bounded worker, not authored fixes or team management. |
+
+FH is a one-off escalation, not a required stage. Review assignments remain independent of the author.
 
 Choose the earliest suitable eligible profile, not every cheaper profile in sequence. General entries permit all task roles. One-off entries require a fresh bounded worker, never a continuing controller. Specialist entries take precedence for their stated role. Other eligible profiles may still use those tools.
 

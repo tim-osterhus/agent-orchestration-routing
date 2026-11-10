@@ -33,9 +33,9 @@ Keep your edits in an ignored `config/local.json` and pass `--overlay config/loc
 
 Both variants have seven base modes with one shared catalog. The [router entrypoint](../skills/agent-orch-router/SKILL.md) links each self-contained mode. Bundled pool order and task-fit guidance are available there without reading JSON. Pool sizes are bundled choices, not hard limits on custom configuration.
 
-Fable `FH`/`FX` remain on-call trials except HiQ's selective `FX` specification-review route and Council's on-call `FX` adviser. Neither appears in the Opus/Haiku preset. Ultracode is not supported. All model IDs require account/runtime verification.
+Fable `FM`, `FX`, and `FMAX` remain on-call. `FH` is eligible for bounded Performance reasoning/review escalation, HiQ specification review, and Council advice. No Fable profile appears in the Opus/Haiku preset. `FH`/`FX` now select Fable 5.2, not 5.1. Ultracode is not supported. All model IDs require account/runtime verification.
 
-[Council](../skills/agent-orch-router/modes/council.md) is shared and opt-in for decision deliberation. Required members default to SMAX, OX, and MFX. AMAX is optional. FX advises without a vote unless explicitly appointed.
+[Council](../skills/agent-orch-router/modes/council.md) is shared and opt-in for decision deliberation. Required members default to SMAX, OX, and MFX. AMAX is optional. FH advises without a vote unless explicitly appointed.
 
 Its five-profile pool describes eligibility, not required membership or simultaneous workers. The inspector does not run a council or establish consensus. Implementation, frontend, integration, and browser roles have no automatic eligibility. Existing concurrency, provider checks, permissions, and assignment budgets still apply.
 
@@ -45,7 +45,7 @@ HiQ is shared and opt-in. Its eight profiles are eligible choices, not required 
 
 Bundled Codex profiles target Standard tier without enforcing it. Launch plans do not set a tier and may inherit runtime settings. Verify and report the effective or inherited tier, or disclose unavailable verification. Do not change global speed settings.
 
-`fast` and `tokenburn` are retired modes, not aliases. Select `efficient`, `performance`, or `balanced` explicitly, or select the relevant provider burn mode. Retired Fast codes (`LF`, `SF`, `SMF`, `SHF`, `SXF`, `ALF`, `AMF`, `AHF`, `AXF`, `AUF`) fail with migration guidance. Their Standard counterparts retain model and effort.
+`fast` and `tokenburn` are retired modes, not aliases. Select `efficient`, `performance`, or `balanced` explicitly, or select the relevant provider burn mode. Retired Fast codes (`LF`, `SF`, `SMF`, `SHF`, `SXF`, `ALF`, `AMF`, `AHF`, `AXF`, `AUF`) fail with migration guidance. Their remaining Standard counterparts retain model and effort. `AU` is no longer bundled. Its exact runtime compatibility was not established, and lookup fails without substitution.
 
 `CMAX` is retired. Select `SNX` explicitly to change Sonnet from Max to XHigh. Remove retired entries from complete configs and overlays before validation.
 

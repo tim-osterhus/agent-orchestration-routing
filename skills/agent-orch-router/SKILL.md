@@ -37,7 +37,6 @@ Variant selects pool preference, not the running host. Never change the parent m
 | AH | gpt-6-astra | high |
 | AX | gpt-6-astra | xhigh |
 | AMAX | gpt-6-astra | max |
-| AU | gpt-6-astra | ultra |
 | HMED | claude-haiku-5-5 | medium |
 | HH | claude-haiku-5-5 | high |
 | HM | claude-haiku-5-5 | xhigh |
@@ -49,14 +48,20 @@ Variant selects pool preference, not the running host. Never change the parent m
 | OH | claude-opus-5-5 | high |
 | OX | claude-opus-5-5 | xhigh |
 | OMAX | claude-opus-5-5 | max |
-| FH | claude-fable-5-1 | high |
-| FX | claude-fable-5-1 | xhigh |
+| FM | claude-fable-5-2 | medium |
+| FH | claude-fable-5-2 | high |
+| FX | claude-fable-5-2 | xhigh |
+| FMAX | claude-fable-5-2 | max |
 | MFH | muse-wonder-full-1.0 | high |
 | MFX | muse-wonder-full-1.0 | xhigh |
 
-Codex profiles target Standard tier. HK has a soft 100K context target. HM does not. Catalog entries outside the selected pool are on-call only. FH/FX are opt-in trials for prose, UI copy, alternative hypotheses, or security-sensitive implementation, not proven specialist advantages.
+Codex profiles target Standard tier. HK has a soft 100K context target. HM does not. Catalog entries outside the selected pool are on-call only.
 
-FH remains outside all bundled pools. FX is in-pool for HiQ specification review and Council research, planning, and specification-review advice. Those listed roles need no pool or role overrides. Council defaults to SMAX/OX/MFX members. FX advises unless explicitly appointed as a member.
+FM is a selective on-call candidate. FH is the preferred Fable reasoning/specification/review profile. FX is an explicit hardest long-running analysis trial. FMAX is exceptional and on-call.
+
+FH/FX now select 5.2, not 5.1. No specialist advantage is established.
+
+FH is eligible for selective Performance reasoning/review escalation, HiQ specification review, and Council advice. These listed roles need no overrides. Council defaults to SMAX/OX/MFX members. FH advises unless explicitly appointed. FM, FX, and FMAX require explicit on-call selection.
 
 For selected Muse work only, read [Muse provider checks](references/muse.md). Exact catalog entries do not establish account access or an available dispatcher.
 
