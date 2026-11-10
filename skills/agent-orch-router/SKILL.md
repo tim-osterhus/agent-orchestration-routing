@@ -61,6 +61,8 @@ FM is a selective on-call candidate. FH is the preferred Fable reasoning/specifi
 
 FH/FX now select 5.2, not 5.1. No specialist advantage is established.
 
+For selected FM/FH/FX/FMAX assignments only, read [Fable prompting](references/fable-prompting.md) before briefing or dispatch. Include relevant work-order guidance. Pool eligibility alone does not trigger this read.
+
 FH is eligible for selective Performance reasoning/review escalation, HiQ specification review, and Council advice. These listed roles need no overrides. Council defaults to SMAX/OX/MFX members. FH advises unless explicitly appointed. FM, FX, and FMAX require explicit on-call selection.
 
 For selected Muse work only, read [Muse provider checks](references/muse.md). Exact catalog entries do not establish account access or an available dispatcher.

@@ -103,6 +103,20 @@ class RouterDocumentTests(unittest.TestCase):
         for code in ("MFH", "MFX"):
             self.assertEqual(fits[code], self.config["profiles"][code]["description"])
 
+    def test_fable_guidance_has_one_conditional_entrypoint_not_mode_preloads(self):
+        target = "references/fable-prompting.md"
+        entrypoint = (SKILL / "SKILL.md").read_text()
+        links = re.findall(r"\[[^\]]*\]\(([^)]+)\)", entrypoint)
+        self.assertEqual(links.count(target), 1)
+        self.assertTrue((SKILL / target).is_file())
+        # Conditional guidance must not become a required read for every mode worker.
+        for mode in (SKILL / "modes").glob("*.md"):
+            self.assertNotIn("fable-prompting.md", mode.read_text(), mode.name)
+        fable_codes = {code for code, profile in self.config["profiles"].items()
+                      if profile["model"] == "claude-fable-5-2"}
+        link_paragraph = next(p for p in entrypoint.split("\n\n") if target in p)
+        self.assertEqual(set(re.findall(r"\b(?:FM|FH|FX|FMAX)\b", link_paragraph)), fable_codes)
+
     def test_muse_checks_keep_permission_choice_separate_from_privacy(self):
         checks = (SKILL / "references/muse.md").read_text()
         self.assertIn("Honor the selected permission profile", checks)
