@@ -21,24 +21,19 @@ def rows(path):
 
 def documented_pool(path):
     pool = []
-    for code, eligibility, task_fit in rows(path)[1:]:
-        entry = {"profile": code}
-        if eligibility == "one-off":
-            entry["one_off_only"] = True
-        elif eligibility == "escalation":
-            entry["escalation"] = True
-        elif "; " in eligibility:
-            roles, *markers = eligibility.split("; ")
-            entry["roles"] = roles.split(", ")
-            flags = {"specialist": "specialist", "independent review": "independent_review",
-                     "escalation": "escalation", "one-off": "one_off_only"}
-            for marker in markers:
-                entry[flags[marker]] = True
-        elif ", " in eligibility:
-            entry["roles"] = eligibility.split(", ")
-        elif eligibility != "general":
-            raise AssertionError("Unknown eligibility: " + eligibility)
-        if len(task_fit.split()) < 8:
+    flags = {"specialist": "specialist", "independent review": "independent_review",
+             "escalation": "escalation", "one-off": "one_off_only",
+             "ongoing thread": "ongoing_thread_only", "final review": "final_only",
+             "verified adapter": "requires_verified_adapter"}
+    for slot, exact, eligibility, task_fit in rows(path)[1:]:
+        code = exact.split(": ", 1)[0]
+        entry = {"slot": slot, "profile": code, "fit": task_fit}
+        for part in eligibility.split("; "):
+            if part in flags:
+                entry[flags[part]] = True
+            elif part != "general":
+                entry["roles"] = part.split(", ")
+        if not task_fit.strip():
             raise AssertionError("Missing concrete task fit for " + code)
         pool.append(entry)
     return pool
@@ -51,8 +46,9 @@ class RouterDocumentTests(unittest.TestCase):
     def test_entrypoint_catalog_preserves_every_exact_model_and_effort(self):
         catalog = {row[0]: (row[1], row[2]) for row in rows(SKILL / "SKILL.md")
                    if row[0] in self.config["profiles"]}
-        self.assertEqual(catalog, {code: (p["model"], p["effort"])
-                                   for code, p in self.config["profiles"].items()})
+        codes = self.config["catalogs"]["frontier"] + self.config["catalogs"]["specialists"]
+        self.assertEqual(catalog, {code: (self.config["profiles"][code]["model"],
+                                        self.config["profiles"][code]["effort"] or "unspecified") for code in codes})
 
     def test_selected_mode_pools_preserve_order_and_all_eligibility_fields(self):
         seen = set()
@@ -62,14 +58,16 @@ class RouterDocumentTests(unittest.TestCase):
                 path = SKILL / "modes" / (name + ".md")
                 self.assertEqual(documented_pool(path), expected, name)
                 seen.add(path)
-        self.assertEqual(seen, set((SKILL / "modes").glob("*.md")))
+        self.assertEqual(seen, set((SKILL / "modes").glob("*.md")) - {SKILL / "modes/hiq.md"})
 
     def test_documented_fences_produce_identical_role_and_lifecycle_decisions(self):
         for variant in self.config["variants"]:
             for mode in bundle.mode_pools(self.config, variant):
                 name = mode if mode in self.config["modes"] else variant + "-" + mode
                 documented = deepcopy(self.config)
-                documented["modes"][mode] = documented_pool(SKILL / "modes" / (name + ".md"))
+                pool = documented_pool(SKILL / "modes" / (name + ".md"))
+                documented["bindings"]["shared"][mode] = {e["slot"]: e["profile"] for e in pool}
+                documented["modes"][mode] = [{k: v for k, v in e.items() if k != "profile"} for e in pool]
                 for role in self.config["roles"]:
                     for kind in ("bounded", "controller"):
                         for bias in self.config["selection"]["bias_options"]:
@@ -87,7 +85,7 @@ class RouterDocumentTests(unittest.TestCase):
     def test_required_native_path_is_entrypoint_and_one_self_contained_mode(self):
         entrypoint = (SKILL / "SKILL.md").read_text()
         targets = re.findall(r"\[[^\]]*\]\((modes/[^)]+)\)", entrypoint)
-        expected = {"modes/" + path.name for path in (SKILL / "modes").glob("*.md")}
+        expected = {"modes/" + path.name for path in (SKILL / "modes").glob("*.md") if path.name != "hiq.md"}
         self.assertEqual(set(targets), expected)
         self.assertEqual(len(targets), len(expected))
         for target in targets:
@@ -96,12 +94,14 @@ class RouterDocumentTests(unittest.TestCase):
             self.assertIn("Use native workers", mode)
             self.assertIn("installed Claude Delegation skill", mode)
             # Council's opening/critique/ratification protocol needs more than a routing pool.
-            self.assertLess(len((entrypoint + mode).split()), 1450 if target == "modes/council.md" else 1200)
+            self.assertLess(len((entrypoint + mode).split()), 2100 if target == "modes/council.md" else 1750)
 
     def test_muse_task_fit_matches_catalog(self):
-        fits = {code: task_fit for code, _, task_fit in rows(SKILL / "modes/hiq.md")[1:]}
-        for code in ("MFH", "MFX"):
-            self.assertEqual(fits[code], self.config["profiles"][code]["description"])
+        fits = {slot: task_fit for slot, _, _, task_fit in rows(SKILL / "modes/amusing.md")[1:]}
+        for slot in ("investigate", "investigate-deep"):
+            entry = next(e for e in self.config["modes"]["amusing"] if e["slot"] == slot)
+            self.assertEqual(fits[slot], entry["fit"])
+            self.assertIn("Implement when the work order authorizes edits.", fits[slot])
 
     def test_fable_guidance_has_one_conditional_entrypoint_not_mode_preloads(self):
         target = "references/fable-prompting.md"

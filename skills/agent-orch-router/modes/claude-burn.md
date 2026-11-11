@@ -8,16 +8,18 @@ Restore the prior mode at the endpoint or backlog completion. Stop on quota, bil
 
 ## Ordered pool
 
-| Profile | Eligibility | Task fit |
-| --- | --- | --- |
-| HMAX | one-off | Use for a bounded one-off backlog packet with concrete inputs, ownership, and acceptance checks. |
-| SNH | general | Use for scoped authorized implementation or analysis needing more judgment than a small Haiku packet. |
-| OM | general | Use for general-purpose authorized implementation and integration spanning related files. |
-| OH | general | Use for uncertain backlog implementation or debugging where additional reasoning is justified. |
-| OX | general | Use for difficult authorized analysis, implementation, or integration with interacting requirements. |
-| OMAX | general | Use for demanding authorized work when sustained reasoning fits the backlog, not merely to consume allowance. |
+<!-- BEGIN GENERATED:pool:claude-burn -->
+| Slot | Exact profile | Eligibility | Task fit |
+| --- | --- | --- | --- |
+| haiku-max | HMAX: claude-haiku-5-5 / max | one-off | Use for a bounded one-off backlog packet with concrete inputs, ownership, and acceptance checks. |
+| sonnet | SNH: claude-sonnet-5-5 / high | general | Use for scoped authorized implementation or analysis needing more judgment than a small Haiku packet. |
+| opus-medium | OM: claude-opus-5-5 / medium | general | Use for general-purpose authorized implementation and integration spanning related files. |
+| opus | OH: claude-opus-5-5 / high | general | Use for uncertain backlog implementation or debugging where additional reasoning is justified. |
+| opus-deep | OX: claude-opus-5-5 / xhigh | general | Use for difficult authorized analysis, implementation, or integration with interacting requirements. |
+| opus-max | OMAX: claude-opus-5-5 / max | general | Use for demanding authorized work when sustained reasoning fits the backlog, not merely to consume allowance. |
+<!-- END GENERATED:pool:claude-burn -->
 
-Choose the earliest suitable eligible profile, not every cheaper profile in sequence. General entries permit all task roles. One-off entries require a fresh bounded worker, never a continuing controller. Specialist entries take precedence for their stated role. Other eligible profiles may still use those tools.
+Choose the earliest suitable eligible slot, not every cheaper profile in sequence. General slots permit all task roles. Bindings never change slot eligibility. One-off slots require a fresh bounded worker, never a continuing controller. Specialist slots take precedence for their stated role. Other eligible profiles may still use those tools.
 
 Role/lifecycle exceptions require explicit user authorization and an exact profile. An out-of-pool choice also needs an explicit pool exception. The optional inspector records these as `--role-override` and `--allow-out-of-pool`. Never import another mode's role fences or silently substitute model/effort.
 

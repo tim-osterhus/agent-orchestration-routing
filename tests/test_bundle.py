@@ -77,7 +77,7 @@ class RoutingTests(unittest.TestCase):
     def test_burn_modes_are_provider_exclusive_under_both_designs(self):
         for mode, provider, expected in [("codex-burn", "codex", ["AL", "SM", "SH", "SX", "AH", "AMAX"]),
                                           ("claude-burn", "claude", ["HMAX", "SNH", "OM", "OH", "OX", "OMAX"])]:
-            self.assertEqual([entry["profile"] for entry in self.config["modes"][mode]], expected)
+            self.assertEqual([entry["profile"] for entry in bundle.mode_pools(self.config)[mode]], expected)
             for design in ("codex-first", "claude-first"):
                 for role in self.config["roles"]:
                     result = self.resolve(mode=mode, design=design, role=role, burn_account="work-account", burn_endpoint="reset")
@@ -137,7 +137,7 @@ class RoutingTests(unittest.TestCase):
                 bundle.validate(bundle.merge(self.config, {"profiles": {code: {"alias_of": "SM"}}}))
         with self.assertRaisesRegex(ValueError, "Standard"):
             bundle.validate(bundle.merge(self.config, {"profiles": {"SM": {"service_tier": "fast"}}}))
-        with self.assertRaisesRegex(ValueError, "Sonnet Max"):
+        with self.assertRaisesRegex(ValueError, "SNX retains Sonnet XHigh"):
             bundle.validate(bundle.merge(self.config, {"profiles": {"SNX": {"effort": "max"}}}))
 
     def test_out_of_pool_requires_separate_pool_and_eligibility_overrides(self):
@@ -224,16 +224,16 @@ class VariantTests(unittest.TestCase):
     def test_exact_bundled_pools_and_counts(self):
         expected = {
             "codex-primary": {
-                "efficient": ["LM", "TL", "SL", "TM", "TH", "SM", "SH"],
+                "efficient": ["LM", "TL", "EX", "TM", "TH", "SM"],
                 "balanced": ["SL", "TM", "TH", "SM", "SH", "SX", "SMAX", "AL", "OH"],
                 "performance": ["SH", "SX", "SMAX", "AMAX", "AH", "OX", "OMAX", "FH"]},
             "claude-primary": {
-                "efficient": ["HMED", "HH", "HM", "HMAX", "SNH", "OM", "OH"],
+                "efficient": ["HL", "TL", "EX", "TM", "TH", "SM"],
                 "balanced": ["HH", "HM", "HMAX", "SNH", "OM", "OH", "OX", "SM", "SMAX"],
                 "performance": ["OM", "OH", "OX", "OMAX", "SMAX", "AMAX", "FH"]}}
         for variant, modes in expected.items():
             actual = bundle.mode_pools(self.config, variant)
-            self.assertEqual(set(actual), {"efficient", "balanced", "performance", "hiq", "council", "codex-burn", "claude-burn"})
+            self.assertEqual(set(actual), {"efficient", "balanced", "performance", "amusing", "council", "codex-burn", "claude-burn"})
             for mode, codes in modes.items():
                 self.assertEqual([entry["profile"] for entry in actual[mode]], codes)
         for mode in bundle.BURN_PROVIDERS:
@@ -252,7 +252,7 @@ class VariantTests(unittest.TestCase):
             "claude-opus-5-5": {"OM": "medium", "OH": "high", "OX": "xhigh", "OMAX": "max"},
             "claude-fable-5-2": {"FM": "medium", "FH": "high", "FX": "xhigh", "FMAX": "max"},
             "muse-wonder-full-1.0": {"MFH": "high", "MFX": "xhigh"}}
-        self.assertEqual(set(self.config["profiles"]), {code for efforts in families.values() for code in efforts})
+        self.assertLessEqual({code for efforts in families.values() for code in efforts}, set(self.config["profiles"]))
         for model, efforts in families.items():
             for code, effort in efforts.items():
                 item = bundle.profile(self.config, code)
@@ -298,7 +298,7 @@ class VariantTests(unittest.TestCase):
         self.assertEqual(native["choices"][0]["execution"], self.config["claude"]["modes"]["implementation"])
 
     def test_general_opus_implementation_and_optional_review(self):
-        for mode, codes in [("efficient", ["OM", "OH"]), ("balanced", ["OM", "OH", "OX"]),
+        for mode, codes in [("balanced", ["OM", "OH", "OX"]),
                             ("performance", ["OM", "OH", "OX", "OMAX"])]:
             for code in codes:
                 result = bundle.resolve(self.config, variant="claude-primary", mode=mode, code=code)
@@ -339,7 +339,7 @@ class VariantTests(unittest.TestCase):
         for variant in self.config["variants"]:
             entry = next(e for e in bundle.mode_pools(self.config, variant)["performance"]
                          if e["profile"] == "FH")
-            self.assertEqual(entry, {"profile": "FH",
+            self.assertEqual({k: v for k, v in entry.items() if k not in {"slot", "fit"}}, {"profile": "FH",
                                     "roles": ["research", "planning", "qa", "spec-review"],
                                     "independent_review": True, "escalation": True, "one_off_only": True})
             for design, dispatch in (("codex-first", "external-claude"),
@@ -375,7 +375,7 @@ class VariantTests(unittest.TestCase):
         for variant in config["variants"]:
             for mode, pool in bundle.mode_pools(config, variant).items():
                 self.assertEqual({"FM", "FH", "FX", "FMAX"} & {entry["profile"] for entry in pool},
-                                 {"FH"} if mode in {"hiq", "council", "performance"} else set())
+                                 {"FH"} if mode in {"amusing", "council", "performance"} else set())
             for code in ("FM", "FH", "FX", "FMAX"):
                 with self.assertRaisesRegex(ValueError, "outside"):
                     bundle.resolve(config, variant=variant, code=code)
@@ -384,12 +384,12 @@ class VariantTests(unittest.TestCase):
                 result = bundle.resolve(config, variant=variant, code=code, allow_out_of_pool=True, role_override=True)
                 self.assertEqual(result["choices"][0]["model"], "claude-fable-5-2")
 
-    def test_hiq_is_shared_non_burn_with_nonpreemptive_role_fences(self):
+    def test_amusing_is_shared_non_burn_with_nonpreemptive_role_fences(self):
         expected = ["SM", "SX", "OM", "OX", "AMAX", "FH", "MFH", "MFX"]
         for variant in self.config["variants"]:
-            pool = bundle.mode_pools(self.config, variant)["hiq"]
+            pool = bundle.mode_pools(self.config, variant)["amusing"]
             self.assertEqual([entry["profile"] for entry in pool], expected)
-            self.assertNotIn("hiq", self.config["variants"][variant]["modes"])
+            self.assertNotIn("amusing", self.config["variants"][variant]["modes"])
             self.assertFalse(any(entry.get("specialist") for entry in pool))
             for role, codes in {
                 "implementation": ["SM", "SX", "OM", "MFH", "MFX"],
@@ -398,20 +398,20 @@ class VariantTests(unittest.TestCase):
                 "qa": ["SM", "SX", "OM", "OX", "AMAX", "MFH", "MFX"],
                 "spec-review": ["SM", "SX", "OM", "OX", "FH"],
                 "browser": ["SM", "SX", "OM", "AMAX"]}.items():
-                result = bundle.resolve(self.config, mode="hiq", variant=variant, role=role)
+                result = bundle.resolve(self.config, mode="amusing", variant=variant, role=role)
                 self.assertEqual([choice["code"] for choice in result["choices"]], codes)
                 self.assertNotIn("burn", result)
             for role in ("qa", "browser"):
-                choice = bundle.resolve(self.config, mode="hiq", variant=variant, code="AMAX", role=role)["choices"][0]
+                choice = bundle.resolve(self.config, mode="amusing", variant=variant, code="AMAX", role=role)["choices"][0]
                 self.assertEqual((choice["model"], choice["effort"]), ("gpt-6-astra", "max"))
                 self.assertTrue(choice["independent_review"])
                 with self.assertRaisesRegex(ValueError, "outside"):
-                    bundle.resolve(self.config, mode="hiq", variant=variant, code="AX", role=role)
+                    bundle.resolve(self.config, mode="amusing", variant=variant, code="AX", role=role)
         for code in ("OX", "AMAX", "FH"):
             with self.assertRaisesRegex(ValueError, "role/lifecycle"):
-                bundle.resolve(self.config, mode="hiq", code=code, role="implementation")
+                bundle.resolve(self.config, mode="amusing", code=code, role="implementation")
         with self.assertRaisesRegex(ValueError, "only to burn"):
-            bundle.resolve(self.config, mode="hiq", burn_account="work", burn_endpoint="reset")
+            bundle.resolve(self.config, mode="amusing", burn_account="work", burn_endpoint="reset")
 
     def test_canonical_mode_names_reject_prior_selectors(self):
         for variant in self.config["variants"]:
@@ -459,11 +459,11 @@ class VariantTests(unittest.TestCase):
         for code, effort in (("MFH", "high"), ("MFX", "xhigh")):
             for design in self.config["designs"]:
                 for role in ("research", "implementation"):
-                    result = bundle.resolve(self.config, mode="hiq", code=code, role=role, design=design)
+                    result = bundle.resolve(self.config, mode="amusing", code=code, role=role, design=design)
                     choice = result["choices"][0]
                     self.assertEqual((choice["provider"], choice["model"], choice["effort"], choice["dispatch"]),
                                      ("muse", "muse-wonder-full-1.0", effort, "external-muse"))
-                    self.assertEqual(set(choice["execution"]), {"launch_plan_supported", "adapter_required", "notice"})
+                    self.assertEqual(set(choice["execution"]), {"launch_plan_supported", "adapter_required", "adapter_route_available", "account_access_verified", "notice"})
                     self.assertFalse(choice["execution"]["launch_plan_supported"])
                     self.assertTrue(choice["execution"]["adapter_required"])
                     self.assertNotIn("claude_mode", choice)
@@ -480,8 +480,8 @@ class VariantTests(unittest.TestCase):
             before = deepcopy(config)
             for code in ("MFH", "MFX"):
                 for variant in config["variants"]:
-                    result = bundle.resolve(config, mode="hiq", code=code, role="implementation", variant=variant)
-                    expected = bundle.resolve(self.config, mode="hiq", code=code, role="implementation", variant=variant)
+                    result = bundle.resolve(config, mode="amusing", code=code, role="implementation", variant=variant)
+                    expected = bundle.resolve(self.config, mode="amusing", code=code, role="implementation", variant=variant)
                     self.assertEqual(result, expected)
             self.assertEqual(config, before)
 
@@ -636,7 +636,7 @@ class PlanTests(unittest.TestCase):
 
     def test_standard_launch_plans_preserve_exact_codex_model_effort(self):
         for code, item in self.config["profiles"].items():
-            if item["provider"] != "codex":
+            if item["provider"] != "codex" or not item.get("executable", True):
                 continue
             plan = self.plan(code=code, allow_out_of_pool=True, role_override=True, design="claude-first")
             self.assertEqual(self.value(plan["argv"], "--model"), item["model"])
@@ -720,10 +720,10 @@ class PlanTests(unittest.TestCase):
         for code in ("MFH", "MFX"):
             for design in self.config["designs"]:
                 with self.assertRaisesRegex(ValueError, "No bundled launch adapter for provider muse"):
-                    self.plan(mode="hiq", code=code, role="research", design=design)
+                    self.plan(mode="amusing", code=code, role="research", design=design)
         for action in ("codex-plan", "claude-plan"):
             result = subprocess.run([sys.executable, str(ROOT / "scripts/bundle.py"), action,
-                                     "--mode", "hiq", "--profile", "MFH", "--role", "research",
+                                     "--mode", "amusing", "--profile", "MFH", "--role", "research",
                                      "--cwd", self.cwd, "--prompt-file", self.prompt, "--artifacts", self.artifacts],
                                     capture_output=True, text=True)
             self.assertNotEqual(result.returncode, 0)

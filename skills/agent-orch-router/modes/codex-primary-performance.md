@@ -4,20 +4,22 @@ Prioritize task success and turnaround. Escalation is available when justified, 
 
 ## Ordered pool
 
-| Profile | Eligibility | Task fit |
-| --- | --- | --- |
-| SH | general | Use for substantive implementation or diagnosis when a routine route would leave material uncertainty. |
-| SX | general | Use for difficult debugging, integration, or implementation with several interacting constraints. |
-| SMAX | general | Use for demanding code changes or independent verification requiring sustained reasoning across a large change surface. |
-| AMAX | general | Use for demanding analysis, visual reasoning, or implementation where Astra's task and tool fit justify the route. |
-| AH | browser; specialist | Start here for difficult browser or computer-use assignments. Confirm actual tools and session access. |
-| OX | qa, spec-review; independent review | Use for optional independent QA or specification review of complex work, not authored fixes. |
-| OMAX | escalation | Use as a justified escalation for demanding analysis or implementation when earlier eligible choices do not fit. |
-| FH | research, planning, qa, spec-review; independent review; escalation; one-off | Selectively escalate difficult reasoning, specification analysis, or independent review. Use a bounded worker, not authored fixes or team management. |
+<!-- BEGIN GENERATED:pool:codex-primary/performance -->
+| Slot | Exact profile | Eligibility | Task fit |
+| --- | --- | --- | --- |
+| deep | SH: gpt-6.1-sol / high | general | Use for substantive implementation or diagnosis when a routine route would leave material uncertainty. |
+| hard | SX: gpt-6.1-sol / xhigh | general | Use for difficult debugging, integration, or implementation with several interacting constraints. |
+| max-code | SMAX: gpt-6.1-sol / max | general | Use for demanding code changes or independent verification requiring sustained reasoning across a large change surface. |
+| broad | AMAX: gpt-6-astra / max | general | Use for demanding analysis, visual reasoning, or implementation where Astra's task and tool fit justify the route. |
+| browser | AH: gpt-6-astra / high | browser; specialist | Start here for difficult browser or computer-use assignments. Confirm actual tools and session access. |
+| opus-deep | OX: claude-opus-5-5 / xhigh | qa, spec-review; independent review | Use for optional independent QA or specification review of complex work, not authored fixes. |
+| opus-max | OMAX: claude-opus-5-5 / max | escalation | Use as a justified escalation for demanding analysis or implementation when earlier eligible choices do not fit. |
+| fable-review | FH: claude-fable-5-2 / high | research, planning, qa, spec-review; independent review; escalation; one-off | Selectively escalate difficult reasoning, specification analysis, or independent review. Use a bounded worker, not authored fixes or team management. |
+<!-- END GENERATED:pool:codex-primary/performance -->
 
 FH is a one-off escalation, not a required stage. Review assignments remain independent of the author.
 
-Choose the earliest suitable eligible profile, not every cheaper profile in sequence. General entries permit all task roles. One-off entries require a fresh bounded worker, never a continuing controller. Specialist entries take precedence for their stated role. Other eligible profiles may still use those tools.
+Choose the earliest suitable eligible slot, not every cheaper profile in sequence. General slots permit all task roles. Bindings never change slot eligibility. One-off slots require a fresh bounded worker, never a continuing controller. Specialist slots take precedence for their stated role. Other eligible profiles may still use those tools.
 
 Role/lifecycle exceptions require explicit user authorization and an exact profile. An out-of-pool choice also needs an explicit pool exception. The optional inspector records these as `--role-override` and `--allow-out-of-pool`. Never import another mode's role fences or silently substitute model/effort.
 

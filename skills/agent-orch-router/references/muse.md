@@ -1,12 +1,16 @@
 # Muse provider checks
 
-Read only when selecting MFH or MFX. Use an available provider adapter, including a configured durable adapter, only after checking its actual controls and lifecycle.
+Read only when selecting Muse work. Use an available provider adapter, including a configured durable adapter, only after checking its actual controls and lifecycle.
 
 A read-only Muse 1.4.14 provider-catalog check on 2026-10-30 listed `muse-wonder-full-1.0` variants `minimal`, `low`, `medium`, `high`, `xhigh`, and `max`. Its reported default was `max`, not `high`. The catalog did not advertise `ultra`. The check sent no model turn and does not prove inference access. Configuration syntax validation does not verify model-specific efforts.
 
 T3 Code's [versioned catalog adapter](https://github.com/pingdotgg/t3code/blob/v0.1.5/packages/provider-muse/src/server/modelCatalog.ts) derives reasoning choices from each model's advertised variants and default. Its [turn adapter](https://github.com/pingdotgg/t3code/blob/v0.1.5/packages/provider-muse/src/server/adapter.ts) reads and validates the selected `reasoningEffort` option. These sources describe adapter behavior, not universal model availability.
 
 Before dispatch, verify the intended account route, exact model, requested effort, tools, and result metadata through the selected adapter. Set MFH to `high` and MFX to `xhigh` explicitly. Do not accept a default, fallback model, or unverified effort as an exact match. Stop if the adapter cannot establish the required route.
+
+EX/EMAX use `muse-ember-1.0` XHigh/Max. MWM uses `muse-wonder-1.0` Max. MSX/MSMAX use `muse-spark-1.3` XHigh/Max. These public Standard API configurations require a verified API adapter and account. Spark Contributor does not support Max.
+
+MFMAX selects the verified Muse Code ID `muse-wonder-full-1.0` at Max. Full requires Power/Maximum subscription access and has no public API ID. Subscription access can support headless execution. Do not substitute Wonder API for Full or impose an interactive-only or read-only route. Verify the selected Code adapter and effective permissions.
 
 MFH/MFX default to investigation. Implementation is eligible when the work order authorizes edits. Reviewers do not author fixes without reassignment.
 

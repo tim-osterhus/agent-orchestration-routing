@@ -12,14 +12,17 @@ For Claude Code, invoke the router explicitly and do not add it to always-loaded
 
 ## Editable controls
 
-`config/routing.json` drives the optional offline inspector and external CLI plans. Its bundled catalog and pools match the router's Markdown tables. When editing bundled defaults, update both and run the tests. Custom configurations need only be loaded when selected.
+`config/routing.json` is the canonical registry for the offline inspector, external CLI plans, and generated Markdown tables. Its bundled catalog and pools match the router's Markdown tables. Edit the registry, regenerate its table blocks, and run the tests. Do not edit generated tables manually. Custom configurations need only be loaded when selected.
 
 | Field | Effect |
 | --- | --- |
 | `controller_design` | Chooses `codex-first` or `claude-first` routing labels. It does not change the current app/model. |
+| `catalogs` | Disjoint frontier, specialist, conditional, and compatibility groups. Catalog presence does not authorize dispatch. |
+| `slots`, `bindings` | Stable job descriptions and mode-specific exact-profile assignments. Eligibility remains on the pool entry. |
+| `adapters` | Availability by exact `provider:access_mode` route. A known adapter does not establish current account access, tools, or permissions. |
 | `profiles` | One master catalog of exact model, provider, effort, target tier, soft context target, and descriptions. Aliases use `alias_of`. |
 | `default_variant`, `variants` | Select `codex-primary` or `claude-primary` pools for Efficient, Balanced, and Performance. |
-| `modes` | Shared HiQ, Council, and burn pools, plus custom/preset pools. Entries carry role/lifecycle, specialist, independent-review, and escalation markers. |
+| `modes` | Shared Amusing, Council, and burn pools, plus custom/preset pools. Entries carry role/lifecycle, specialist, independent-review, and escalation markers. |
 | `selection.bias` | Low/default/high selection preference. It never changes model effort or sorts unknown benchmark values. |
 | `execution_style` | Pure orchestration or supporting delegation. |
 | `max_parallel_workers` | Scheduling ceiling, further limited by the actual runtime. |
@@ -29,25 +32,52 @@ For Claude Code, invoke the router explicitly and do not add it to always-loaded
 
 Keep your edits in an ignored `config/local.json` and pass `--overlay config/local.json`, or pass a complete replacement with `--config`. Recursive object merge preserves unspecified fields. Arrays replace rather than append. Later presets/overlays win. Presets load before overlays, so local policy can narrow a preset. Validate the final merged configuration.
 
-`--variant` selects pool preference independently of controller design, permissions, and bias. Codex-primary is the default. `variants.NAME.modes` defines each variant's normal pools. Top-level `modes` supplies shared HiQ, Council, burns, and custom/preset pools. A legacy top-level normal-mode override takes precedence for every variant. Prefer a variant-specific overlay when only one variant should change. Complete legacy configs without `variants` still use their top-level modes.
+`--variant` selects pool preference independently of controller design, permissions, and bias. Codex-primary is the default. `variants.NAME.modes` defines each variant's normal pools. Top-level `modes` supplies shared Amusing, Council, burns, and custom/preset pools. A legacy top-level normal-mode override takes precedence for every variant. Prefer a variant-specific overlay when only one variant should change. Complete legacy configs without `variants` still use their top-level modes.
 
 Both variants have seven base modes with one shared catalog. The [router entrypoint](../skills/agent-orch-router/SKILL.md) links each self-contained mode. Bundled pool order and task-fit guidance are available there without reading JSON. Pool sizes are bundled choices, not hard limits on custom configuration.
 
-Fable `FM`, `FX`, and `FMAX` remain on-call. `FH` is eligible for bounded Performance reasoning/review escalation, HiQ specification review, and Council advice. No Fable profile appears in the Opus/Haiku preset. `FH`/`FX` now select Fable 5.2, not 5.1. Ultracode is not supported. All model IDs require account/runtime verification.
+Fable `FM`, `FX`, and `FMAX` remain on-call. `FH` is eligible for bounded Performance reasoning/review escalation, Amusing specification review, and Council advice. No Fable profile appears in the Opus/Haiku preset. `FH`/`FX` now select Fable 5.2, not 5.1. Ultracode is not supported. All model IDs require account/runtime verification.
 
 [Council](../skills/agent-orch-router/modes/council.md) is shared and opt-in for decision deliberation. Required members default to SMAX, OX, and MFX. AMAX is optional. FH advises without a vote unless explicitly appointed.
 
 Its five-profile pool describes eligibility, not required membership or simultaneous workers. The inspector does not run a council or establish consensus. Implementation, frontend, integration, and browser roles have no automatic eligibility. Existing concurrency, provider checks, permissions, and assignment budgets still apply.
 
-HiQ is shared and opt-in. Its eight profiles are eligible choices, not required pipeline stages. Muse `MFH`/`MFX` default to investigation and allow implementation when the work order authorizes edits. Their exact efforts remain `high`/`xhigh`. Read [Muse provider checks](../skills/agent-orch-router/references/muse.md) only when selecting them.
+Amusing is shared and opt-in. Its eight profiles are eligible choices, not required pipeline stages. Muse `MFH`/`MFX` default to investigation and allow implementation when the work order authorizes edits. Their exact efforts remain `high`/`xhigh`. Read [Muse provider checks](../skills/agent-orch-router/references/muse.md) only when selecting them.
 
-`resolve` returns `external-muse` with adapter-required metadata. Bundled launch plans reject Muse. Use a separately verified adapter rather than substituting Codex or Claude settings. Configure Muse permissions through that adapter independently of model and role. Honor and read back the selected profile. This bundle imposes neither read-only nor maximum access.
+`resolve` returns exact external-provider labels with adapter-required metadata. Bundled launch plans reject providers other than Codex and Claude. Use a separately verified adapter rather than substituting Codex or Claude settings. Configure Muse permissions through that adapter independently of model and role. Honor and read back the selected profile. This bundle imposes neither read-only nor maximum access.
+
+The existing `muse:muse_code_subscription` adapter route keeps MFH/MFX eligible in Council and Amusing. Its known route does not verify the current account or model entitlement. Perform the selected mode's dispatch preflight. `muse:public_api_standard` remains unavailable by default, so Code availability cannot enable EX or other Muse API profiles. Provider-wide flags do not override an explicit access route.
 
 Bundled Codex profiles target Standard tier without enforcing it. Launch plans do not set a tier and may inherit runtime settings. Verify and report the effective or inherited tier, or disclose unavailable verification. Do not change global speed settings.
 
 `fast` and `tokenburn` are retired modes, not aliases. Select `efficient`, `performance`, or `balanced` explicitly, or select the relevant provider burn mode. Retired Fast codes (`LF`, `SF`, `SMF`, `SHF`, `SXF`, `ALF`, `AMF`, `AHF`, `AXF`, `AUF`) fail with migration guidance. Their remaining Standard counterparts retain model and effort. `AU` is no longer bundled. Its exact runtime compatibility was not established, and lookup fails without substitution.
 
-`CMAX` is retired. Select `SNX` explicitly to change Sonnet from Max to XHigh. Remove retired entries from complete configs and overlays before validation.
+`CMAX` is retired. Select `SNX` for XHigh or `SNMAX` for the newly verified Max configuration explicitly. Remove retired entries from complete configs and overlays before validation.
+
+## Bindings and generated instructions
+
+Pool entries name a stable `slot` and retain their own role/lifecycle fences. `bindings.VARIANT.MODE.SLOT` selects its exact profile. Shared modes use `bindings.shared.MODE.SLOT`. Two slots may bind to one model without merging their eligibility. Legacy explicit `{profile: CODE}` pools still work, including presets and top-level overrides.
+
+For example, this local overlay rebinds only Balanced's general implementation slot:
+
+```json
+{"bindings": {"codex-primary": {"balanced": {"standard": "SX"}}}}
+```
+
+An exact `--profile SM` request still means Sol Medium, not the rebound slot. Use `--slot standard` to follow the active binding. Pool and role exceptions remain explicit. Slot bindings never modify permission profiles.
+
+If several slots bind to the requested exact profile, an explicit profile request uses the first role/lifecycle-eligible slot. It produces one launch target and does not merge authority flags from other slots. Select a named slot when its specific job matters. Automatic inspection keeps separate slot identities.
+
+Render from the same merged configuration used by the inspector:
+
+```sh
+python3 scripts/render_docs.py --overlay config/local.json
+python3 scripts/render_docs.py --overlay config/local.json --check
+```
+
+The renderer replaces only marked table blocks, not workflow prose. `--skill-root` targets an installed or temporary skill folder. `--root` controls preset lookup. An explicit `--config` is the only registry read when supplied. Render-only private registries can use the renderer API without adopting public runtime settings.
+
+Run `--check` with the selected overlay for local drift checks. Run it without overlays for committed defaults. Rendering never calls a provider or validates account access. A private runtime must supply its private registry instead of loading public JSON.
 
 ## Approvals are a separate choice
 
@@ -82,7 +112,7 @@ Codex separately configures `sandbox_by_role`, `approval_policy`, `bypass_approv
 python3 scripts/bundle.py validate
 python3 scripts/bundle.py resolve --mode efficient --role research
 python3 scripts/bundle.py resolve --mode performance --role browser
-python3 scripts/bundle.py resolve --mode hiq --profile MFH --role research
+python3 scripts/bundle.py resolve --mode amusing --profile MFH --role research
 python3 scripts/bundle.py resolve --mode council --profile MFX --role planning
 python3 scripts/bundle.py resolve --mode balanced --profile OH --role qa
 python3 scripts/bundle.py resolve --mode balanced --profile SM --role implementation --design claude-first
@@ -94,7 +124,7 @@ python3 scripts/bundle.py validate --preset opus-haiku
 python3 scripts/bundle.py resolve --preset opus-haiku --mode opus-haiku --profile OH --role implementation --claude-mode orchestration
 ```
 
-`resolve` returns eligible candidates, not the final suitability decision. The agent evaluates task complexity and tool fit before choosing one. Entries marked `specialist` take precedence for their stated roles. HiQ uses nonpreemptive role restrictions instead. Unknown profiles, alias cycles, ineligible roles, and disabled orchestration fail rather than silently selecting something else. An empty eligible set is a blocker.
+`resolve` returns eligible candidates, not the final suitability or dispatch decision. Efficient's EX slot requires a verified adapter for automatic eligibility. An explicit EX request stays exact and reports unsupported launch planning without substitution. The agent evaluates task complexity and tool fit before choosing one. Entries marked `specialist` take precedence for their stated roles. Amusing uses nonpreemptive role restrictions instead. Unknown profiles, alias cycles, ineligible roles, and disabled orchestration fail rather than silently selecting something else. An empty eligible set is a blocker.
 
 An explicit out-of-pool profile requires both `--allow-out-of-pool` and `--role-override`. The active pool has no entry defining that profile's role/lifecycle eligibility. The second flag acknowledges this unspecified eligibility, not a global model restriction inferred from another mode.
 
@@ -130,7 +160,8 @@ CLI plans apply only to external routes. A native dispatch label now fails launc
 ## Checks and publication
 
 ```sh
-python3 -m unittest discover -s tests -v
+python3 scripts/render_docs.py --check
+python3 -m unittest tests.test_bundle tests.test_router_documents tests.test_slots_and_generation -v
 ```
 
 The tests are offline and spend no model usage. Launch plans do not prove model access, effective effort, Standard tier enforcement, timeout cleanup, or successful cross-provider execution. Report requested versus observed or inherited tier without changing global speed settings. Disclose unavailable tier controls or verification. Run bounded, authorized live tests before making execution claims publicly. This bundle is available under the [MIT License](../LICENSE).

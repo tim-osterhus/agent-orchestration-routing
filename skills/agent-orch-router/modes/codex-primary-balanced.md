@@ -4,19 +4,21 @@ Use this everyday pool for low/default/high bias. Low favors the least resource-
 
 ## Ordered pool
 
-| Profile | Eligibility | Task fit |
-| --- | --- | --- |
-| SL | general | Use for routine, clearly specified edits whose output is easy to check. |
-| TM | general | Use for everyday bounded implementation, source-grounded writing, visual interpretation, or screen-based workflows. |
-| TH | general | Use for harder diagnosis, multi-step visual reasoning, or computer-use work needing more deliberation than TM. |
-| SM | general | Use for general implementation, related-file changes, or independent verification with moderate ambiguity. |
-| SH | general | Use for debugging, unclear behavior, or integration where controller repair would otherwise be substantial. |
-| SX | general | Use for difficult implementation or debugging with interacting constraints and explicit acceptance checks. |
-| SMAX | general | Use for demanding implementation or independent code verification when the task warrants sustained reasoning. |
-| AL | browser; specialist | Start here for browser interaction or visual inspection. Confirm the worker has the required browser tools and session. |
-| OH | qa, spec-review; independent review | Use for an optional independent QA or specification review of a completed candidate, not implementation. |
+<!-- BEGIN GENERATED:pool:codex-primary/balanced -->
+| Slot | Exact profile | Eligibility | Task fit |
+| --- | --- | --- | --- |
+| routine | SL: gpt-6.1-sol / low | general | Use for routine, clearly specified edits whose output is easy to check. |
+| visual | TM: gpt-6.1-terra / medium | general | Use for everyday bounded implementation, source-grounded writing, visual interpretation, or screen-based workflows. |
+| visual-deep | TH: gpt-6.1-terra / high | general | Use for harder diagnosis, multi-step visual reasoning, or computer-use work needing more deliberation than TM. |
+| standard | SM: gpt-6.1-sol / medium | general | Use for general implementation, related-file changes, or independent verification with moderate ambiguity. |
+| deep | SH: gpt-6.1-sol / high | general | Use for debugging, unclear behavior, or integration where controller repair would otherwise be substantial. |
+| hard | SX: gpt-6.1-sol / xhigh | general | Use for difficult implementation or debugging with interacting constraints and explicit acceptance checks. |
+| max-code | SMAX: gpt-6.1-sol / max | general | Use for demanding implementation or independent code verification when the task warrants sustained reasoning. |
+| browser | AL: gpt-6-astra / low | browser; specialist | Start here for browser interaction or visual inspection. Confirm the worker has the required browser tools and session. |
+| opus | OH: claude-opus-5-5 / high | qa, spec-review; independent review | Use for an optional independent QA or specification review of a completed candidate, not implementation. |
+<!-- END GENERATED:pool:codex-primary/balanced -->
 
-Choose the earliest suitable eligible profile, not every cheaper profile in sequence. General entries permit all task roles. One-off entries require a fresh bounded worker, never a continuing controller. Specialist entries take precedence for their stated role. Other eligible profiles may still use those tools.
+Choose the earliest suitable eligible slot, not every cheaper profile in sequence. General slots permit all task roles. Bindings never change slot eligibility. One-off slots require a fresh bounded worker, never a continuing controller. Specialist slots take precedence for their stated role. Other eligible profiles may still use those tools.
 
 Role/lifecycle exceptions require explicit user authorization and an exact profile. An out-of-pool choice also needs an explicit pool exception. The optional inspector records these as `--role-override` and `--allow-out-of-pool`. Never import another mode's role fences or silently substitute model/effort.
 

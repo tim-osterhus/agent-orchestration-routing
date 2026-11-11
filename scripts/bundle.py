@@ -9,15 +9,16 @@ import sys
 import uuid
 
 ROOT = Path(__file__).resolve().parents[1]
-EFFORTS = {"low", "medium", "high", "xhigh", "max", "ultra"}
+EFFORTS = {"minimal", "low", "medium", "high", "xhigh", "max", "ultra"}
 PERMISSION_MODES = {"default", "manual", "dontAsk", "auto", "acceptEdits", "plan", "bypassPermissions"}
 RETIRED_PROFILES = {"LF": "L", "SF": "SM", "SMF": "SM", "SHF": "SH", "SXF": "SX",
                     "ALF": "AL", "AMF": "AM", "AHF": "AH", "AXF": "AX",
-                    "AUF": "a verified current Astra profile", "CMAX": "SNX"}
+                    "AUF": "a verified current Astra profile", "CMAX": "SNX (XHigh) or SNMAX (Max)"}
 BURN_PROVIDERS = {"codex-burn": "codex", "claude-burn": "claude"}
 
 
 def check_mode(mode):
+    require(mode != "hiq", "Routing mode hiq was renamed. Select amusing explicitly.")
     require(mode != "fast", "Routing mode fast is retired. Select efficient, performance, or balanced explicitly.")
     require(mode != "tokenburn", "Routing mode tokenburn is retired. Select codex-burn or claude-burn explicitly.")
 
@@ -55,7 +56,38 @@ def mode_pools(config, variant=None):
     variants = config.get("variants", {})
     require(variant in variants if variants else variant is None, f"Unknown routing variant: {variant}")
     # Shared/custom top-level modes also preserve legacy mode overlays and presets.
-    return {**variants.get(variant, {}).get("modes", {}), **config["modes"]}
+    pools = {**variants.get(variant, {}).get("modes", {}), **config["modes"]}
+    result = {}
+    for mode, pool in pools.items():
+        scope = "shared" if mode in config["modes"] else variant
+        bindings = config.get("bindings", {}).get(scope, {}).get(mode, {})
+        bound = []
+        for source in pool:
+            entry = deepcopy(source)
+            if "slot" in entry:
+                slot = entry["slot"]
+                require(slot in config.get("slots", {}), f"Unknown slot: {slot}")
+                require(slot in bindings, f"Missing binding for slot {slot} in {scope}/{mode}")
+                require("profile" not in entry, f"Slot {slot} must use its binding, not a duplicate profile")
+                entry["profile"] = bindings[slot]
+            else:
+                require("profile" in entry, f"Missing slot/profile in {mode}")
+            bound.append(entry)
+        result[mode] = bound
+    return result
+
+
+def adapter_available(config, item):
+    """Known adapter routes do not prove current account access or tool availability."""
+    if item.get("executable", True) is False:
+        return False
+    if item["provider"] in {"codex", "claude"}:
+        return True
+    route = item["provider"]
+    if item.get("access_mode"):
+        # A known Muse Code route must never enable a different public API route.
+        route += ":" + item["access_mode"]
+    return config.get("adapters", {}).get(route, {}).get("verified", False) is True
 
 
 def validate(config):
@@ -73,32 +105,52 @@ def validate(config):
         require(design["external_workers"] in {"codex", "claude"} - {design["controller"]}, f"Invalid external provider in {name}")
     for code in config["profiles"]:
         item = profile(config, code)
-        require(item["provider"] in {"codex", "claude", "muse"}, f"Unknown provider in {code}")
-        require(isinstance(item["model"], str) and item["model"].strip(), f"Missing model in {code}")
-        require(item["effort"] in EFFORTS, f"Invalid effort in {code}")
+        require(item["provider"] in {"codex", "claude", "muse", "gemini", "kimi", "deepseek", "glm"}, f"Unknown provider in {code}")
+        documentary = item.get("executable", True) is False
+        require(isinstance(item["model"], str) and item["model"].strip() or
+                documentary and item["model"] is None and item.get("label"), f"Missing model in {code}")
+        require(item["effort"] in EFFORTS or documentary and item["effort"] is None, f"Invalid effort in {code}")
         require(item["provider"] != "claude" or item["effort"] != "ultra", f"Claude does not use the Codex ultra effort in {code}")
         require("description" not in item or isinstance(item["description"], str) and item["description"].strip(), f"Invalid description in {code}")
         require(item.get("service_tier", "standard") == "standard", f"Only Standard service tier is supported in {code}")
-        require(not (item["model"] == "claude-sonnet-5-5" and item["effort"] == "max"),
-                f"Sonnet Max is retired in {code}. Select claude-sonnet-5-5/xhigh explicitly.")
+        require(code != "SNX" or item["effort"] == "xhigh", "SNX retains Sonnet XHigh. Select SNMAX explicitly for Max.")
         target = item.get("context_target_tokens")
         require(target is None or type(target) is int and target > 0, f"Invalid context target in {code}")
-    pools = list(config["modes"].items())
+    pools = []
     for name, variant in config.get("variants", {}).items():
         require(variant.get("modes"), f"Missing mode pools in variant {name}")
         require(not set(variant["modes"]) & set(BURN_PROVIDERS), "Burn pools must be shared top-level modes")
         require(config["default_mode"] in mode_pools(config, name), f"Unknown default mode in variant {name}")
-        pools.extend(variant["modes"].items())
+        pools.extend(mode_pools(config, name).items())
+    if not config.get("variants"):
+        pools.extend(mode_pools(config).items())
+    for scope, modes in config.get("bindings", {}).items():
+        # Legacy complete configs can discard variants while retaining unused bindings.
+        if scope != "shared" and not config.get("variants"):
+            continue
+        require(scope == "shared" or scope in config.get("variants", {}), f"Unknown binding scope: {scope}")
+        source_modes = config["modes"] if scope == "shared" else config["variants"][scope]["modes"]
+        for mode, bindings in modes.items():
+            require(mode in source_modes, f"Unknown binding mode: {scope}/{mode}")
+            for slot, code in bindings.items():
+                require(slot in config.get("slots", {}), f"Unknown slot: {slot}")
+                profile(config, code)
+    catalogs = config.get("catalogs", {})
+    catalog_codes = [code for codes in catalogs.values() for code in codes]
+    require(len(set(catalog_codes)) == len(catalog_codes), "Catalogs must be disjoint")
+    for code in catalog_codes:
+        profile(config, code)
     for name, pool in pools:
         check_mode(name)
         require(isinstance(pool, list) and pool, f"Empty pool: {name}")
-        require(len({entry["profile"] for entry in pool}) == len(pool), f"Duplicate profiles in {name}")
+        identities = [entry.get("slot", entry["profile"]) for entry in pool]
+        require(len(set(identities)) == len(pool), f"Duplicate slot/profile identity in {name}")
         for entry in pool:
             item = profile(config, entry["profile"])
             require(name not in BURN_PROVIDERS or item["provider"] == BURN_PROVIDERS[name],
                     f"{name} requires {BURN_PROVIDERS.get(name)} profiles only")
             require(set(entry.get("roles", config["roles"])) <= set(config["roles"]), f"Unknown role in {name}")
-            for flag in ("one_off_only", "ongoing_thread_only", "final_only", "specialist", "independent_review", "escalation"):
+            for flag in ("one_off_only", "ongoing_thread_only", "final_only", "specialist", "independent_review", "escalation", "requires_verified_adapter"):
                 require(flag not in entry or type(entry[flag]) is bool, f"Invalid {flag} in {name}")
     codex = config["codex"]
     require(all(value in {"read-only", "workspace-write", "danger-full-access"} for value in codex["sandbox_by_role"].values()), "Invalid Codex sandbox")
@@ -138,17 +190,18 @@ def validate(config):
     return config
 
 
-def load_config(path=None, presets=(), overlays=()):
-    with open(path or ROOT / "config/routing.json", encoding="utf-8") as handle:
+def load_config(path=None, presets=(), overlays=(), root=None, validate_config=True):
+    root = Path(root) if root is not None else ROOT
+    with open(path or root / "config/routing.json", encoding="utf-8") as handle:
         config = json.load(handle)
     for name in presets:
         require(name and name.replace("-", "").isalnum(), "Preset names must be simple names")
-        with open(ROOT / "config/presets" / (name + ".json"), encoding="utf-8") as handle:
+        with open(root / "config/presets" / (name + ".json"), encoding="utf-8") as handle:
             config = merge(config, json.load(handle))
     for path in overlays:
         with open(path, encoding="utf-8") as handle:
             config = merge(config, json.load(handle))
-    return validate(config)
+    return validate(config) if validate_config else config
 
 
 def eligible(entry, role, assignment_kind, ongoing, final):
@@ -158,7 +211,7 @@ def eligible(entry, role, assignment_kind, ongoing, final):
             and not (entry.get("final_only") and not final))
 
 
-def resolve(config, *, mode=None, code=None, role="implementation", design=None,
+def resolve(config, *, mode=None, code=None, slot=None, role="implementation", design=None,
             assignment_kind="bounded", ongoing=False, final=False,
             allow_out_of_pool=False, role_override=False, claude_mode=None,
             burn_account=None, burn_endpoint=None, variant=None, bias=None):
@@ -183,27 +236,43 @@ def resolve(config, *, mode=None, code=None, role="implementation", design=None,
     else:
         require(burn_account is None and burn_endpoint is None, "Burn account and endpoint apply only to burn modes")
     pool = pools[mode]
-    if code:
+    require(not (code and slot), "Select a slot or exact profile, not both")
+    unavailable = []
+    if slot:
+        require(slot in config.get("slots", {}), f"Unknown slot: {slot}")
+        selected = [entry for entry in pool if entry.get("slot") == slot]
+        require(selected, f"Slot {slot} is outside the active pool")
+        require(role_override or eligible(selected[0], role, assignment_kind, ongoing, final),
+                "Slot violates role/lifecycle restrictions; explicit override required")
+    elif code:
         requested = profile(config, code)
         matches = [entry for entry in pool if profile(config, entry["profile"]) == requested]
         require(matches or allow_out_of_pool, "Profile is outside the active pool; explicit out-of-pool authorization is required")
         require(matches or role_override, "Out-of-pool profile has no role/lifecycle eligibility in the active pool. Explicit --role-override required.")
         require(role_override or any(eligible(entry, role, assignment_kind, ongoing, final) for entry in matches), "Profile violates role/lifecycle restrictions; explicit override required")
-        codes = [code]
+        allowed = [entry for entry in matches if role_override or eligible(entry, role, assignment_kind, ongoing, final)]
+        # An exact profile request stays exact even if its aliases or slot bindings change.
+        # A profile request needs one exact launch target, not duplicate model launches.
+        # Take the first eligible job only. Never merge flags from other slots.
+        selected = [{**allowed[0], "profile": code}] if allowed else [{"profile": code}]
     else:
         require(not role_override, "Role override requires an explicit profile")
         candidates = [entry for entry in pool if eligible(entry, role, assignment_kind, ongoing, final)]
+        unavailable = [entry["profile"] for entry in candidates if not adapter_available(config, profile(config, entry["profile"]))]
+        candidates = [entry for entry in candidates if adapter_available(config, profile(config, entry["profile"]))]
         specialists = [entry for entry in candidates if entry.get("specialist")]
-        codes = [entry["profile"] for entry in specialists or candidates]
-    require(codes, "No eligible profile; do not substitute silently")
+        selected = specialists or candidates
+    require(selected, "No eligible profile with a verified adapter; do not substitute silently")
     choices = []
-    for candidate in codes:
+    for entry in selected:
+        candidate = entry["profile"]
         item = profile(config, candidate)
         native = item["provider"] == config["designs"][design]["controller"]
         choice = {"code": candidate, **item, "dispatch": ("native-" if native else "external-") + item["provider"]}
-        matching_entries = [entry for entry in pool if profile(config, entry["profile"]) == item]
+        if "slot" in entry:
+            choice["slot"] = entry["slot"]
         for flag in ("specialist", "independent_review", "escalation"):
-            if any(entry.get(flag) for entry in matching_entries):
+            if entry.get(flag):
                 choice[flag] = True
         if item["provider"] == "claude":
             selected_mode = claude_mode or ("consultation" if role in {"research", "planning", "qa", "spec-review"} else "implementation")
@@ -217,7 +286,9 @@ def resolve(config, *, mode=None, code=None, role="implementation", design=None,
             choice["execution"] = deepcopy(config["codex"])
         else:
             choice["execution"] = {"launch_plan_supported": False, "adapter_required": True,
-                                   "notice": "External Muse requires a separately verified provider adapter; no bundled launcher or dispatch guarantee."}
+                                   "adapter_route_available": adapter_available(config, item),
+                                   "account_access_verified": False,
+                                   "notice": "Requires a separately verified provider adapter and exact account access. No bundled launcher or substitution."}
         choices.append(choice)
     result = {"controller_design": design, "controller": config["designs"][design]["controller"],
             "routing_variant": variant, "routing_mode": mode, "role": role, "selection_bias": bias,
@@ -225,6 +296,8 @@ def resolve(config, *, mode=None, code=None, role="implementation", design=None,
             "overrides": {"out_of_pool": allow_out_of_pool, "role_or_lifecycle": role_override},
             "limits": {key: config[key] for key in ("max_parallel_workers", "max_external_sessions_per_assignment")},
             "notice": "Eligibility only, not measured suitability, account access, or dispatch verification."}
+    if unavailable:
+        result["unavailable_profiles"] = unavailable
     if burn_provider:
         result["burn"] = {"provider": burn_provider, "account": burn_account, "endpoint": burn_endpoint}
         if any(choice["provider"] != burn_provider for choice in choices):
@@ -236,6 +309,7 @@ def resolve(config, *, mode=None, code=None, role="implementation", design=None,
 def launch_plan(resolved, cwd, prompt_file, artifacts, resume=None):
     require(len(resolved["choices"]) == 1, "Select one explicit --profile for a launch plan")
     choice = resolved["choices"][0]
+    require(choice.get("executable", True), "Documentary catalog record has no verified executable configuration")
     require(choice["provider"] in {"codex", "claude"},
             f"No bundled launch adapter for provider {choice['provider']}; use a separately verified provider adapter")
     require(choice["dispatch"].startswith("external-"), "Native routes require the host's worker controls, not an external CLI launch plan")
@@ -348,6 +422,7 @@ def main(argv=None):
     parser.add_argument("--burn-account", help="Non-secret account identifier for the selected burn provider")
     parser.add_argument("--burn-endpoint", help="Identified reset/deadline or authorized queue endpoint")
     parser.add_argument("--profile")
+    parser.add_argument("--slot", help="Stable job slot from the active mode's bindings")
     parser.add_argument("--role")
     parser.add_argument("--design")
     parser.add_argument("--assignment-kind", choices=["bounded", "controller"], default="bounded")
@@ -370,7 +445,7 @@ def main(argv=None):
                       "modes": list(mode_pools(config, args.variant))}
         else:
             role = args.role or ("qa" if args.action == "claude-plan" else "implementation")
-            code = args.profile or (config["claude"]["default_profile"] if args.action == "claude-plan" else None)
+            code = args.profile or (config["claude"]["default_profile"] if args.action == "claude-plan" and not args.slot else None)
             mode = args.mode
             claude_mode = args.claude_mode
             if args.direct:
@@ -380,7 +455,7 @@ def main(argv=None):
                 mode = "direct-claude"
                 if args.role is None and claude_mode is None:
                     claude_mode = config["claude"]["default_mode"]
-            output = resolve(config, mode=mode, code=code, role=role, design=args.design,
+            output = resolve(config, mode=mode, code=code, slot=args.slot, role=role, design=args.design,
                              assignment_kind=args.assignment_kind, ongoing=args.ongoing_thread, final=args.final_review,
                              allow_out_of_pool=args.allow_out_of_pool, role_override=args.role_override, claude_mode=claude_mode,
                              burn_account=args.burn_account, burn_endpoint=args.burn_endpoint, variant=args.variant, bias=args.bias)

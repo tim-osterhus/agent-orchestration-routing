@@ -1,20 +1,21 @@
 # codex-primary / efficient
 
-Minimize resources per accepted task, including retries and controller repair.
+Minimize resources per accepted task, including retries and controller repair. The six choices share one workflow across variants. Only the cheap slot differs: LM under Codex-primary, HL under Claude-primary. EX requires a verified exact Muse adapter and account access. Otherwise report EX unavailable, without substituting for an explicit EX request.
 
 ## Ordered pool
 
-| Profile | Eligibility | Task fit |
-| --- | --- | --- |
-| LM | one-off | Use for a trivial one-off edit, extraction, or lookup with an immediate, inexpensive check. |
-| TL | general | Use for a small specified code fix, concise writing task, or straightforward visual interpretation. |
-| SL | general | Use for routine implementation with a narrow change surface and clear expected output. |
-| TM | general | Use for bounded implementation, source-grounded writing, or screen-based work requiring several connected steps. |
-| TH | general | Use for a harder diagnosis or multi-step visual task when Medium leaves important uncertainty. |
-| SM | general | Use for general implementation spanning related files or a bounded integration with explicit checks. |
-| SH | general | Use when uncertain requirements, debugging, or likely repair work justify more reasoning within this efficiency pool. |
+<!-- BEGIN GENERATED:pool:codex-primary/efficient -->
+| Slot | Exact profile | Eligibility | Task fit |
+| --- | --- | --- | --- |
+| cheap | LM: gpt-6-luna / medium | one-off | Use for a trivial one-off edit, extraction, or lookup with an immediate, inexpensive check. |
+| small | TL: gpt-6.1-terra / low | general | Use for a small specified code fix, concise writing task, or straightforward visual interpretation. |
+| ember | EX: muse-ember-1.0 / xhigh | verified adapter | Use for bounded reasoning only after verifying the exact Muse API adapter and account route. |
+| visual | TM: gpt-6.1-terra / medium | general | Use for bounded implementation, source-grounded writing, or screen-based work requiring several connected steps. |
+| visual-deep | TH: gpt-6.1-terra / high | general | Use for a harder diagnosis or multi-step visual task when Medium leaves important uncertainty. |
+| standard | SM: gpt-6.1-sol / medium | general | Use for general implementation spanning related files or a bounded integration with explicit checks. |
+<!-- END GENERATED:pool:codex-primary/efficient -->
 
-Choose the earliest suitable eligible profile, not every cheaper profile in sequence. General entries permit all task roles. One-off entries require a fresh bounded worker, never a continuing controller. Specialist entries take precedence for their stated role. Other eligible profiles may still use those tools.
+Choose the earliest suitable eligible slot, not every cheaper profile in sequence. General slots permit all task roles. Bindings never change slot eligibility. One-off slots require a fresh bounded worker, never a continuing controller. Specialist slots take precedence for their stated role. Other eligible profiles may still use those tools.
 
 Role/lifecycle exceptions require explicit user authorization and an exact profile. An out-of-pool choice also needs an explicit pool exception. The optional inspector records these as `--role-override` and `--allow-out-of-pool`. Never import another mode's role fences or silently substitute model/effort.
 

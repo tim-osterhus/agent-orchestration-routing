@@ -1,6 +1,6 @@
 ---
 name: agent-orch-router
-description: Explicit-only routing for delegated work across Codex, Claude Code, and configured Muse adapters. Select exact model/effort profiles from ordered, role-aware mode pools.
+description: Explicit-only routing for delegated work through exact model/effort profiles, stable job slots, and role-aware mode pools. Catalog discovery does not establish an available provider adapter.
 ---
 
 # Agent Orchestration Router
@@ -14,57 +14,66 @@ Read this file and **only the selected mode document**:
 | codex-primary | [Efficient](modes/codex-primary-efficient.md) | [Balanced](modes/codex-primary-balanced.md) | [Performance](modes/codex-primary-performance.md) |
 | claude-primary | [Efficient](modes/claude-primary-efficient.md) | [Balanced](modes/claude-primary-balanced.md) | [Performance](modes/claude-primary-performance.md) |
 
-Shared across variants: [HiQ](modes/hiq.md) · [Council](modes/council.md) · [Codex-burn](modes/codex-burn.md) · [Claude-burn](modes/claude-burn.md).
+Shared across variants: [Amusing](modes/amusing.md) · [Council](modes/council.md) · [Codex-burn](modes/codex-burn.md) · [Claude-burn](modes/claude-burn.md).
 
-Variant selects pool preference, not the running host. Never change the parent model. Shorthand selects the exact model and effort below, not an automatic pool exception. Retired Fast codes, `fast`, `tokenburn`, and `CMAX` fail without substitution.
+Variant selects pool preference, not the running host. Never change the parent model. Select a stable job slot through its active-mode binding, or honor an explicit exact profile. Rebinding a slot changes its model, not its role, lifecycle, or review authority. Two slots sharing a model remain separate jobs.
 
-## Exact catalog
+## Standard frontier
 
-| Code | Model | Effort |
+These are all **21 raw-score nondominated configurations** in the dated four-provider Standard comparison, not a curated subset. Frontier membership is comparison-specific, not proof of suitability, subscription economics, access, or an available dispatcher.
+
+<!-- BEGIN GENERATED:catalog-frontier -->
+| Code | Exact model | Effort |
 | --- | --- | --- |
+| LL | gpt-6-luna | low |
 | LM | gpt-6-luna | medium |
-| L | gpt-6-luna | max |
+| HL | claude-haiku-5-5 | low |
 | TL | gpt-6.1-terra | low |
+| EX | muse-ember-1.0 | xhigh |
+| EMAX | muse-ember-1.0 | max |
 | TM | gpt-6.1-terra | medium |
 | TH | gpt-6.1-terra | high |
-| SL | gpt-6.1-sol | low |
 | SM | gpt-6.1-sol | medium |
 | SH | gpt-6.1-sol | high |
 | SX | gpt-6.1-sol | xhigh |
 | SMAX | gpt-6.1-sol | max |
-| AL | gpt-6-astra | low |
-| AM | gpt-6-astra | medium |
 | AH | gpt-6-astra | high |
 | AX | gpt-6-astra | xhigh |
-| AMAX | gpt-6-astra | max |
-| HMED | claude-haiku-5-5 | medium |
-| HH | claude-haiku-5-5 | high |
-| HM | claude-haiku-5-5 | xhigh |
-| HK | claude-haiku-5-5 | xhigh |
-| HMAX | claude-haiku-5-5 | max |
-| SNH | claude-sonnet-5-5 | high |
-| SNX | claude-sonnet-5-5 | xhigh |
-| OM | claude-opus-5-5 | medium |
-| OH | claude-opus-5-5 | high |
-| OX | claude-opus-5-5 | xhigh |
-| OMAX | claude-opus-5-5 | max |
 | FM | claude-fable-5-2 | medium |
+| OX | claude-opus-5-5 | xhigh |
+| GCM | gemini-4-carbon | medium |
+| GCH | gemini-4-carbon | high |
 | FH | claude-fable-5-2 | high |
 | FX | claude-fable-5-2 | xhigh |
 | FMAX | claude-fable-5-2 | max |
-| MFH | muse-wonder-full-1.0 | high |
-| MFX | muse-wonder-full-1.0 | xhigh |
+<!-- END GENERATED:catalog-frontier -->
 
-Codex profiles target Standard tier. HK has a soft 100K context target. HM does not. Catalog entries outside the selected pool are on-call only.
+## Specialist exceptions
 
-FM is a selective on-call candidate. FH is the preferred Fable reasoning/specification/review profile. FX is an explicit hardest long-running analysis trial. FMAX is exceptional and on-call.
+Consider these disjoint exceptions only when their task evidence fits. They do not automatically expand a mode pool or authorize spending. Evidence types, limitations, and three conditional candidates are in [model fit and specialist evidence](references/model-fit.md).
 
-FH/FX now select 5.2, not 5.1. No specialist advantage is established.
+<!-- BEGIN GENERATED:catalog-specialists -->
+| Code | Exact model | Effort | Task exception | Access |
+| --- | --- | --- | --- | --- |
+| OH | claude-opus-5-5 | high | Agentic frontend and full-stack implementation | public_api |
+| MWM | muse-wonder-1.0 | max | Website design and visual aesthetics | public_api_standard |
+| MSX | muse-spark-1.3 | xhigh | Lower-cost website and UI generation | public_api_standard |
+| SNMAX | claude-sonnet-5-5 | max | Professional deliverables and knowledge work | public_api |
+| MFMAX | muse-wonder-full-1.0 | max | Orchestration and steerable prose trials | muse_code_subscription |
+| KK31 | kimi-k3.1-pro | unspecified | Terminal-intensive engineering | public_api_or_self_hosted_weights |
+| GA4H | gemini-4-argon | high | Visual reasoning and MCP tool use | public_api |
+| DSFH | deepseek-flash | high | Budget workflow automation experiments | public_api_rolling_alias_or_self_hosted_weights |
+| G38FH | gemini-3.8-flash | high | Audio understanding with text output | public_api |
+<!-- END GENERATED:catalog-specialists -->
+
+Kimi's benchmark does not specify effort. Its record is documentary until an explicit supported runtime effort is selected. Wonder Full is a Muse Code subscription model, not Wonder's public API. Verify the exact adapter, account, tools, effort, and effective data handling before dispatch. Unavailable routes fail without Codex/Claude substitution. Ordinary permissions remain independently configurable.
+
+Existing exact profiles outside these catalogs remain available in [compatibility profiles](references/compatibility.md). They are not specialists merely because they are retained. Retired Fast codes, `fast`, `tokenburn`, and `CMAX` fail with explicit migration guidance. `hiq` was renamed to `amusing` and requires explicit reselection.
+
+FM is a selective on-call comparison. FH is the preferred Fable reasoning/specification/review trial. FX is an explicit hardest long-running trial. FMAX is exceptional and on-call. These are task-fit proposals, not guaranteed effort rankings.
 
 For selected FM/FH/FX/FMAX assignments only, read [Fable prompting](references/fable-prompting.md) before briefing or dispatch. Include relevant work-order guidance. Pool eligibility alone does not trigger this read.
 
-FH is eligible for selective Performance reasoning/review escalation, HiQ specification review, and Council advice. These listed roles need no overrides. Council defaults to SMAX/OX/MFX members. FH advises unless explicitly appointed. FM, FX, and FMAX require explicit on-call selection.
+For selected Muse work only, read [Muse provider checks](references/muse.md). Other provider references are optional until selecting that route.
 
-For selected Muse work only, read [Muse provider checks](references/muse.md). Exact catalog entries do not establish account access or an available dispatcher.
-
-Optional: [configuration and installation](../../docs/configuration.md), [selection evidence](references/evidence.md). Neither is required for ordinary routing. Custom configuration or the Opus/Haiku preset applies only when selected.
+Optional: [configuration and generation](../../docs/configuration.md), [selection evidence](references/evidence.md). `config/routing.json`, followed by selected presets/overlays, is the source of generated tables. Regenerate installed Markdown when selecting an overlay so native instructions use the same bindings.

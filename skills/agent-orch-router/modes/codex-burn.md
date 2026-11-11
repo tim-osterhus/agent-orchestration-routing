@@ -8,16 +8,18 @@ Restore the prior mode at the endpoint or backlog completion. Stop on quota, bil
 
 ## Ordered pool
 
-| Profile | Eligibility | Task fit |
-| --- | --- | --- |
-| AL | general | Use for a bounded authorized backlog item involving browser work, visual interpretation, or general analysis. |
-| SM | general | Use for ordinary authorized implementation or verification with a clear change surface and acceptance checks. |
-| SH | general | Use for backlog diagnosis or integration where uncertainty warrants additional reasoning. |
-| SX | general | Use for difficult authorized implementation or debugging with multiple interacting constraints. |
-| AH | general | Use for harder visual, browser, or general reasoning tasks that fit the remaining authorized backlog. |
-| AMAX | general | Use for demanding authorized analysis, implementation, or verification when task fit justifies sustained reasoning. |
+<!-- BEGIN GENERATED:pool:codex-burn -->
+| Slot | Exact profile | Eligibility | Task fit |
+| --- | --- | --- | --- |
+| browser | AL: gpt-6-astra / low | general | Use for a bounded authorized backlog item involving browser work, visual interpretation, or general analysis. |
+| standard | SM: gpt-6.1-sol / medium | general | Use for ordinary authorized implementation or verification with a clear change surface and acceptance checks. |
+| deep | SH: gpt-6.1-sol / high | general | Use for backlog diagnosis or integration where uncertainty warrants additional reasoning. |
+| hard | SX: gpt-6.1-sol / xhigh | general | Use for difficult authorized implementation or debugging with multiple interacting constraints. |
+| browser-ah | AH: gpt-6-astra / high | general | Use for harder visual, browser, or general reasoning tasks that fit the remaining authorized backlog. |
+| broad | AMAX: gpt-6-astra / max | general | Use for demanding authorized analysis, implementation, or verification when task fit justifies sustained reasoning. |
+<!-- END GENERATED:pool:codex-burn -->
 
-Choose the earliest suitable eligible profile, not every cheaper profile in sequence. General entries permit all task roles. One-off entries require a fresh bounded worker, never a continuing controller. Specialist entries take precedence for their stated role. Other eligible profiles may still use those tools.
+Choose the earliest suitable eligible slot, not every cheaper profile in sequence. General slots permit all task roles. Bindings never change slot eligibility. One-off slots require a fresh bounded worker, never a continuing controller. Specialist slots take precedence for their stated role. Other eligible profiles may still use those tools.
 
 Role/lifecycle exceptions require explicit user authorization and an exact profile. An out-of-pool choice also needs an explicit pool exception. The optional inspector records these as `--role-override` and `--allow-out-of-pool`. Never import another mode's role fences or silently substitute model/effort.
 
