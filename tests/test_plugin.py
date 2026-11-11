@@ -73,8 +73,12 @@ class PluginPackageTests(unittest.TestCase):
             self.assertEqual(meta["name"], f"{item['provider']}-{code.lower()}")
             if item["provider"] == "codex":
                 self.assertEqual((meta["model"], meta["effort"], meta["tools"]), ("haiku", "low", "Bash"))
-                self.assertIn(f'codex-companion.mjs" task --json --model {item["model"]} --effort {item["effort"]} [--write]', text)
+                command = re.search(r"```bash\n(.+)\n```", text)[1]
+                self.assertEqual(command, 'node "${CLAUDE_PLUGIN_ROOT}/runtime/codex/scripts/codex-companion.mjs" task --json '
+                                          f'--model {item["model"]} --effort {item["effort"]} [--write] [--resume-thread <id>] '
+                                          '--prompt-file "<work order file>"')
                 self.assertIn("Roles " + ", ".join(write_roles) + " add `--write`", text)
+                self.assertNotIn("<<", text, "Work orders travel by file, never through a heredoc")
             else:
                 self.assertEqual((meta["model"], meta["effort"]), (item["model"], item["effort"]))
                 self.assertNotIn("tools", meta)

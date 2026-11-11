@@ -10,7 +10,7 @@ Codex agents are Haiku relays. Each starts or resumes one Codex app-server threa
 
 ## Work order
 
-Send each worker one self-contained work order in this shape. Relays read only `Role:` and `Resume thread:`; everything is forwarded to Codex unchanged.
+Give each worker one self-contained work order in this shape. Send Claude agents the work order itself. For a Codex agent, write the work order to a file in a private run directory outside the project, then send the relay only `Role:`, `Work order file: <absolute path>`, and any `Resume thread:` line. The relay passes the file to Codex unchanged, so the work order never appears in a shell command.
 
 ```text
 Role: implementation
