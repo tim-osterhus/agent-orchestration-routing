@@ -1,4 +1,4 @@
-// Modified by Tim Osterhus for agent-orch (2026-11-10): agent-orch service name, effort config on thread start/resume, observed route and reroute capture. See ../../VENDORED.md.
+// Modified by Tim Osterhus for agent-orch (2026-11-11): route capture and request-local broker retries without resumed-operation replay. See ../../VENDORED.md.
 /**
  * @typedef {import("./app-server-protocol").AppServerNotification} AppServerNotification
  * @typedef {import("./app-server-protocol").ReviewTarget} ReviewTarget
@@ -39,6 +39,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { setTimeout as delay } from "node:timers/promises";
 
 import { readJsonFile } from "./fs.mjs";
 import { BROKER_BUSY_RPC_CODE, BROKER_ENDPOINT_ENV, CodexAppServerClient } from "./app-server.mjs";
@@ -643,41 +644,121 @@ async function captureTurn(client, threadId, startRequest, options = {}) {
       completeTurn(state, response.turn);
     }
 
-    return await state.completion;
+    return await Promise.race([
+      state.completion,
+      client.exitPromise.then(() => {
+        if (state.completed) return state;
+        const error = new Error("Codex connection lost while awaiting turn completion.", { cause: client.exitError });
+        error.relayConnectionLost = true;
+        error.threadId = state.threadId;
+        error.turnId = state.turnId;
+        throw error;
+      })
+    ]);
   } finally {
     clearCompletionTimer(state);
     client.setNotificationHandler(previousHandler ?? null);
   }
 }
 
-async function withAppServer(cwd, fn) {
+export async function withAppServer(cwd, fn, options = {}) {
+  const connect = options.connect ?? ((root, settings) => CodexAppServerClient.connect(root, settings));
+  const sleep = options.sleep ?? ((ms, signal) => delay(ms, undefined, { signal }));
+  const now = options.now ?? Date.now;
+  const waitLimit = options.brokerWaitTimeoutMs ?? 120_000;
   let client = null;
-  try {
-    client = await CodexAppServerClient.connect(cwd);
-    const result = await fn(client);
-    await client.close();
-    return result;
-  } catch (error) {
-    const brokerRequested = client?.transport === "broker" || Boolean(process.env[BROKER_ENDPOINT_ENV]);
-    const shouldRetryDirect =
-      (client?.transport === "broker" && error?.rpcCode === BROKER_BUSY_RPC_CODE) ||
-      (brokerRequested && (error?.code === "ENOENT" || error?.code === "ECONNREFUSED"));
+  let acceptedRequests = 0;
+  let phase = "connecting";
+  let threadId = null;
+  let turnId = null;
+  let waitStartedAt = null;
 
-    if (client) {
+  async function invoke(current, allowFreshFallback) {
+    const originalRequest = current.request;
+    current.request = async (method, params) => {
+      phase = `${method} pending`;
+      threadId = params?.threadId ?? threadId;
+      let attempt = 0;
+      for (;;) {
+        options.signal?.throwIfAborted();
+        if (current.closed || current.exitResolved) {
+          const error = new Error("Codex connection closed before request.", { cause: current.exitError });
+          error.relayConnectionLost = true;
+          throw error;
+        }
+        try {
+          phase = `${method} pending`;
+          const response = await originalRequest.call(current, method, params);
+          acceptedRequests += 1; // Acknowledged responses, not proof that an unacknowledged request was rejected.
+          threadId = response.thread?.id ?? response.reviewThreadId ?? threadId;
+          turnId = response.turn?.id ?? turnId;
+          phase = `${method} accepted`;
+          return response;
+        } catch (error) {
+          const rejectedByBroker = current.transport === "broker" &&
+            error?.rpcCode === BROKER_BUSY_RPC_CODE && error.message === "Shared Codex broker is busy.";
+          if (!rejectedByBroker) throw error;
+          if (allowFreshFallback && method === "thread/start" && acceptedRequests === 0) {
+            error.freshThreadRejectedBeforeCreation = true;
+            throw error;
+          }
+          waitStartedAt ??= now();
+          const remaining = waitLimit - (now() - waitStartedAt);
+          if (remaining <= 0) {
+            const timeout = new Error("Timed out waiting for the owning Codex broker; the rejected request was not forwarded.", { cause: error });
+            timeout.code = "BROKER_WAIT_TIMEOUT";
+            timeout.rpcCode = error.rpcCode;
+            throw timeout;
+          }
+          if (attempt === 0) emitProgress(options.onProgress, "Shared Codex broker busy; waiting on its existing server.", "waiting");
+          phase = `${method} rejected; waiting for broker`;
+          await sleep(Math.min(100 * 2 ** Math.min(attempt++, 4), 1000, remaining), options.signal);
+        }
+      }
+    };
+    try {
+      return await fn(current);
+    } finally {
+      current.request = originalRequest;
+    }
+  }
+
+  try {
+    options.signal?.throwIfAborted();
+    client = await connect(cwd);
+    try {
+      return await invoke(client, options.allowFreshThreadFallback === true);
+    } catch (error) {
+      // Only a rejected first thread/start is safe to replay on a new server.
+      if (!error.freshThreadRejectedBeforeCreation || acceptedRequests !== 0) throw error;
       await client.close().catch(() => {});
       client = null;
+      options.signal?.throwIfAborted();
+      phase = "connecting fresh worker after rejected creation";
+      client = await connect(cwd, { disableBroker: true });
+      return await invoke(client, false);
     }
-
-    if (!shouldRetryDirect) {
-      throw error;
+  } catch (error) {
+    const context = {
+      phase, threadId: error.threadId ?? threadId, turnId: error.turnId ?? turnId, acceptedRequests,
+      transport: client?.transport ?? null, brokerEndpoint: client?.endpoint ?? process.env[BROKER_ENDPOINT_ENV] ?? null,
+      reconciliationRequired: acceptedRequests > 0 || phase !== "connecting", automaticRetryAllowed: false
+    };
+    if (error.relayConnectionLost || client?.exitResolved || ["ENOENT", "ECONNREFUSED", "ECONNRESET", "EPIPE"].includes(error.code)) {
+      const detail = context.reconciliationRequired
+        ? "Acceptance may be uncertain; reconcile the recorded thread/turn before retrying."
+        : "No operation callback was started.";
+      const failure = new Error(`${error.message} [relay ${phase}; thread=${context.threadId ?? "none"}; turn=${context.turnId ?? "none"}]. ${detail} No callback replayed.`, { cause: error });
+      failure.code = error.code;
+      failure.rpcCode = error.rpcCode;
+      failure.relayContext = context;
+      throw failure;
     }
-
-    const directClient = await CodexAppServerClient.connect(cwd, { disableBroker: true });
-    try {
-      return await fn(directClient);
-    } finally {
-      await directClient.close();
-    }
+    error.relayContext = context;
+    throw error;
+  } finally {
+    // A cleanup error must not replace the primary failure or replay work.
+    await client?.close().catch(() => {});
   }
 }
 
@@ -1092,7 +1173,7 @@ export async function runAppServerReview(cwd, options = {}) {
       error: turnState.error,
       stderr: cleanCodexStderr(client.stderr)
     };
-  });
+  }, { allowFreshThreadFallback: true, signal: options.signal, onProgress: options.onProgress });
 }
 
 export async function importExternalAgentSession(cwd, options = {}) {
@@ -1133,7 +1214,7 @@ export async function importExternalAgentSession(cwd, options = {}) {
 }
 
 export async function runAppServerTurn(cwd, options = {}) {
-  const availability = getCodexAvailability(cwd);
+  const availability = (options.getAvailability ?? getCodexAvailability)(cwd);
   if (!availability.available) {
     throw new Error("Codex CLI is not installed or is missing required runtime support. Install it with `npm install -g @openai/codex`, then rerun `/codex:setup`.");
   }
@@ -1202,7 +1283,7 @@ export async function runAppServerTurn(cwd, options = {}) {
       commandExecutions: turnState.commandExecutions,
       route: buildRoute(options, threadResponse, turnState.reroutes)
     };
-  });
+  }, { allowFreshThreadFallback: !options.resumeThreadId, signal: options.signal, onProgress: options.onProgress });
 }
 
 export async function findLatestTaskThread(cwd) {

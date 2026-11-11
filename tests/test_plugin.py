@@ -152,6 +152,12 @@ class VendoredRuntimeTests(unittest.TestCase):
         self.assertEqual((RUNTIME / "scripts/lib" / manifest).resolve(), (PLUGIN / ".claude-plugin/plugin.json").resolve())
 
     @unittest.skipUnless(NODE, "node is required")
+    def test_relay_retry_and_error_persistence_regressions(self):
+        result = subprocess.run([NODE, "--test", str(RUNTIME / "tests/relay-retry.test.mjs")],
+                                cwd=ROOT, capture_output=True, text=True, timeout=30, env=bundle.git_env())
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    @unittest.skipUnless(NODE, "node is required")
     def test_modules_parse_and_task_arguments_fail_before_codex_starts(self):
         for module in (RUNTIME / "scripts").rglob("*.mjs"):
             result = subprocess.run([NODE, "--check", str(module)], capture_output=True, text=True)

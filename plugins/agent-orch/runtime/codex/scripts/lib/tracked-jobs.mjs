@@ -1,4 +1,4 @@
-// Modified by Tim Osterhus for agent-orch (2026-11-10): agent-orch session environment name. See ../../VENDORED.md.
+// Modified by Tim Osterhus for agent-orch (2026-11-11): session environment name and persisted relay error context. See ../../VENDORED.md.
 import fs from "node:fs";
 import process from "node:process";
 
@@ -140,6 +140,17 @@ function readStoredJobOrNull(workspaceRoot, jobId) {
   return readJobFile(jobFile);
 }
 
+// Preserve recovery metadata without serializing arbitrary transport payloads or Error objects.
+export function serializeRelayError(error, depth = 0) {
+  if (!error || depth > 3) return null;
+  return {
+    name: error.name ?? "Error", message: error.message ?? String(error),
+    code: error.code ?? null, rpcCode: error.rpcCode ?? null,
+    ...(error.relayContext ? { relayContext: error.relayContext } : {}),
+    ...(error.cause ? { cause: serializeRelayError(error.cause, depth + 1) } : {})
+  };
+}
+
 export async function runTrackedJob(job, runner, options = {}) {
   const runningRecord = {
     ...job,
@@ -188,6 +199,7 @@ export async function runTrackedJob(job, runner, options = {}) {
       status: "failed",
       phase: "failed",
       errorMessage,
+      ...(error.relayContext ? { relayError: serializeRelayError(error) } : {}),
       pid: null,
       completedAt,
       logFile: options.logFile ?? job.logFile ?? existing.logFile ?? null
@@ -198,6 +210,7 @@ export async function runTrackedJob(job, runner, options = {}) {
       phase: "failed",
       pid: null,
       errorMessage,
+      ...(error.relayContext ? { relayError: serializeRelayError(error) } : {}),
       completedAt
     });
     throw error;

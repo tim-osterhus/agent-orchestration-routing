@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Modified by Tim Osterhus for agent-orch (2026-11-10): max effort, exact --resume-thread, route and job id in task JSON, prompt-file result copy. See ../VENDORED.md.
+// Modified by Tim Osterhus for agent-orch (2026-11-11): exact task routes and persisted success/failure results beside work orders. See ../VENDORED.md.
 
 import { spawn } from "node:child_process";
 import fs from "node:fs";
@@ -51,6 +51,7 @@ import {
   createProgressReporter,
   nowIso,
   runTrackedJob,
+  serializeRelayError,
   SESSION_ID_ENV
 } from "./lib/tracked-jobs.mjs";
 import { resolveWorkspaceRoot } from "./lib/workspace.mjs";
@@ -841,22 +842,36 @@ async function handleTask(argv) {
   if (resultFile) {
     fs.rmSync(resultFile, { force: true });
   }
-  const execution = await runForegroundCommand(
-    job,
-    (progress) =>
-      executeTaskRun({
-        cwd,
-        model,
-        effort,
-        prompt,
-        write,
-        resumeLast,
-        resumeThreadId,
-        jobId: job.id,
-        onProgress: progress
-      }),
-    { json: options.json }
-  );
+  let execution;
+  try {
+    execution = await runForegroundCommand(
+      job,
+      (progress) =>
+        executeTaskRun({
+          cwd,
+          model,
+          effort,
+          prompt,
+          write,
+          resumeLast,
+          resumeThreadId,
+          jobId: job.id,
+          onProgress: progress
+        }),
+      { json: options.json }
+    );
+  } catch (error) {
+    if (error.relayContext) {
+      const payload = {
+        status: 1, jobId: job.id,
+        threadId: error.relayContext.threadId, turnId: error.relayContext.turnId,
+        error: serializeRelayError(error)
+      };
+      if (resultFile) writeTaskResultFile(resultFile, payload);
+      if (options.json) outputResult(payload, true);
+    }
+    throw error;
+  }
   if (resultFile) {
     writeTaskResultFile(resultFile, execution.payload);
   }

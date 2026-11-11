@@ -49,3 +49,21 @@ python3 <plugin-root>/scripts/bundle.py check-ownership --snapshot <private-run-
 - When a Codex relay finishes, read `<work order file>.result.json`. The companion writes its JSON there, so use that file, not the relay's reply, for status, `threadId`, `route`, and `touchedFiles`. If the file is missing, the run failed before producing a result; the relay's reply should carry the exit status and stderr.
 - Workers never message each other. The controller decides each handoff request, then sends it to the owning worker as a new work order with that worker's exact `Resume thread:` id, or reassigns ownership. Never resume a thread chosen by recency or title.
 - To cancel, run `node <plugin-root>/runtime/codex/scripts/codex-companion.mjs status --json`, then `cancel <job-id>` for jobs this assignment started. The controller enforces any user deadline this way; relays have no timer.
+
+## Interrupted connections and uncertain acceptance
+
+Relay failures can produce a nonzero exit and a failure result file. Inspect its `error.relayContext`, or the saved job's `relayError`, before any retry. `acceptedRequests` counts acknowledged responses, not every request the native server may have accepted. A missing turn ID does not prove that no turn started.
+
+The relay retries only the exact pre-forward broker-busy rejection on the same client. Resumed or acknowledged work never falls back to another native server. Fresh creation may use a direct server only after an explicitly rejected first `thread/start`. The 120-second busy-wait budget is shared across requests. It is not a general request or model-turn timeout.
+
+When `reconciliationRequired` is true:
+
+If the failed transport was direct, or no original broker endpoint is recorded, stop and report for manual recovery. No companion inspection command is provided. If no verified read-only RPC client can inspect the existing endpoint, stop rather than improvising a resume or direct connection.
+
+1. Keep the failed job ID, exact thread/turn IDs, broker endpoint, work order, and ownership snapshot. Read `result <job-id> --json` for the persisted cause and context.
+2. Verify the recorded endpoint still belongs to the original broker. Connect only to that existing endpoint. Do not create or replace a broker for inspection.
+3. Read the exact thread through `thread/read`, without `thread/resume`. Inspect its current status and stored turns with the installed version's read-only history APIs. If the turn response was lost, identify any accepted turn from that history and work-order timing before sending another prompt.
+4. If work is running, observe its owned job or request its identified interrupt when cancellation is authorized. Do not replay it. If completed, recover its output and inspect the checkout against the ownership snapshot before accepting it.
+5. Retry only after establishing that no prior turn remains running or unaccounted for. Use the same conversation and owning broker at a safe lifecycle boundary. If ownership or acceptance cannot be established, report the uncertainty and stop for reconciliation.
+
+Do not delete locks, kill a shared broker, or switch servers to force a resume. Unreachable endpoints and silently stalled requests require separate diagnosis. Source updates affect new workers. Do not restart active shared work to load a patch.

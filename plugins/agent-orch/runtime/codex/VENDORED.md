@@ -19,6 +19,18 @@ Each modified file starts with a notice line. All changes are on top of the unmo
 | `scripts/session-lifecycle-hook.mjs` | Exports this plugin's `CLAUDE_PLUGIN_DATA` as `AGENT_ORCH_CODEX_DATA` instead of re-exporting `CLAUDE_PLUGIN_DATA`, so the official plugin cannot redirect state. |
 | `scripts/lib/broker-lifecycle.mjs`, `lib/claude-session-transfer.mjs`, `lib/tracked-jobs.mjs`, `app-server-broker.mjs` | `CODEX_COMPANION_*` environment names renamed to `AGENT_ORCH_CODEX_*`; broker user agent renamed. |
 
+Relay repair (2026-11-11): `lib/codex.mjs` retries only exact pre-forward broker-busy rejections on the same client. It never replays resumed or acknowledged work on a different server. Direct fallback is limited to explicitly rejected fresh creation. Connection loss during an accepted turn rejects with recovery identity rather than waiting for missing notifications. Cleanup errors cannot trigger replay or mask the primary failure.
+
+`lib/tracked-jobs.mjs` persists structured relay context and bounded cause chains. `codex-companion.mjs` also writes relay failures beside foreground work orders and emits their JSON with a nonzero exit. Permission and routing policy are unchanged. Read-only reconciliation is documented in the plugin dispatch reference.
+
+Offline regression command from the repository root:
+
+```sh
+node --test plugins/agent-orch/runtime/codex/tests/relay-retry.test.mjs
+```
+
+`tests/test_plugin.py` runs this suite as part of the repository checks. Tests use fake clients and an offline broker fixture, not provider requests. They cover the public read-only/workspace-write contract rather than importing private full-access policy.
+
 `route.observed.reasoningEffort` is what the thread reports after the effort configuration. Treat any entry in `route.mismatches`, including a reroute, as an inexact route.
 
 Some human-readable messages still mention the official plugin's `/codex:status`, `/codex:result`, `/codex:cancel`, and `/codex:setup` commands. Under agent-orch, run `node <plugin-root>/runtime/codex/scripts/codex-companion.mjs status|result|cancel|setup` instead.
