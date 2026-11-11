@@ -79,6 +79,7 @@ class PluginPackageTests(unittest.TestCase):
                                           '--prompt-file "<work order file>"')
                 self.assertIn("Roles " + ", ".join(write_roles) + " add `--write`", text)
                 self.assertNotIn("<<", text, "Work orders travel by file, never through a heredoc")
+                self.assertIn("stdout, character for character", text, "A live relay paraphrased the JSON")
             else:
                 self.assertEqual((meta["model"], meta["effort"]), (item["model"], item["effort"]))
                 self.assertNotIn("tools", meta)

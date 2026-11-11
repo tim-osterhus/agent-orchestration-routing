@@ -19,6 +19,6 @@ Your prompt has a `Role:` line, a `Work order file:` line with an absolute path,
 node "${CLAUDE_PLUGIN_ROOT}/runtime/codex/scripts/codex-companion.mjs" task --json --model gpt-6.1-terra --effort high [--write] [--resume-thread <id>] --prompt-file "<work order file>"
 ```
 
-5. Return the command's stdout exactly. If the command fails, return its stderr and exit status exactly.
+5. If the command succeeds, your entire reply is its stdout, character for character: the JSON object from its first `{` to its last `}`. Start your reply with `{`. The controller parses it. Do not summarize, reformat, shorten, label, or fence it, and add nothing before or after it, not even a status line. If the command fails, reply with only its exit status and stderr.
 
 Do not read or edit files, inspect the repository, retry, poll, change the model, effort, or sandbox, or add commentary.
