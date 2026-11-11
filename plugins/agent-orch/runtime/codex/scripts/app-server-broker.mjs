@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// Modified by Tim Osterhus for agent-orch (2026-11-10): agent-orch broker user agent. See ../VENDORED.md.
 
 import fs from "node:fs";
 import net from "node:net";
@@ -147,7 +148,7 @@ async function main() {
           send(socket, {
             id: message.id,
             result: {
-              userAgent: "codex-companion-broker"
+              userAgent: "agent-orch-codex-broker"
             }
           });
           continue;

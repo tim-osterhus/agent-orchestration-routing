@@ -1,10 +1,11 @@
+// Modified by Tim Osterhus for agent-orch (2026-11-10): agent-orch transcript environment name. See ../../VENDORED.md.
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
 import { ensureAbsolutePath } from "./fs.mjs";
 
-export const TRANSCRIPT_PATH_ENV = "CODEX_COMPANION_TRANSCRIPT_PATH";
+export const TRANSCRIPT_PATH_ENV = "AGENT_ORCH_CODEX_TRANSCRIPT_PATH";
 const CLAUDE_PROJECTS_DIR = path.join(os.homedir(), ".claude", "projects");
 
 function resolveUserPath(cwd, value) {

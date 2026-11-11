@@ -1,9 +1,10 @@
+// Modified by Tim Osterhus for agent-orch (2026-11-10): agent-orch session environment name. See ../../VENDORED.md.
 import fs from "node:fs";
 import process from "node:process";
 
 import { readJobFile, resolveJobFile, resolveJobLogFile, upsertJob, writeJobFile } from "./state.mjs";
 
-export const SESSION_ID_ENV = "CODEX_COMPANION_SESSION_ID";
+export const SESSION_ID_ENV = "AGENT_ORCH_CODEX_SESSION_ID";
 
 export function nowIso() {
   return new Date().toISOString();

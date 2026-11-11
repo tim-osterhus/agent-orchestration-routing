@@ -1,3 +1,4 @@
+// Modified by Tim Osterhus for agent-orch (2026-11-10): agent-orch service name, effort config on thread start/resume, observed route and reroute capture. See ../../VENDORED.md.
 /**
  * @typedef {import("./app-server-protocol").AppServerNotification} AppServerNotification
  * @typedef {import("./app-server-protocol").ReviewTarget} ReviewTarget
@@ -44,7 +45,7 @@ import { BROKER_BUSY_RPC_CODE, BROKER_ENDPOINT_ENV, CodexAppServerClient } from 
 import { loadBrokerSession } from "./broker-lifecycle.mjs";
 import { binaryAvailable } from "./process.mjs";
 
-const SERVICE_NAME = "claude_code_codex_plugin";
+const SERVICE_NAME = "agent_orch_router";
 const TASK_THREAD_PREFIX = "Codex Companion Task";
 const DEFAULT_CONTINUE_PROMPT =
   "Continue from the current thread state. Pick the next highest-value step and follow through until the task is resolved.";
@@ -66,6 +67,7 @@ function buildThreadParams(cwd, options = {}) {
     model: options.model ?? null,
     approvalPolicy: options.approvalPolicy ?? "never",
     sandbox: options.sandbox ?? "read-only",
+    config: options.effort ? { model_reasoning_effort: options.effort } : null,
     serviceName: SERVICE_NAME,
     ephemeral: options.ephemeral ?? true
   };
@@ -78,8 +80,37 @@ function buildResumeParams(threadId, cwd, options = {}) {
     cwd,
     model: options.model ?? null,
     approvalPolicy: options.approvalPolicy ?? "never",
-    sandbox: options.sandbox ?? "read-only"
+    sandbox: options.sandbox ?? "read-only",
+    config: options.effort ? { model_reasoning_effort: options.effort } : null
   };
+}
+
+function buildRoute(options, response, reroutes) {
+  const requested = {
+    model: options.model ?? null,
+    effort: options.effort ?? null,
+    sandbox: options.sandbox ?? null
+  };
+  const observed = {
+    model: response?.model ?? null,
+    modelProvider: response?.modelProvider ?? null,
+    reasoningEffort: response?.reasoningEffort ?? null,
+    serviceTier: response?.serviceTier ?? null,
+    approvalPolicy: response?.approvalPolicy ?? null,
+    sandbox: response?.sandbox?.type ?? null,
+    cwd: response?.cwd ?? null
+  };
+  const mismatches = [];
+  if (requested.model && observed.model !== requested.model) {
+    mismatches.push(`model: requested ${requested.model}, observed ${observed.model ?? "unknown"}`);
+  }
+  if (requested.effort && observed.reasoningEffort !== requested.effort) {
+    mismatches.push(`effort: requested ${requested.effort}, observed ${observed.reasoningEffort ?? "unknown"}`);
+  }
+  for (const reroute of reroutes) {
+    mismatches.push(`rerouted: ${reroute.fromModel} -> ${reroute.toModel} (${reroute.reason})`);
+  }
+  return { requested, observed, reroutes, mismatches, exact: mismatches.length === 0 };
 }
 
 /** @returns {UserInput[]} */
@@ -332,6 +363,7 @@ function createTurnCaptureState(threadId, options = {}) {
     messages: [],
     fileChanges: [],
     commandExecutions: [],
+    reroutes: [],
     onProgress: options.onProgress ?? null
   };
 }
@@ -533,6 +565,14 @@ function applyTurnNotification(state, message) {
         const update = describeCompletedItem(state, message.params.item);
         emitProgress(state.onProgress, update?.message, update?.phase ?? null);
       }
+      break;
+    case "model/rerouted":
+      state.reroutes.push({
+        fromModel: message.params.fromModel ?? null,
+        toModel: message.params.toModel ?? null,
+        reason: message.params.reason ?? null,
+        turnId: message.params.turnId ?? null
+      });
       break;
     case "error":
       state.error = message.params.error;
@@ -1100,23 +1140,28 @@ export async function runAppServerTurn(cwd, options = {}) {
 
   return withAppServer(cwd, async (client) => {
     let threadId;
+    let threadResponse;
 
     if (options.resumeThreadId) {
       emitProgress(options.onProgress, `Resuming thread ${options.resumeThreadId}.`, "starting");
       const response = await resumeThread(client, options.resumeThreadId, cwd, {
         model: options.model,
+        effort: options.effort,
         sandbox: options.sandbox,
         ephemeral: false
       });
+      threadResponse = response;
       threadId = response.thread.id;
     } else {
       emitProgress(options.onProgress, "Starting Codex task thread.", "starting");
       const response = await startThread(client, cwd, {
         model: options.model,
+        effort: options.effort,
         sandbox: options.sandbox,
         ephemeral: options.persistThread ? false : true,
         threadName: options.persistThread ? options.threadName : options.threadName ?? null
       });
+      threadResponse = response;
       threadId = response.thread.id;
     }
 
@@ -1154,7 +1199,8 @@ export async function runAppServerTurn(cwd, options = {}) {
       stderr: cleanCodexStderr(client.stderr),
       fileChanges: turnState.fileChanges,
       touchedFiles: collectTouchedFiles(turnState.fileChanges),
-      commandExecutions: turnState.commandExecutions
+      commandExecutions: turnState.commandExecutions,
+      route: buildRoute(options, threadResponse, turnState.reroutes)
     };
   });
 }

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// Modified by Tim Osterhus for agent-orch (2026-11-10): agent-orch environment names; export this plugin's data directory under its own name. See ../VENDORED.md.
 
 import fs from "node:fs";
 import process from "node:process";
@@ -17,8 +18,10 @@ import { loadState, resolveStateFile, saveState } from "./lib/state.mjs";
 import { TRANSCRIPT_PATH_ENV } from "./lib/claude-session-transfer.mjs";
 import { resolveWorkspaceRoot } from "./lib/workspace.mjs";
 
-export const SESSION_ID_ENV = "CODEX_COMPANION_SESSION_ID";
+export const SESSION_ID_ENV = "AGENT_ORCH_CODEX_SESSION_ID";
 const PLUGIN_DATA_ENV = "CLAUDE_PLUGIN_DATA";
+// Exported under this plugin's own name so another plugin's CLAUDE_PLUGIN_DATA export cannot redirect state.
+const STATE_DATA_ENV = "AGENT_ORCH_CODEX_DATA";
 
 function readHookInput() {
   const raw = fs.readFileSync(0, "utf8").trim();
@@ -77,7 +80,7 @@ function cleanupSessionJobs(cwd, sessionId) {
 function handleSessionStart(input) {
   appendEnvVar(SESSION_ID_ENV, input.session_id);
   appendEnvVar(TRANSCRIPT_PATH_ENV, input.transcript_path);
-  appendEnvVar(PLUGIN_DATA_ENV, process.env[PLUGIN_DATA_ENV]);
+  appendEnvVar(STATE_DATA_ENV, process.env[PLUGIN_DATA_ENV]);
 }
 
 async function handleSessionEnd(input) {
@@ -114,6 +117,9 @@ async function handleSessionEnd(input) {
 }
 
 async function main() {
+  if (!process.env[STATE_DATA_ENV] && process.env[PLUGIN_DATA_ENV]) {
+    process.env[STATE_DATA_ENV] = process.env[PLUGIN_DATA_ENV];
+  }
   const input = readHookInput();
   const eventName = process.argv[2] ?? input.hook_event_name ?? "";
 

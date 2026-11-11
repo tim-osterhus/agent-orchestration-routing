@@ -1,3 +1,4 @@
+// Modified by Tim Osterhus for agent-orch (2026-11-10): agent-orch broker environment names. See ../../VENDORED.md.
 import fs from "node:fs";
 import net from "node:net";
 import os from "node:os";
@@ -8,8 +9,8 @@ import { fileURLToPath } from "node:url";
 import { createBrokerEndpoint, parseBrokerEndpoint } from "./broker-endpoint.mjs";
 import { resolveStateDir } from "./state.mjs";
 
-export const PID_FILE_ENV = "CODEX_COMPANION_APP_SERVER_PID_FILE";
-export const LOG_FILE_ENV = "CODEX_COMPANION_APP_SERVER_LOG_FILE";
+export const PID_FILE_ENV = "AGENT_ORCH_CODEX_APP_SERVER_PID_FILE";
+export const LOG_FILE_ENV = "AGENT_ORCH_CODEX_APP_SERVER_LOG_FILE";
 const BROKER_STATE_FILE = "broker.json";
 
 export function createBrokerSessionDir(prefix = "cxc-") {
