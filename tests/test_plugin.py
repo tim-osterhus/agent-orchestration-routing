@@ -3,6 +3,7 @@
 from copy import deepcopy
 import importlib.util
 import json
+import os
 from pathlib import Path
 import re
 import shutil
@@ -10,6 +11,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 PLUGIN = ROOT / "plugins/agent-orch"
@@ -160,7 +162,7 @@ class VendoredRuntimeTests(unittest.TestCase):
                                   (["--resume-thread", "thread-1", "--fresh"], "Choose only one of --resume-thread"),
                                   (["--resume-thread", "thread-1", "--resume-last"], "Choose only one of --resume-thread")]:
                 result = subprocess.run([NODE, companion, "task", *args, "Bounded task."], cwd=directory, input="",
-                                        capture_output=True, text=True, timeout=30)
+                                        capture_output=True, text=True, timeout=30, env=bundle.git_env())
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn(message, result.stderr)
 
@@ -178,7 +180,7 @@ class OwnershipTests(unittest.TestCase):
         (self.repo / "private").mkdir()
         (self.repo / "private/bench.json").write_text("{}\n")
         for command in (["init", "-q"], ["add", "."], ["-c", "user.name=t", "-c", "user.email=t@example.invalid", "commit", "-qm", "base"]):
-            subprocess.run(["git", "-C", str(self.repo), *command], check=True, capture_output=True)
+            subprocess.run(["git", "-C", str(self.repo), *command], check=True, capture_output=True, env=bundle.git_env())
         (self.repo / "docs/guide.md").write_text("user edit\n")  # Pre-existing uncommitted change.
 
     def snapshot(self):
@@ -188,6 +190,19 @@ class OwnershipTests(unittest.TestCase):
         path = self.runs / "owners.json"
         path.write_text(json.dumps(owners))
         return bundle.check_ownership(self.runs / "baseline.json", path)
+
+    def test_inherited_git_repository_variables_cannot_redirect_git(self):
+        # Git hooks and `git rebase --exec` export GIT_DIR. Inherited, it once sent these fixtures' commits into the real checkout.
+        decoy = self.runs / "decoy"
+        decoy.mkdir(parents=True)
+        subprocess.run(["git", "-C", str(decoy), "init", "-q"], check=True, capture_output=True, env=bundle.git_env())
+        before = (decoy / ".git/config").read_bytes()
+        hostile = {"GIT_DIR": str(decoy / ".git"), "GIT_WORK_TREE": str(decoy), "GIT_INDEX_FILE": str(decoy / ".git/index")}
+        with mock.patch.dict(os.environ, hostile):
+            self.assertEqual(self.snapshot()["dirty"], ["docs/guide.md"])
+            self.assertTrue(set(hostile) <= set(os.environ) and not set(hostile) & set(bundle.git_env()))
+        self.assertEqual((decoy / ".git/config").read_bytes(), before)
+        self.assertFalse((decoy / ".git/index").exists())
 
     def test_snapshot_records_dirty_and_protected_files_outside_the_project(self):
         result = self.snapshot()

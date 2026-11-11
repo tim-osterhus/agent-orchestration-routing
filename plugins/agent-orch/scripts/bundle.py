@@ -6,6 +6,7 @@ from copy import deepcopy
 from fnmatch import fnmatchcase
 import hashlib
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -498,8 +499,21 @@ You are an agent-orch-router worker for profile {code}: `{item['model']}` at eff
 """
 
 
+# `git rev-parse --local-env-vars`. Git hooks and `git rebase --exec` export these; inherited, they
+# override `git -C <cwd>` and point reads and writes at the caller's repository instead.
+GIT_LOCAL_ENV = frozenset((
+    "GIT_ALTERNATE_OBJECT_DIRECTORIES", "GIT_CONFIG", "GIT_CONFIG_PARAMETERS", "GIT_CONFIG_COUNT",
+    "GIT_OBJECT_DIRECTORY", "GIT_DIR", "GIT_WORK_TREE", "GIT_IMPLICIT_WORK_TREE", "GIT_GRAFT_FILE",
+    "GIT_INDEX_FILE", "GIT_NO_REPLACE_OBJECTS", "GIT_REPLACE_REF_BASE", "GIT_PREFIX",
+    "GIT_INTERNAL_SUPER_PREFIX", "GIT_SHALLOW_FILE", "GIT_COMMON_DIR"))
+
+
+def git_env():
+    return {key: value for key, value in os.environ.items() if key not in GIT_LOCAL_ENV}
+
+
 def git_lines(cwd, *args):
-    result = subprocess.run(["git", "-C", str(cwd), *args], capture_output=True)
+    result = subprocess.run(["git", "-C", str(cwd), *args], capture_output=True, env=git_env())
     require(result.returncode == 0, f"git {args[0]} failed in {cwd}: {result.stderr.decode(errors='replace').strip()}")
     return [entry.decode() for entry in result.stdout.split(b"\0") if entry]
 
@@ -589,7 +603,7 @@ def snapshot(cwd, out, protect=()):
     require(cwd.is_dir(), "cwd must be an existing directory")
     require(not out.is_relative_to(cwd), "Write snapshots outside the project so they are not reported as changes")
     protect = sorted({spec.rstrip("/") + ("/" if (cwd / spec).is_dir() else "") for spec in protect})
-    head = subprocess.run(["git", "-C", str(cwd), "rev-parse", "HEAD"], capture_output=True, text=True)
+    head = subprocess.run(["git", "-C", str(cwd), "rev-parse", "HEAD"], capture_output=True, text=True, env=git_env())
     record = {"schema": 1, "cwd": str(cwd), "head": head.stdout.strip() or None, "protected": protect,
               "dirty": dirty_paths(cwd), "files": worktree_hashes(cwd, protect)}
     out.parent.mkdir(parents=True, exist_ok=True)
