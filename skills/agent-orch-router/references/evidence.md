@@ -14,6 +14,12 @@ Efficient, Balanced, Performance, Amusing, Council, and burn pools are approved 
 
 [OpenAI's Terra guidance](https://developers.openai.com/api/docs/guides/latest-model) supports visual reasoning, computer use, and source-grounded writing. Start at Medium and raise effort when checked gains justify extra time and tokens. No controlled comparison establishes universal Low/Medium/High task rankings.
 
+## Terra practitioner anecdote
+
+Matt Maher reports successful [established-workflow implementation](https://www.youtube.com/watch?v=KwHKVA9fjd4&t=254). He prefers Terra over Sol for [structuring his own dictated material](https://www.youtube.com/watch?v=KwHKVA9fjd4&t=406). He also reports [problem-framing failures](https://www.youtube.com/watch?v=KwHKVA9fjd4&t=566) and [loops in unfamiliar UI](https://www.youtube.com/watch?v=KwHKVA9fjd4&t=821).
+
+Reviewed 2026-11-10 from captions and 49 scene frames. These are practitioner anecdotes, not independently verified task runs or a controlled comparison. The presenter specifies neither trial counts nor Terra effort. They support task-fit and escalation preferences, not TL/TM/TH rankings, a creativity ban, or changed pools and permissions.
+
 ## Fable interpretation
 
 FM/FH/FX/FMAX select `claude-fable-5-2`. [Official model guidance](https://platform.claude.com/docs/en/models/fable-5-2/overview) and [effort documentation](https://platform.claude.com/docs/en/build-with-claude/effort) support the exact configuration contract and High preference.

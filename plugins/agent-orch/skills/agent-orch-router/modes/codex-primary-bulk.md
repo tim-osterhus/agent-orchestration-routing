@@ -8,8 +8,8 @@ Use this pool when Codex should author most work and Claude should take hard or 
 | Slot | Exact profile | Eligibility | Task fit |
 | --- | --- | --- | --- |
 | routine | SL: gpt-6.1-sol / low | general | Use for routine, clearly specified edits whose output is easy to check. |
-| visual | TM: gpt-6.1-terra / medium | general | Use for everyday bounded implementation, source-grounded writing, visual interpretation, or screen-based workflows. |
-| visual-deep | TH: gpt-6.1-terra / high | general | Use for harder diagnosis, multi-step visual reasoning, or computer-use work needing more deliberation than TM. |
+| visual | TM: gpt-6.1-terra / medium | general | Execute established implementation or screen-based workflows and structure source-rich writing, including substantial multi-step work. Supply relevant patterns, decision boundaries, and acceptance checks, and surface unresolved choices instead of narrowing the task. |
+| visual-deep | TH: gpt-6.1-terra / high | general | Handle harder bounded diagnosis, implementation, synthesis, or visual analysis with explicit ownership and checks. Ask the coordinator to reframe unresolved problems rather than assuming more Terra effort will resolve them. |
 | standard | SM: gpt-6.1-sol / medium | general | Use for general implementation, related-file changes, or independent verification with moderate ambiguity. |
 | deep | SH: gpt-6.1-sol / high | general | Use for debugging, unclear behavior, or integration where controller repair would otherwise be substantial. |
 | hard | SX: gpt-6.1-sol / xhigh | general | Use for difficult implementation or debugging with interacting constraints and explicit acceptance checks. |
@@ -19,6 +19,10 @@ Use this pool when Codex should author most work and Claude should take hard or 
 | opus | OH: claude-opus-5-5 / high | qa, spec-review; independent review | Use for independent QA or specification review of a Codex-authored candidate, not implementation. |
 | fable-review | FH: claude-fable-5-2 / high | research, planning, qa, spec-review; independent review; escalation; one-off | Selectively escalate difficult reasoning, specification analysis, or independent review. Use a bounded worker, not authored fixes or team management. |
 <!-- END GENERATED:pool:codex-primary/bulk -->
+
+Known patterns can span long workflows. A clear outcome alone does not make the solution path known.
+
+Return unresolved framing or repeated UI loops to the coordinator with the current state, attempts, and open decision. Reassignment follows existing pool, role, and route authorization, without silent substitution.
 
 OX is an escalation, not a default author. Prefer it after a failed or unconvincing Codex attempt, or when a mistake would be costly: security-sensitive code, data migrations, public interfaces, or subtle concurrency. FH advises or reviews; it does not author fixes or manage a team.
 

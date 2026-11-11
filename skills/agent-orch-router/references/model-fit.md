@@ -5,7 +5,7 @@ Read only when comparing model families or selecting a specialist. Evidence chec
 ## Family traits
 
 - Luna and Haiku: small bounded packets with inexpensive checks. Cheap attempts are not efficient when retries or controller repair dominate.
-- Terra: visual reasoning, computer use, and clear source-grounded writing. Start at Medium. Raise effort when checked quality gains justify extra time.
+- Terra: established-pattern implementation, source-rich writing, synthesis, and visual analysis. Start at Medium, choosing effort by checked results rather than assuming High resolves a framing problem.
 - Sol: implementation, debugging, and integration. Higher effort is a task-dependent tradeoff, not a guaranteed quality ladder.
 - Astra: visual/browser work and demanding reasoning. Tool availability belongs to the actual worker, not the model name.
 - Ember and Gemini Carbon: general reasoning candidates on the supplied frontier. Use only through a verified exact provider route.
@@ -13,6 +13,8 @@ Read only when comparing model families or selecting a specialist. Evidence chec
 - Fable: demanding reasoning and requirements review. FH is the preferred selective trial. FX is not strictly dominated by FH on unrounded AAI scores.
 
 The [OpenAI Terra guidance](https://developers.openai.com/api/docs/guides/latest-model), [Muse model documentation](https://dev.meta.ai/docs/muse-ember), and [Gemini Carbon documentation](https://aistudio.google.com/docs/models/gemini-4-carbon) support capabilities and configuration contracts, not local account access.
+
+Known workflows may be substantial. Prefer another eligible profile for unresolved problem framing, then return executable work to Terra when the approach is established. These are routing preferences, not bans on exploratory or creative work. See the [Terra practitioner anecdote](evidence.md#terra-practitioner-anecdote) for evidence and effort limits.
 
 ## Nine specialist records
 

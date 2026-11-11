@@ -8,12 +8,16 @@ Minimize resources per accepted task, including retries and controller repair. T
 | Slot | Exact profile | Eligibility | Task fit |
 | --- | --- | --- | --- |
 | cheap | HL: claude-haiku-5-5 / low | one-off | Use for a tiny one-off extraction, lookup, or specified edit with a cheap acceptance check. |
-| small | TL: gpt-6.1-terra / low | general | Use for a small specified code fix, concise writing task, or straightforward visual interpretation. |
+| small | TL: gpt-6.1-terra / low | general | Use for small, specified changes, source transformations, or straightforward visual interpretation following an established pattern, with inexpensive checks. Prefer another eligible profile when substantial interpretation or reframing is needed. |
 | ember | EX: muse-ember-1.0 / xhigh | verified adapter | Use for bounded reasoning only after verifying the exact Muse API adapter and account route. |
-| visual | TM: gpt-6.1-terra / medium | general | Use for bounded implementation, source-grounded writing, or screen-based work requiring several connected steps. |
-| visual-deep | TH: gpt-6.1-terra / high | general | Use for a harder diagnosis or multi-step visual task when Medium leaves important uncertainty. |
+| visual | TM: gpt-6.1-terra / medium | general | Execute established implementation or screen-based workflows and structure source-rich writing, including substantial multi-step work. Supply relevant patterns, decision boundaries, and acceptance checks, and surface unresolved choices instead of narrowing the task. |
+| visual-deep | TH: gpt-6.1-terra / high | general | Handle harder bounded diagnosis, implementation, synthesis, or visual analysis with explicit ownership and checks. Ask the coordinator to reframe unresolved problems rather than assuming more Terra effort will resolve them. |
 | standard | SM: gpt-6.1-sol / medium | general | Use for general implementation spanning related files or a bounded integration with explicit checks. |
 <!-- END GENERATED:pool:claude-primary/efficient -->
+
+Known patterns can span long workflows. A clear outcome alone does not make the solution path known.
+
+Return unresolved framing or repeated UI loops to the coordinator with the current state, attempts, and open decision. Reassignment follows existing pool, role, and route authorization, without silent substitution.
 
 Choose the earliest suitable eligible slot, not every cheaper profile in sequence. General slots permit all task roles. Bindings never change slot eligibility. One-off slots require a fresh bounded worker, never a continuing controller. Specialist slots take precedence for their stated role. Other eligible profiles may still use those tools.
 

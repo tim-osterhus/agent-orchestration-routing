@@ -25,9 +25,9 @@
   "profiles": {
     "LM": {"provider": "codex", "model": "gpt-6-luna", "effort": "medium", "service_tier": "standard", "description": "Candidate for trivial, tightly bounded work with inexpensive acceptance checks."},
     "L": {"provider": "codex", "model": "gpt-6-luna", "effort": "max", "service_tier": "standard", "description": "Retained Luna Max profile for explicit selection or custom pools, not a synonym for Luna Medium."},
-    "TL": {"provider": "codex", "model": "gpt-6.1-terra", "effort": "low", "service_tier": "standard", "description": "Use for small, clearly specified code fixes, concise writing, and straightforward visual interpretation with inexpensive acceptance checks."},
-    "TM": {"provider": "codex", "model": "gpt-6.1-terra", "effort": "medium", "service_tier": "standard", "description": "Default Terra option for bounded implementation, source-grounded writing, visual interpretation, and screen-based workflows. Verify required tools and saved results."},
-    "TH": {"provider": "codex", "model": "gpt-6.1-terra", "effort": "high", "service_tier": "standard", "description": "Use for harder diagnosis, multi-step visual reasoning, or computer-use work when additional reasoning is worth testing. Prefer it over Medium when checked quality gains justify the additional time and usage."},
+    "TL": {"provider": "codex", "model": "gpt-6.1-terra", "effort": "low", "service_tier": "standard", "description": "Use for small, specified changes, source transformations, or straightforward visual interpretation following an established pattern, with inexpensive checks. Prefer another eligible profile when substantial interpretation or reframing is needed."},
+    "TM": {"provider": "codex", "model": "gpt-6.1-terra", "effort": "medium", "service_tier": "standard", "description": "Execute established implementation or screen-based workflows and structure source-rich writing, including substantial multi-step work. Supply relevant patterns, decision boundaries, and acceptance checks, and surface unresolved choices instead of narrowing the task."},
+    "TH": {"provider": "codex", "model": "gpt-6.1-terra", "effort": "high", "service_tier": "standard", "description": "Handle harder bounded diagnosis, implementation, synthesis, or visual analysis with explicit ownership and checks. Ask the coordinator to reframe unresolved problems rather than assuming more Terra effort will resolve them."},
     "SL": {"provider": "codex", "model": "gpt-6.1-sol", "effort": "low", "service_tier": "standard", "description": "Candidate for routine bounded work with clear acceptance checks."},
     "SM": {"provider": "codex", "model": "gpt-6.1-sol", "effort": "medium", "service_tier": "standard", "description": "General-purpose implementation or independent verification candidate, depending on the active pool."},
     "SH": {"provider": "codex", "model": "gpt-6.1-sol", "effort": "high", "service_tier": "standard", "description": "Candidate for assignments where uncertainty or likely repair work justifies additional reasoning."},
@@ -78,16 +78,16 @@
       "modes": {
         "efficient": [
           {"slot": "cheap", "one_off_only": true, "fit": "Use for a trivial one-off edit, extraction, or lookup with an immediate, inexpensive check."},
-          {"slot": "small", "fit": "Use for a small specified code fix, concise writing task, or straightforward visual interpretation."},
+          {"slot": "small", "fit": "Use for small, specified changes, source transformations, or straightforward visual interpretation following an established pattern, with inexpensive checks. Prefer another eligible profile when substantial interpretation or reframing is needed."},
           {"slot": "ember", "requires_verified_adapter": true, "fit": "Use for bounded reasoning only after verifying the exact Muse API adapter and account route."},
-          {"slot": "visual", "fit": "Use for bounded implementation, source-grounded writing, or screen-based work requiring several connected steps."},
-          {"slot": "visual-deep", "fit": "Use for a harder diagnosis or multi-step visual task when Medium leaves important uncertainty."},
+          {"slot": "visual", "fit": "Execute established implementation or screen-based workflows and structure source-rich writing, including substantial multi-step work. Supply relevant patterns, decision boundaries, and acceptance checks, and surface unresolved choices instead of narrowing the task."},
+          {"slot": "visual-deep", "fit": "Handle harder bounded diagnosis, implementation, synthesis, or visual analysis with explicit ownership and checks. Ask the coordinator to reframe unresolved problems rather than assuming more Terra effort will resolve them."},
           {"slot": "standard", "fit": "Use for general implementation spanning related files or a bounded integration with explicit checks."}
         ],
         "balanced": [
           {"slot": "routine", "fit": "Use for routine, clearly specified edits whose output is easy to check."},
-          {"slot": "visual", "fit": "Use for everyday bounded implementation, source-grounded writing, visual interpretation, or screen-based workflows."},
-          {"slot": "visual-deep", "fit": "Use for harder diagnosis, multi-step visual reasoning, or computer-use work needing more deliberation than TM."},
+          {"slot": "visual", "fit": "Execute established implementation or screen-based workflows and structure source-rich writing, including substantial multi-step work. Supply relevant patterns, decision boundaries, and acceptance checks, and surface unresolved choices instead of narrowing the task."},
+          {"slot": "visual-deep", "fit": "Handle harder bounded diagnosis, implementation, synthesis, or visual analysis with explicit ownership and checks. Ask the coordinator to reframe unresolved problems rather than assuming more Terra effort will resolve them."},
           {"slot": "standard", "fit": "Use for general implementation, related-file changes, or independent verification with moderate ambiguity."},
           {"slot": "deep", "fit": "Use for debugging, unclear behavior, or integration where controller repair would otherwise be substantial."},
           {"slot": "hard", "fit": "Use for difficult implementation or debugging with interacting constraints and explicit acceptance checks."},
@@ -107,8 +107,8 @@
         ],
         "bulk": [
           {"slot": "routine", "fit": "Use for routine, clearly specified edits whose output is easy to check."},
-          {"slot": "visual", "fit": "Use for everyday bounded implementation, source-grounded writing, visual interpretation, or screen-based workflows."},
-          {"slot": "visual-deep", "fit": "Use for harder diagnosis, multi-step visual reasoning, or computer-use work needing more deliberation than TM."},
+          {"slot": "visual", "fit": "Execute established implementation or screen-based workflows and structure source-rich writing, including substantial multi-step work. Supply relevant patterns, decision boundaries, and acceptance checks, and surface unresolved choices instead of narrowing the task."},
+          {"slot": "visual-deep", "fit": "Handle harder bounded diagnosis, implementation, synthesis, or visual analysis with explicit ownership and checks. Ask the coordinator to reframe unresolved problems rather than assuming more Terra effort will resolve them."},
           {"slot": "standard", "fit": "Use for general implementation, related-file changes, or independent verification with moderate ambiguity."},
           {"slot": "deep", "fit": "Use for debugging, unclear behavior, or integration where controller repair would otherwise be substantial."},
           {"slot": "hard", "fit": "Use for difficult implementation or debugging with interacting constraints and explicit acceptance checks."},
@@ -124,10 +124,10 @@
       "modes": {
         "efficient": [
           {"slot": "cheap", "one_off_only": true, "fit": "Use for a tiny one-off extraction, lookup, or specified edit with a cheap acceptance check."},
-          {"slot": "small", "fit": "Use for a small specified code fix, concise writing task, or straightforward visual interpretation."},
+          {"slot": "small", "fit": "Use for small, specified changes, source transformations, or straightforward visual interpretation following an established pattern, with inexpensive checks. Prefer another eligible profile when substantial interpretation or reframing is needed."},
           {"slot": "ember", "requires_verified_adapter": true, "fit": "Use for bounded reasoning only after verifying the exact Muse API adapter and account route."},
-          {"slot": "visual", "fit": "Use for bounded implementation, source-grounded writing, or screen-based work requiring several connected steps."},
-          {"slot": "visual-deep", "fit": "Use for a harder diagnosis or multi-step visual task when Medium leaves important uncertainty."},
+          {"slot": "visual", "fit": "Execute established implementation or screen-based workflows and structure source-rich writing, including substantial multi-step work. Supply relevant patterns, decision boundaries, and acceptance checks, and surface unresolved choices instead of narrowing the task."},
+          {"slot": "visual-deep", "fit": "Handle harder bounded diagnosis, implementation, synthesis, or visual analysis with explicit ownership and checks. Ask the coordinator to reframe unresolved problems rather than assuming more Terra effort will resolve them."},
           {"slot": "standard", "fit": "Use for general implementation spanning related files or a bounded integration with explicit checks."}
         ],
         "balanced": [
@@ -266,10 +266,10 @@
   },
   "slots": {
     "cheap": {"description": "Trivial bounded extraction or mechanical edits with an inexpensive acceptance check."},
-    "small": {"description": "Small specified changes, concise writing, or straightforward visual interpretation."},
+    "small": {"description": "Small specified changes, source transformations, or visual interpretation following an established pattern with inexpensive checks."},
     "ember": {"description": "Bounded reasoning only after exact Muse adapter and account access are verified."},
-    "visual": {"description": "Bounded implementation, source-grounded writing, visual reasoning, or screen-based workflows."},
-    "visual-deep": {"description": "Harder diagnosis or multi-step visual reasoning when additional effort is justified."},
+    "visual": {"description": "Established implementation or screen-based workflows and source-rich writing with clear decision boundaries and acceptance evidence."},
+    "visual-deep": {"description": "Harder bounded diagnosis, implementation, synthesis, or visual analysis with focused checks and coordinator escalation for unresolved framing."},
     "standard": {"description": "General implementation or related-file integration with explicit acceptance checks."},
     "routine": {"description": "Routine specified implementation with a narrow change surface."},
     "deep": {"description": "Substantive debugging or ambiguous work where repair overhead warrants more reasoning."},
