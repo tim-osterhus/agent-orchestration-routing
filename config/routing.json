@@ -154,6 +154,13 @@
     }
   },
   "modes": {
+    "browser-3d": [
+      {"slot": "standard", "fit": "Implement conventional UI, interactions, asset manifests, automation, and tests. Also handle routine browser journeys and screenshot collection with verified tool access."},
+      {"slot": "deep", "fit": "Build scene-generation and export pipelines, browser rendering, and asset integration. Diagnose performance problems while preserving the approved visual direction."},
+      {"slot": "hard", "fit": "Resolve difficult rendering, shader, transform, collision, or integration failures with interacting constraints. Return demonstrated causes and verified corrections."},
+      {"slot": "max-code", "fit": "Handle exceptional engineering problems or independently review a complex candidate against functional and performance requirements. Use a fresh reviewer when this profile authored the work."},
+      {"slot": "broad", "fit": "Create and refine geometry, materials, lighting, and spatial composition through the available 3D toolchain. Inspect actual browser output for visual fidelity and interaction defects, separately from authored work when reviewing."}
+    ],
     "council": [
       {"slot": "max-code", "roles": ["research", "planning", "qa", "spec-review"], "fit": "Develop a decision proposal, test its assumptions, and compare concrete implementation tradeoffs."},
       {"slot": "opus-deep", "roles": ["research", "planning", "qa", "spec-review"], "fit": "Challenge architectural choices against requirements, source evidence, and simpler alternatives."},
@@ -366,6 +373,13 @@
       }
     },
     "shared": {
+      "browser-3d": {
+        "standard": "SM",
+        "deep": "SH",
+        "hard": "SX",
+        "max-code": "SMAX",
+        "broad": "AMAX"
+      },
       "council": {
         "max-code": "SMAX",
         "opus-deep": "OX",

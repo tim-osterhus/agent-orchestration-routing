@@ -70,6 +70,36 @@ class SlotTests(unittest.TestCase):
         self.assertEqual(exact["model"], "muse-wonder-full-1.0")
         self.assertFalse(exact["execution"]["adapter_route_available"])
 
+    def test_browser_3d_workers_are_codex_only_under_both_variants(self):
+        for variant in self.config["variants"]:
+            result = bundle.resolve(self.config, variant=variant, mode="browser-3d", design="claude-plugin")
+            self.assertEqual([c["code"] for c in result["choices"]], ["SM", "SH", "SX", "SMAX", "AMAX"])
+            for choice in result["choices"]:
+                self.assertEqual(choice["provider"], "codex")
+                self.assertNotEqual(choice["model"], "gpt-6.1-terra")
+                self.assertEqual(choice["agent"], "agent-orch:codex-" + choice["code"].lower())
+            self.assertEqual(result["limits"]["max_parallel_workers"], self.config["max_parallel_workers"])
+
+    def test_browser_3d_routine_checks_and_visual_authoring_are_eligible(self):
+        for code, role in (("SM", "browser"), ("SM", "qa"), ("AMAX", "implementation"),
+                           ("AMAX", "browser"), ("SMAX", "qa"), ("SH", "integration")):
+            result = bundle.resolve(self.config, mode="browser-3d", code=code, role=role)
+            self.assertEqual(result["choices"][0]["code"], code)
+            self.assertEqual(result["choices"][0]["execution"], self.config["codex"])
+        for code in ("SL", "TL", "TM", "TH", "FH"):
+            with self.assertRaisesRegex(ValueError, "outside the active pool"):
+                bundle.resolve(self.config, mode="browser-3d", code=code)
+
+    def test_browser_3d_claude_first_counts_codex_as_external(self):
+        result = bundle.resolve(self.config, mode="browser-3d", design="claude-first")
+        self.assertEqual(result["controller"], "claude")
+        self.assertEqual([c["code"] for c in result["choices"]], ["SM", "SH", "SX", "SMAX", "AMAX"])
+        self.assertTrue(all(c["dispatch"] == "external-codex" for c in result["choices"]))
+        self.assertEqual(result["limits"], {"max_parallel_workers": 3, "max_external_sessions_per_assignment": 1})
+        changed = bundle.merge(self.config, {"max_parallel_workers": 2, "max_external_sessions_per_assignment": 2})
+        self.assertEqual(bundle.resolve(changed, mode="browser-3d", design="claude-first")["limits"],
+                         {"max_parallel_workers": 2, "max_external_sessions_per_assignment": 2})
+
     def test_mode_specific_fit_preserves_review_scope_and_authority(self):
         cases = [
             ("claude-primary", "balanced", "SM", "qa", "not implementation"),

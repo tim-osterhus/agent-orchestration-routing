@@ -234,7 +234,7 @@ class VariantTests(unittest.TestCase):
                 "performance": ["OM", "OH", "OX", "OMAX", "SMAX", "AMAX", "FH"]}}
         for variant, modes in expected.items():
             actual = bundle.mode_pools(self.config, variant)
-            self.assertEqual(set(actual) - set(modes), {"amusing", "council", "codex-burn", "claude-burn"})
+            self.assertEqual(set(actual) - set(modes), {"amusing", "council", "browser-3d", "codex-burn", "claude-burn"})
             self.assertEqual(set(modes) - set(actual), set())
             for mode, codes in modes.items():
                 self.assertEqual([entry["profile"] for entry in actual[mode]], codes)
