@@ -11,7 +11,7 @@ Read this file and **only the selected mode document**:
 
 | Variant | Efficient | Balanced | Performance |
 | --- | --- | --- | --- |
-| codex-primary | [Efficient](modes/codex-primary-efficient.md) | [Balanced](modes/codex-primary-balanced.md) | [Performance](modes/codex-primary-performance.md) |
+| codex-primary | [Efficient](modes/codex-primary-efficient.md) | [Balanced](modes/codex-primary-balanced.md) | [Performance](modes/codex-primary-performance.md) · [Bulk](modes/codex-primary-bulk.md) |
 | claude-primary | [Efficient](modes/claude-primary-efficient.md) | [Balanced](modes/claude-primary-balanced.md) | [Performance](modes/claude-primary-performance.md) |
 
 Shared across variants: [Amusing](modes/amusing.md) · [Council](modes/council.md) · [Codex-burn](modes/codex-burn.md) · [Claude-burn](modes/claude-burn.md).

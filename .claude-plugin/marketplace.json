@@ -1,0 +1,16 @@
+{
+  "name": "agent-orchestration-routing",
+  "owner": {
+    "name": "Tim Osterhus"
+  },
+  "metadata": {
+    "description": "Agent Orchestration Router packaged for Claude Code."
+  },
+  "plugins": [
+    {
+      "name": "agent-orch",
+      "description": "Explicit-only Agent Orchestration Router for Claude Code, with pinned Codex app-server and Claude profile agents.",
+      "source": "./plugins/agent-orch"
+    }
+  ]
+}

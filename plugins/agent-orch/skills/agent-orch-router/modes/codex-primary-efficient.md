@@ -1,0 +1,30 @@
+# codex-primary / efficient
+
+Minimize resources per accepted task, including retries and controller repair. The six choices share one workflow across variants. Only the cheap slot differs: LM under Codex-primary, HL under Claude-primary. EX requires a verified exact Muse adapter and account access. Otherwise report EX unavailable, without substituting for an explicit EX request.
+
+## Ordered pool
+
+<!-- BEGIN GENERATED:pool:codex-primary/efficient -->
+| Slot | Exact profile | Eligibility | Task fit |
+| --- | --- | --- | --- |
+| cheap | LM: gpt-6-luna / medium | one-off | Use for a trivial one-off edit, extraction, or lookup with an immediate, inexpensive check. |
+| small | TL: gpt-6.1-terra / low | general | Use for a small specified code fix, concise writing task, or straightforward visual interpretation. |
+| ember | EX: muse-ember-1.0 / xhigh | verified adapter | Use for bounded reasoning only after verifying the exact Muse API adapter and account route. |
+| visual | TM: gpt-6.1-terra / medium | general | Use for bounded implementation, source-grounded writing, or screen-based work requiring several connected steps. |
+| visual-deep | TH: gpt-6.1-terra / high | general | Use for a harder diagnosis or multi-step visual task when Medium leaves important uncertainty. |
+| standard | SM: gpt-6.1-sol / medium | general | Use for general implementation spanning related files or a bounded integration with explicit checks. |
+<!-- END GENERATED:pool:codex-primary/efficient -->
+
+Choose the earliest suitable eligible slot, not every cheaper profile in sequence. General slots permit all task roles. Bindings never change slot eligibility. One-off slots require a fresh bounded worker, never a continuing controller. Specialist slots take precedence for their stated role. Other eligible profiles may still use those tools.
+
+Role/lifecycle exceptions require explicit user authorization and an exact profile. An out-of-pool choice also needs an explicit pool exception. The optional inspector records these as `--role-override` and `--allow-out-of-pool`. Never import another mode's role fences or silently substitute model/effort.
+
+## Execute
+
+Use native workers for the current host's provider with the exact catalog model/effort and required tools. For selected Claude work, load the installed Claude Delegation skill and only its relevant launch reference. QA/spec review defaults to Consultation. Authored work defaults to Implementation. An explicit workflow override does not change task-role eligibility. For external Codex work under Claude, use the optional [controller adapter](../../../docs/controller-designs.md).
+
+Give workers the objective, inputs, disjoint write ownership, acceptance checks, profile, and any deadline. The controller integrates results. An author cannot be the sole acceptance check. Reviewers do not author fixes without reassignment.
+
+Default to at most three workers and one parent-owned external session across descendants, subject to host limits. Native workers are leaves unless assigned a team role. Pass the variant, mode, bias, and role fences to descendants. External workers must not recursively launch the opposite controller.
+
+Preserve actual host permissions and user-selected tool/approval settings. Routing does not impose a new permission policy.

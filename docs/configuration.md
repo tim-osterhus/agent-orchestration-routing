@@ -8,7 +8,30 @@ Retain this checkout as the canonical source. Expose `skills/agent-orch-router` 
 
 Ordinary native routing reads only `agent-orch-router/SKILL.md` and one selected `modes/*.md` file. Copying that skill folder intact supports this path. Keep the full checkout for optional configuration, offline scripts, controller adapters, or the Claude companion, whose external tooling uses shared files. Do not overwrite an existing installation without reviewing it. This package does not install itself or modify global settings.
 
-For Claude Code, invoke the router explicitly and do not add it to always-loaded instructions. This package does not silently create Claude-specific frontmatter or preload the skill. Set `disable-model-invocation: true` in a host-specific installed copy if automatic Claude invocation must be technically disabled. Codex's `agents/openai.yaml` already keeps both skills explicit-only.
+For Claude Code, invoke the router explicitly and do not add it to always-loaded instructions. This package does not silently create Claude-specific frontmatter or preload the skill. Set `disable-model-invocation: true` in a host-specific installed copy if automatic Claude invocation must be technically disabled. The Claude Code plugin below is such a copy. Codex's `agents/openai.yaml` already keeps both skills explicit-only.
+
+## Claude Code plugin
+
+The `agent-orch` plugin packages the router for Claude Code with one pinned agent per Codex and Claude catalog profile. It needs Node.js 18.18 or later and a signed-in `codex` CLI. Install it once for all projects:
+
+```sh
+claude plugin marketplace add tim-osterhus/agent-orchestration-routing
+claude plugin install agent-orch@agent-orchestration-routing
+```
+
+Invoke it explicitly with `/agent-orch:agent-orch-router` and select design `claude-plugin`, for example with the [Bulk](../skills/agent-orch-router/modes/codex-primary-bulk.md) pool. The plugin's router copy sets `disable-model-invocation: true`. Claude Delegation and other skills in this checkout are not part of the plugin.
+
+Codex profile agents are Haiku relays for the vendored Codex companion runtime; its provenance and patches are in `plugins/agent-orch/runtime/codex/VENDORED.md`. Each assignment starts or resumes a persistent app-server thread with your existing Codex login and configuration. Sandboxes come from `codex.sandbox_by_role` (read-only or workspace-write) with `approval_policy: never`; other Codex approval or sandbox settings fail for this design. Claude profile agents pin the exact model and effort. HK's context target becomes `autoCompactWindow`, still a soft target.
+
+Background relays should not stall on permission prompts. Allow the relay command in your Claude Code settings, for example `Bash(node *codex-companion.mjs task *)`. That rule also matches the official Codex plugin's helper. Both plugins can be installed together; this one keeps its own state directory and environment names.
+
+After editing the router skill, `docs/`, `config/`, or `scripts/bundle.py`, check the generated plugin copy:
+
+```sh
+python3 scripts/bundle.py plugin --check
+```
+
+Regenerate it with the same `plugin` action without `--check`. Generation copies tracked and untracked-unignored files only, so ignored local material such as `config/local.json` never enters the plugin. To try local changes without installing, start Claude Code with `claude --plugin-dir plugins/agent-orch`.
 
 ## Editable controls
 
@@ -36,7 +59,7 @@ Keep your edits in an ignored `config/local.json` and pass `--overlay config/loc
 
 Both variants have seven base modes with one shared catalog. The [router entrypoint](../skills/agent-orch-router/SKILL.md) links each self-contained mode. Bundled pool order and task-fit guidance are available there without reading JSON. Pool sizes are bundled choices, not hard limits on custom configuration.
 
-Fable `FM`, `FX`, and `FMAX` remain on-call. `FH` is eligible for bounded Performance reasoning/review escalation, Amusing specification review, and Council advice. No Fable profile appears in the Opus/Haiku preset. `FH`/`FX` now select Fable 5.2, not 5.1. Ultracode is not supported. All model IDs require account/runtime verification.
+Fable `FM`, `FX`, and `FMAX` remain on-call. `FH` is eligible for bounded Performance and Bulk reasoning/review escalation, Amusing specification review, and Council advice. No Fable profile appears in the Opus/Haiku preset. `FH`/`FX` now select Fable 5.2, not 5.1. Ultracode is not supported. All model IDs require account/runtime verification.
 
 [Council](../skills/agent-orch-router/modes/council.md) is shared and opt-in for decision deliberation. Required members default to SMAX, OX, and MFX. AMAX is optional. FH advises without a vote unless explicitly appointed.
 

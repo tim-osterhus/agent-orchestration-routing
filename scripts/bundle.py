@@ -3,12 +3,25 @@
 
 import argparse
 from copy import deepcopy
+from fnmatch import fnmatchcase
+import hashlib
 import json
 from pathlib import Path
+import subprocess
 import sys
 import uuid
 
 ROOT = Path(__file__).resolve().parents[1]
+PLUGIN_DIR = ROOT / "plugins/agent-orch"
+# Tracked sources copied into the generated Claude Code plugin; runtime/, hooks/ and .claude-plugin/ are maintained by hand.
+PLUGIN_COPIES = ("skills/agent-orch-router", "docs", "scripts/bundle.py", "config", "LICENSE")
+PLUGIN_GENERATED = PLUGIN_COPIES + ("agents",)
+PLUGIN_PROVIDERS = {"codex", "claude"}
+# Added only to the plugin's router copy; the canonical router stays host-neutral.
+PLUGIN_POINTER = ("In Claude Code with the agent-orch plugin, use design `claude-plugin` and read "
+                  "[Claude plugin dispatch](references/claude-plugin.md) before the first dispatch.\n\n")
+REVIEW_ROLES = {"research", "planning", "qa", "spec-review"}
+RELAY = {"model": "haiku", "effort": "low"}
 EFFORTS = {"minimal", "low", "medium", "high", "xhigh", "max", "ultra"}
 PERMISSION_MODES = {"default", "manual", "dontAsk", "auto", "acceptEdits", "plan", "bypassPermissions"}
 RETIRED_PROFILES = {"LF": "L", "SF": "SM", "SMF": "SM", "SHF": "SH", "SXF": "SX",
@@ -103,6 +116,9 @@ def validate(config):
         require(design["controller"] in {"codex", "claude"}, f"Invalid controller in {name}")
         require(design["native_workers"] == design["controller"], f"Native provider mismatch in {name}")
         require(design["external_workers"] in {"codex", "claude"} - {design["controller"]}, f"Invalid external provider in {name}")
+        plugin = design.get("plugin_agents")
+        require(plugin is None or design["controller"] == "claude" and isinstance(plugin, str) and plugin.replace("-", "").isalnum(),
+                f"Plugin agents require a Claude controller and a simple plugin name in {name}")
     for code in config["profiles"]:
         item = profile(config, code)
         require(item["provider"] in {"codex", "claude", "muse", "gemini", "kimi", "deepseek", "glm"}, f"Unknown provider in {code}")
@@ -263,14 +279,21 @@ def resolve(config, *, mode=None, code=None, slot=None, role="implementation", d
         specialists = [entry for entry in candidates if entry.get("specialist")]
         selected = specialists or candidates
     require(selected, "No eligible profile with a verified adapter; do not substitute silently")
+    plugin = config["designs"][design].get("plugin_agents")
     choices = []
     for entry in selected:
         candidate = entry["profile"]
         item = profile(config, candidate)
-        native = item["provider"] == config["designs"][design]["controller"]
+        # A plugin design dispatches every Codex and Claude profile through its pinned host agent.
+        plugin_route = bool(plugin) and item["provider"] in PLUGIN_PROVIDERS and item.get("executable", True)
+        native = plugin_route or item["provider"] == config["designs"][design]["controller"]
         choice = {"code": candidate, **item, "dispatch": ("native-" if native else "external-") + item["provider"]}
         if "slot" in entry:
             choice["slot"] = entry["slot"]
+        if plugin_route:
+            if item["provider"] == "codex":
+                codex_write_roles(config)
+            choice["agent"] = plugin + ":" + agent_name(candidate, item)
         for flag in ("specialist", "independent_review", "escalation"):
             if entry.get(flag):
                 choice[flag] = True
@@ -410,9 +433,219 @@ def launch_plan(resolved, cwd, prompt_file, artifacts, resume=None):
     return plan
 
 
+def agent_name(code, item):
+    return item["provider"] + "-" + code.lower()
+
+
+def codex_write_roles(config):
+    """Roles whose Codex sandbox is workspace-write; plugin agents support only unattended read-only/workspace-write threads."""
+    codex = config["codex"]
+    require(not codex["bypass_approvals_and_sandbox"] and codex["approval_policy"] == "never",
+            "Codex plugin agents run unattended app-server threads: approval_policy must be never and bypass disabled")
+    sandboxes = {role: codex["sandbox_by_role"].get(role, codex["sandbox_by_role"]["default"]) for role in config["roles"]}
+    require(set(sandboxes.values()) <= {"read-only", "workspace-write"},
+            "Codex plugin agents support only read-only and workspace-write sandboxes")
+    return [role for role in config["roles"] if sandboxes[role] == "workspace-write"]
+
+
+def frontmatter(fields):
+    return "---\n" + "".join(f"{key}: {value}\n" for key, value in fields.items()) + "---\n"
+
+
+def codex_agent(config, code, item):
+    write_roles = codex_write_roles(config)
+    read_roles = [role for role in config["roles"] if role not in write_roles]
+    summary = f"profile {code} (Codex {item['model']}, {item['effort']})"
+    return frontmatter({
+        "name": agent_name(code, item),
+        "description": f"Router-only relay for {summary}. Dispatch only when agent-orch-router selects {code}.",
+        "model": RELAY["model"], "effort": RELAY["effort"], "tools": "Bash"}) + f"""
+You relay one agent-orch-router work order to {summary}. You are a forwarder, not a worker.
+
+1. Find the work order's `Role:` line. Roles {", ".join(read_roles)} run read-only. Roles {", ".join(write_roles)} add `--write`. If the role is missing or not listed, return `RELAY ERROR: missing or unknown Role` and run nothing.
+2. If the work order has a `Resume thread:` line with an id, add `--resume-thread <id>`.
+3. Run exactly one Bash command, with the complete work order unchanged as its standard input:
+
+```bash
+node "${{CLAUDE_PLUGIN_ROOT}}/runtime/codex/scripts/codex-companion.mjs" task --json --model {item['model']} --effort {item['effort']} [--write] [--resume-thread <id>] <<'AGENT_ORCH_WORK_ORDER'
+<complete work order>
+AGENT_ORCH_WORK_ORDER
+```
+
+If any line of the work order is exactly `AGENT_ORCH_WORK_ORDER`, use `AGENT_ORCH_WORK_ORDER_END` as the delimiter instead.
+
+4. Return the command's stdout exactly. If the command fails, return its stderr and exit status exactly.
+
+Do not read or edit files, inspect the repository, retry, poll, change the model, effort, or sandbox, or add commentary.
+"""
+
+
+def claude_agent(config, code, item):
+    fields = {"name": agent_name(code, item),
+              "description": f"Router-only worker for profile {code} ({item['model']}, {item['effort']}). Dispatch only when agent-orch-router selects {code}.",
+              "model": item["model"], "effort": item["effort"]}
+    target = item.get("context_target_tokens")
+    if target:
+        require(100000 <= target <= 1000000, f"Context target for {code} is outside the supported auto-compact window")
+        fields["autoCompactWindow"] = target  # A compaction threshold, still a soft context target.
+    return frontmatter(fields) + f"""
+You are an agent-orch-router worker for profile {code}: `{item['model']}` at effort `{item['effort']}`. Complete only the attached work order.
+
+- Change only files matching its `Write:` list. Treat `Forbidden:` paths and changes that existed before you started as read-only.
+- If the work needs a change outside your `Write:` list, stop and return a handoff request naming the file, the change, and the reason. Do not make the change.
+- Roles {", ".join(role for role in config["roles"] if role in REVIEW_ROLES)} do not edit files unless the work order explicitly authorizes edits.
+- Run the listed acceptance checks. Return changed files, checks with results, findings, handoff requests, and anything unverified.
+- Do not start other workers unless the work order assigns you a team role.
+"""
+
+
+def git_lines(cwd, *args):
+    result = subprocess.run(["git", "-C", str(cwd), *args], capture_output=True)
+    require(result.returncode == 0, f"git {args[0]} failed in {cwd}: {result.stderr.decode(errors='replace').strip()}")
+    return [entry.decode() for entry in result.stdout.split(b"\0") if entry]
+
+
+def source_files(prefix):
+    """Tracked and untracked-but-not-ignored files, so ignored local material never enters the plugin."""
+    return git_lines(ROOT, "ls-files", "-z", "--cached", "--others", "--exclude-standard", "--", prefix)
+
+
+def plugin_files(config):
+    require((ROOT / ".claude-plugin/marketplace.json").is_file(), "Run plugin generation from the repository checkout")
+    files = {}
+    for prefix in PLUGIN_COPIES:
+        for rel in source_files(prefix):
+            if not (ROOT / rel).is_file():
+                continue
+            data = (ROOT / rel).read_bytes()
+            if rel == "skills/agent-orch-router/SKILL.md":
+                head, separator, body = data.decode().partition("\n---\n")
+                require(separator and head.startswith("---\n") and "disable-model-invocation" not in head, "Unexpected router frontmatter")
+                require(body.count("\nOptional: ") == 1, "Router copy needs one Optional paragraph for the plugin pointer")
+                # Host-specific installed copy: Claude Code may not invoke the router implicitly.
+                body = body.replace("\nOptional: ", "\n" + PLUGIN_POINTER + "Optional: ")
+                data = (head + "\ndisable-model-invocation: true" + separator + body).encode()
+            files[rel] = data
+    for code in config["profiles"]:
+        item = profile(config, code)
+        if not item.get("executable", True):
+            continue  # Documentary catalog records have no verified model or effort to pin.
+        if item["provider"] == "codex":
+            files[f"agents/{agent_name(code, item)}.md"] = codex_agent(config, code, item).encode()
+        elif item["provider"] == "claude":
+            files[f"agents/{agent_name(code, item)}.md"] = claude_agent(config, code, item).encode()
+    return files
+
+
+def sync_plugin(config, check):
+    expected = plugin_files(config)
+    actual = {}
+    for top in PLUGIN_GENERATED:
+        path = PLUGIN_DIR / top
+        candidates = [path] if path.is_file() else path.rglob("*") if path.is_dir() else []
+        for item in candidates:
+            if item.is_file() and not {"__pycache__", ".DS_Store"} & set(item.parts):
+                actual[item.relative_to(PLUGIN_DIR).as_posix()] = item.read_bytes()
+    stale = sorted(rel for rel in expected if actual.get(rel, expected[rel]) != expected[rel])
+    missing = sorted(rel for rel in expected if rel not in actual)
+    extra = sorted(rel for rel in actual if rel not in expected)
+    if check:
+        require(not (stale or missing or extra),
+                f"Plugin copy is out of date (stale {stale}, missing {missing}, extra {extra}). Regenerate it with the plugin action.")
+    else:
+        for rel in stale + missing:
+            (PLUGIN_DIR / rel).parent.mkdir(parents=True, exist_ok=True)
+            (PLUGIN_DIR / rel).write_bytes(expected[rel])
+        for rel in extra:
+            (PLUGIN_DIR / rel).unlink()
+    return {"plugin": PLUGIN_DIR.relative_to(ROOT).as_posix(), "in_sync": check or not (stale or missing or extra),
+            "files": len(expected), "agents": sum(rel.startswith("agents/") for rel in expected),
+            **({} if check else {"written": stale + missing, "removed": extra})}
+
+
+def worktree_hashes(cwd, protect=()):
+    """Hash tracked and untracked-unignored files, plus explicitly protected paths even when ignored."""
+    paths = set(git_lines(cwd, "ls-files", "-z", "--cached", "--others", "--exclude-standard"))
+    for spec in protect:
+        target = cwd / spec
+        if target.is_dir():
+            paths.update(item.relative_to(cwd).as_posix() for item in target.rglob("*") if item.is_file() and ".git" not in item.parts)
+        elif target.is_file():
+            paths.add(target.relative_to(cwd).as_posix())
+    return {rel: hashlib.sha256((cwd / rel).read_bytes()).hexdigest() for rel in sorted(paths) if (cwd / rel).is_file()}
+
+
+def dirty_paths(cwd):
+    entries, dirty = git_lines(cwd, "status", "--porcelain=v1", "-z", "--untracked-files=all"), []
+    while entries:
+        entry = entries.pop(0)
+        dirty.append(entry[3:])
+        if entry[0] in "RC":
+            dirty.append(entries.pop(0))  # Rename/copy source path follows the destination.
+    return sorted(set(dirty))
+
+
+def snapshot(cwd, out, protect=()):
+    cwd, out = Path(cwd).expanduser().resolve(), Path(out).expanduser().resolve()
+    require(cwd.is_dir(), "cwd must be an existing directory")
+    require(not out.is_relative_to(cwd), "Write snapshots outside the project so they are not reported as changes")
+    protect = sorted({spec.rstrip("/") + ("/" if (cwd / spec).is_dir() else "") for spec in protect})
+    head = subprocess.run(["git", "-C", str(cwd), "rev-parse", "HEAD"], capture_output=True, text=True)
+    record = {"schema": 1, "cwd": str(cwd), "head": head.stdout.strip() or None, "protected": protect,
+              "dirty": dirty_paths(cwd), "files": worktree_hashes(cwd, protect)}
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(record, indent=1) + "\n")
+    return {"snapshot": str(out), "files": len(record["files"]), "dirty": record["dirty"], "protected": protect}
+
+
+def owns(pattern, path):
+    """A trailing slash owns a directory tree; otherwise fnmatch, where `*` also crosses `/`."""
+    pattern = pattern[2:] if pattern.startswith("./") else pattern
+    return path.startswith(pattern) if pattern.endswith("/") else fnmatchcase(path, pattern)
+
+
+def check_ownership(snapshot_file, owners_file):
+    """Pre-dispatch: overlapping or dirty-file ownership. Post-dispatch: changes outside every owner's Write list."""
+    base = json.loads(Path(snapshot_file).read_text())
+    require(base.get("schema") == 1, "Unsupported snapshot")
+    owners = json.loads(Path(owners_file).read_text())
+    require(isinstance(owners, dict) and owners and all(isinstance(pats, list) and pats and all(isinstance(p, str) and p for p in pats)
+                                                         for pats in owners.values()),
+            "Owners must map each worker to a non-empty list of path patterns")
+    cwd = Path(base["cwd"])
+    current = worktree_hashes(cwd, base["protected"])
+    universe = sorted(set(base["files"]) | set(current))
+
+    def owners_of(path):
+        return sorted(worker for worker, patterns in owners.items() if any(owns(p, path) for p in patterns))
+
+    names = sorted(owners)
+    overlaps = []
+    for index, first in enumerate(names):
+        for second in names[index + 1:]:
+            shared = [path for path in universe if {first, second} <= set(owners_of(path))]
+            literal = [p for p in owners[first] for q in owners[second]
+                       if p == q or owns(p, q.rstrip("/")) or owns(q, p.rstrip("/"))]
+            if shared or literal:
+                overlaps.append({"workers": [first, second], "files": shared, "patterns": sorted(set(literal))})
+    changes = {"added": sorted(set(current) - set(base["files"])), "deleted": sorted(set(base["files"]) - set(current)),
+               "modified": sorted(path for path in set(current) & set(base["files"]) if current[path] != base["files"][path])}
+    changed = sorted(path for paths in changes.values() for path in paths)
+    result = {
+        "ok": True, "overlaps": overlaps,
+        "owned_dirty": [{"file": path, "workers": owners_of(path)} for path in base["dirty"] if owners_of(path)],
+        "changes": {path: owners_of(path) for path in changed},
+        "unowned_changes": [path for path in changed if not owners_of(path)],
+        "multiply_owned_changes": [path for path in changed if len(owners_of(path)) > 1],
+        "protected_changes": [path for path in changed if any(owns(spec, path) for spec in base["protected"])],
+        "notice": "Ignored files outside protected paths are not tracked. Cross-check each worker's reported touched files."}
+    result["ok"] = not any(result[key] for key in ("overlaps", "owned_dirty", "unowned_changes", "multiply_owned_changes", "protected_changes"))
+    return result
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=["validate", "resolve", "claude-plan", "codex-plan"])
+    parser.add_argument("action", choices=["validate", "resolve", "claude-plan", "codex-plan", "plugin", "snapshot", "check-ownership"])
     parser.add_argument("--config", type=Path)
     parser.add_argument("--preset", action="append", default=[])
     parser.add_argument("--overlay", type=Path, action="append", default=[])
@@ -436,11 +669,25 @@ def main(argv=None):
     parser.add_argument("--prompt-file")
     parser.add_argument("--artifacts")
     parser.add_argument("--resume")
+    parser.add_argument("--check", action="store_true", help="plugin: verify the generated plugin copy without writing")
+    parser.add_argument("--out", help="snapshot: JSON file outside the project")
+    parser.add_argument("--protect", action="append", default=[], help="snapshot: path to watch even if ignored")
+    parser.add_argument("--snapshot", help="check-ownership: snapshot JSON")
+    parser.add_argument("--owners", help="check-ownership: JSON mapping each worker to its Write patterns")
     args = parser.parse_args(argv)
     try:
         config = load_config(args.config, args.preset, args.overlay)
         require(not args.direct or args.action == "claude-plan", "--direct applies only to claude-plan")
-        if args.action == "validate":
+        if args.action == "plugin":
+            require(not (args.config or args.preset or args.overlay), "The plugin copy is generated from the bundled configuration only")
+            output = sync_plugin(config, args.check)
+        elif args.action == "snapshot":
+            require(args.cwd and args.out, "snapshot requires --cwd and --out")
+            output = snapshot(args.cwd, args.out, args.protect)
+        elif args.action == "check-ownership":
+            require(args.snapshot and args.owners, "check-ownership requires --snapshot and --owners")
+            output = check_ownership(args.snapshot, args.owners)
+        elif args.action == "validate":
             output = {"valid": True, "profiles": len(config["profiles"]), "variant": args.variant or config.get("default_variant"),
                       "modes": list(mode_pools(config, args.variant))}
         else:
@@ -464,7 +711,7 @@ def main(argv=None):
                 require(len(output["choices"]) == 1 and output["choices"][0]["provider"] == args.action.split("-")[0], "Profile provider does not match the requested adapter")
                 output = launch_plan(output, args.cwd, args.prompt_file, args.artifacts, args.resume)
         print(json.dumps(output, indent=2))
-        return 0
+        return 1 if output.get("ok") is False else 0
     except (KeyError, TypeError, ValueError, OSError) as error:
         parser.error(str(error))
 

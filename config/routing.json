@@ -9,7 +9,8 @@
   "roles": ["research", "planning", "implementation", "frontend", "integration", "qa", "spec-review", "browser"],
   "designs": {
     "codex-first": {"controller": "codex", "native_workers": "codex", "external_workers": "claude"},
-    "claude-first": {"controller": "claude", "native_workers": "claude", "external_workers": "codex"}
+    "claude-first": {"controller": "claude", "native_workers": "claude", "external_workers": "codex"},
+    "claude-plugin": {"controller": "claude", "native_workers": "claude", "external_workers": "codex", "plugin_agents": "agent-orch"}
   },
   "selection": {
     "method": "dated-raw-pareto-frontier-with-specialist-exceptions",
@@ -102,6 +103,19 @@
           {"slot": "browser", "roles": ["browser"], "specialist": true, "fit": "Start here for difficult browser or computer-use assignments. Confirm actual tools and session access."},
           {"slot": "opus-deep", "roles": ["qa", "spec-review"], "independent_review": true, "fit": "Use for optional independent QA or specification review of complex work, not authored fixes."},
           {"slot": "opus-max", "escalation": true, "fit": "Use as a justified escalation for demanding analysis or implementation when earlier eligible choices do not fit."},
+          {"slot": "fable-review", "roles": ["research", "planning", "qa", "spec-review"], "independent_review": true, "escalation": true, "one_off_only": true, "fit": "Selectively escalate difficult reasoning, specification analysis, or independent review. Use a bounded worker, not authored fixes or team management."}
+        ],
+        "bulk": [
+          {"slot": "routine", "fit": "Use for routine, clearly specified edits whose output is easy to check."},
+          {"slot": "visual", "fit": "Use for everyday bounded implementation, source-grounded writing, visual interpretation, or screen-based workflows."},
+          {"slot": "visual-deep", "fit": "Use for harder diagnosis, multi-step visual reasoning, or computer-use work needing more deliberation than TM."},
+          {"slot": "standard", "fit": "Use for general implementation, related-file changes, or independent verification with moderate ambiguity."},
+          {"slot": "deep", "fit": "Use for debugging, unclear behavior, or integration where controller repair would otherwise be substantial."},
+          {"slot": "hard", "fit": "Use for difficult implementation or debugging with interacting constraints and explicit acceptance checks."},
+          {"slot": "max-code", "fit": "Use for demanding implementation or independent code verification when the task warrants sustained reasoning."},
+          {"slot": "browser", "roles": ["browser"], "specialist": true, "fit": "Start here for browser interaction or visual inspection. Confirm the worker has the required browser tools and session."},
+          {"slot": "opus-max", "escalation": true, "fit": "Escalate hard or quality-sensitive implementation or analysis after an unconvincing Codex attempt or when errors would be costly."},
+          {"slot": "opus", "roles": ["qa", "spec-review"], "independent_review": true, "fit": "Use for independent QA or specification review of a Codex-authored candidate, not implementation."},
           {"slot": "fable-review", "roles": ["research", "planning", "qa", "spec-review"], "independent_review": true, "escalation": true, "one_off_only": true, "fit": "Selectively escalate difficult reasoning, specification analysis, or independent review. Use a bounded worker, not authored fixes or team management."}
         ]
       }
@@ -305,6 +319,19 @@
         "browser": "AH",
         "opus-deep": "OX",
         "opus-max": "OMAX",
+        "fable-review": "FH"
+      },
+      "bulk": {
+        "routine": "SL",
+        "visual": "TM",
+        "visual-deep": "TH",
+        "standard": "SM",
+        "deep": "SH",
+        "hard": "SX",
+        "max-code": "SMAX",
+        "browser": "AL",
+        "opus-max": "OX",
+        "opus": "OH",
         "fable-review": "FH"
       }
     },

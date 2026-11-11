@@ -1,0 +1,10 @@
+{
+  "name": "agent-orch",
+  "version": "0.1.0",
+  "description": "Explicit-only Agent Orchestration Router for Claude Code, with pinned Codex app-server and Claude profile agents.",
+  "author": {
+    "name": "Tim Osterhus"
+  },
+  "repository": "https://github.com/tim-osterhus/agent-orchestration-routing",
+  "license": "MIT AND Apache-2.0"
+}

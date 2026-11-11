@@ -226,14 +226,16 @@ class VariantTests(unittest.TestCase):
             "codex-primary": {
                 "efficient": ["LM", "TL", "EX", "TM", "TH", "SM"],
                 "balanced": ["SL", "TM", "TH", "SM", "SH", "SX", "SMAX", "AL", "OH"],
-                "performance": ["SH", "SX", "SMAX", "AMAX", "AH", "OX", "OMAX", "FH"]},
+                "performance": ["SH", "SX", "SMAX", "AMAX", "AH", "OX", "OMAX", "FH"],
+                "bulk": ["SL", "TM", "TH", "SM", "SH", "SX", "SMAX", "AL", "OX", "OH", "FH"]},
             "claude-primary": {
                 "efficient": ["HL", "TL", "EX", "TM", "TH", "SM"],
                 "balanced": ["HH", "HM", "HMAX", "SNH", "OM", "OH", "OX", "SM", "SMAX"],
                 "performance": ["OM", "OH", "OX", "OMAX", "SMAX", "AMAX", "FH"]}}
         for variant, modes in expected.items():
             actual = bundle.mode_pools(self.config, variant)
-            self.assertEqual(set(actual), {"efficient", "balanced", "performance", "amusing", "council", "codex-burn", "claude-burn"})
+            self.assertEqual(set(actual) - set(modes), {"amusing", "council", "codex-burn", "claude-burn"})
+            self.assertEqual(set(modes) - set(actual), set())
             for mode, codes in modes.items():
                 self.assertEqual([entry["profile"] for entry in actual[mode]], codes)
         for mode in bundle.BURN_PROVIDERS:
@@ -276,9 +278,12 @@ class VariantTests(unittest.TestCase):
                         result = bundle.resolve(self.config, variant=variant, mode=mode, role=role, design=design, **kwargs)
                         self.assertTrue(result["choices"])
                         self.assertEqual(result["routing_variant"], variant)
+                        plugin = self.config["designs"][design].get("plugin_agents")
                         for item in result["choices"]:
-                            expected = ("native-" if item["provider"] == result["controller"] else "external-") + item["provider"]
-                            self.assertEqual(item["dispatch"], expected)
+                            via_plugin = bool(plugin) and item["provider"] in {"codex", "claude"}
+                            native = via_plugin or item["provider"] == result["controller"]
+                            self.assertEqual(item["dispatch"], ("native-" if native else "external-") + item["provider"])
+                            self.assertEqual(item.get("agent"), f"{plugin}:{item['provider']}-{item['code'].lower()}" if via_plugin else None)
                             if mode in bundle.BURN_PROVIDERS:
                                 self.assertEqual(item["provider"], bundle.BURN_PROVIDERS[mode])
 
@@ -375,7 +380,7 @@ class VariantTests(unittest.TestCase):
         for variant in config["variants"]:
             for mode, pool in bundle.mode_pools(config, variant).items():
                 self.assertEqual({"FM", "FH", "FX", "FMAX"} & {entry["profile"] for entry in pool},
-                                 {"FH"} if mode in {"amusing", "council", "performance"} else set())
+                                 {"FH"} if mode in {"amusing", "council", "performance", "bulk"} else set())
             for code in ("FM", "FH", "FX", "FMAX"):
                 with self.assertRaisesRegex(ValueError, "outside"):
                     bundle.resolve(config, variant=variant, code=code)

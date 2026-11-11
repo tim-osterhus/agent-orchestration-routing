@@ -6,6 +6,8 @@ Select exact model/effort profiles using the [Artificial Analysis capability–c
 
 Start with [Agent Orchestration Router](skills/agent-orch-router/SKILL.md) and one selected mode. Native routing needs no script or configuration read. Keep the router folder intact. Use the full checkout for optional [installation/configuration](docs/configuration.md), [controller adapters](docs/controller-designs.md), or Claude companion tooling.
 
+In Claude Code, the [agent-orch plugin](docs/configuration.md#claude-code-plugin) runs the router with pinned Codex app-server and Claude profile agents: `/plugin install agent-orch --marketplace tim-osterhus/agent-orchestration-routing`.
+
 Opt-in [Amusing](skills/agent-orch-router/modes/amusing.md) adds maintainability review and selective Muse investigation through a separately verified provider adapter.
 
 ```sh
