@@ -10,7 +10,7 @@ Codex agents are Haiku relays. Each starts or resumes one Codex app-server threa
 
 ## Work order
 
-Give each worker one self-contained work order in this shape. Send Claude agents the work order itself. For a Codex agent, write the work order to a file in a private run directory outside the project, then send the relay only `Role:`, `Work order file: <absolute path>`, and any `Resume thread:` line. The relay passes the file to Codex unchanged, so the work order never appears in a shell command.
+Give each worker one self-contained work order in this shape. Send Claude agents the work order itself. For a Codex agent, write the work order to a new file in a private run directory outside the project, one file per dispatch including resumes, then send the relay only `Role:`, `Work order file: <absolute path>`, and any `Resume thread:` line. The relay passes the file to Codex unchanged, so the work order never appears in a shell command.
 
 ```text
 Role: implementation
@@ -46,6 +46,6 @@ python3 <plugin-root>/scripts/bundle.py check-ownership --snapshot <private-run-
 ## Results and coordination
 
 - Codex JSON includes `route`. Treat any `route.mismatches` entry, including a reroute, as an inexact route and report it. `exact: true` means the thread reported the requested model and effort; it does not prove output quality.
-- Parse the JSON object in the relay's reply and ignore any text around it. If the object is missing, cut short, or reworded, run `node <plugin-root>/runtime/codex/scripts/codex-companion.mjs result <job-id> --json` and use `storedJob.result`. Job records are cleared when the Claude session ends.
+- When a Codex relay finishes, read `<work order file>.result.json`. The companion writes its JSON there, so use that file, not the relay's reply, for status, `threadId`, `route`, and `touchedFiles`. If the file is missing, the run failed before producing a result; the relay's reply should carry the exit status and stderr.
 - Workers never message each other. The controller decides each handoff request, then sends it to the owning worker as a new work order with that worker's exact `Resume thread:` id, or reassigns ownership. Never resume a thread chosen by recency or title.
 - To cancel, run `node <plugin-root>/runtime/codex/scripts/codex-companion.mjs status --json`, then `cancel <job-id>` for jobs this assignment started. The controller enforces any user deadline this way; relays have no timer.

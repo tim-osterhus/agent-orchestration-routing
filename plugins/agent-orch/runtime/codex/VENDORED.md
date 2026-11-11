@@ -12,7 +12,7 @@ Each modified file starts with a notice line. All changes are on top of the unmo
 
 | File | Change |
 | --- | --- |
-| `scripts/codex-companion.mjs` | Accept `max` effort. Add `--resume-thread <id>` for exact-thread resume; it cannot be combined with `--resume`, `--resume-last`, or `--fresh`. Task JSON adds `jobId` and `route`. |
+| `scripts/codex-companion.mjs` | Accept `max` effort. Add `--resume-thread <id>` for exact-thread resume; it cannot be combined with `--resume`, `--resume-last`, or `--fresh`. Task JSON adds `jobId` and `route`. A foreground task with `--prompt-file <file>` removes any stale `<file>.result.json` before it runs and writes the task JSON there when the run returns, so a controller does not depend on the relay repeating stdout. |
 | `scripts/lib/codex.mjs` | Pass the requested effort as `model_reasoning_effort` thread configuration on start and resume. Report requested versus observed model, effort, service tier, approval policy, sandbox, and cwd from the thread response, plus any `model/rerouted` notifications, as `route`. Service name `agent_orch_router`. |
 | `scripts/lib/app-server.mjs` | Read this plugin's manifest from the plugin root. Client title `Agent Orch Router`. Broker endpoint variable renamed. |
 | `scripts/lib/state.mjs` | State root comes from `AGENT_ORCH_CODEX_DATA`, falling back to `<tmp>/agent-orch-codex`. |

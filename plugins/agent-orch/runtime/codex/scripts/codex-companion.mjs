@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Modified by Tim Osterhus for agent-orch (2026-11-10): max effort, exact --resume-thread, route and job id in task JSON. See ../VENDORED.md.
+// Modified by Tim Osterhus for agent-orch (2026-11-10): max effort, exact --resume-thread, route and job id in task JSON, prompt-file result copy. See ../VENDORED.md.
 
 import { spawn } from "node:child_process";
 import fs from "node:fs";
@@ -683,6 +683,18 @@ async function runForegroundCommand(job, runner, options = {}) {
   return execution;
 }
 
+// agent-orch: relays may paraphrase stdout, so a foreground --prompt-file task also leaves its JSON
+// beside the work order. Write atomically so a reader never sees a partial file.
+function taskResultFile(cwd, options) {
+  return options["prompt-file"] ? `${path.resolve(cwd, options["prompt-file"])}.result.json` : null;
+}
+
+function writeTaskResultFile(file, payload) {
+  const temporary = `${file}.${process.pid}.tmp`;
+  fs.writeFileSync(temporary, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+  fs.renameSync(temporary, file);
+}
+
 function spawnDetachedTaskWorker(cwd, jobId) {
   const scriptPath = path.join(ROOT_DIR, "scripts", "codex-companion.mjs");
   const child = spawn(process.execPath, [scriptPath, "task-worker", "--cwd", cwd, "--job-id", jobId], {
@@ -825,7 +837,11 @@ async function handleTask(argv) {
   }
 
   const job = buildTaskJob(workspaceRoot, taskMetadata, write);
-  await runForegroundCommand(
+  const resultFile = taskResultFile(cwd, options);
+  if (resultFile) {
+    fs.rmSync(resultFile, { force: true });
+  }
+  const execution = await runForegroundCommand(
     job,
     (progress) =>
       executeTaskRun({
@@ -841,6 +857,9 @@ async function handleTask(argv) {
       }),
     { json: options.json }
   );
+  if (resultFile) {
+    writeTaskResultFile(resultFile, execution.payload);
+  }
 }
 
 async function handleTransfer(argv) {

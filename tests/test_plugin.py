@@ -166,6 +166,27 @@ class VendoredRuntimeTests(unittest.TestCase):
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn(message, result.stderr)
 
+    @unittest.skipUnless(NODE, "node is required")
+    def test_task_result_file_never_carries_a_stale_result(self):
+        # Live Haiku relays sometimes paraphrased the JSON, so controllers read <work order>.result.json instead.
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            (base / "bin").mkdir()
+            (base / "bin/codex").write_text('#!/bin/sh\necho "fake codex failure" >&2\nexit 1\n')
+            (base / "bin/codex").chmod(0o755)
+            order = base / "order.md"
+            order.write_text("Role: research\n")
+            stale = base / "order.md.result.json"
+            stale.write_text('{"stale": true}\n')
+            env = {**bundle.git_env(), "PATH": f"{base / 'bin'}:/usr/bin:/bin", "AGENT_ORCH_CODEX_DATA": str(base / "state")}
+            result = subprocess.run([NODE, str(RUNTIME / "scripts/codex-companion.mjs"), "task", "--json", "--prompt-file", str(order)],
+                                    cwd=directory, input="", capture_output=True, text=True, timeout=30, env=env)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertFalse(stale.exists(), "A run that produced no result must not leave an older result behind")
+        source = (RUNTIME / "scripts/codex-companion.mjs").read_text()
+        self.assertIn('`${path.resolve(cwd, options["prompt-file"])}.result.json`', source)
+        self.assertIn("fs.renameSync(temporary, file)", source)
+
 
 class OwnershipTests(unittest.TestCase):
     def setUp(self):
