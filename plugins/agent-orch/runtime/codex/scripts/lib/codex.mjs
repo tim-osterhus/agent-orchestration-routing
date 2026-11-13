@@ -1,4 +1,4 @@
-// Modified by Tim Osterhus for agent-orch (2026-11-11): route capture and request-local broker retries without resumed-operation replay. See ../../VENDORED.md.
+// Modified by Tim Osterhus for agent-orch (2026-11-13): route capture, request-local broker retries without resumed-operation replay, and thread token totals. See ../../VENDORED.md.
 /**
  * @typedef {import("./app-server-protocol").AppServerNotification} AppServerNotification
  * @typedef {import("./app-server-protocol").ReviewTarget} ReviewTarget
@@ -365,8 +365,25 @@ function createTurnCaptureState(threadId, options = {}) {
     fileChanges: [],
     commandExecutions: [],
     reroutes: [],
+    tokenUsage: new Map(),
     onProgress: options.onProgress ?? null
   };
+}
+
+// agent-orch: cumulative totals from thread/tokenUsage/updated, summed over the task thread and its subagent threads.
+const TOKEN_USAGE_FIELDS = ["inputTokens", "cachedInputTokens", "outputTokens", "reasoningOutputTokens", "totalTokens"];
+
+function sumTokenUsage(byThread) {
+  if (byThread.size === 0) {
+    return null;
+  }
+  const total = Object.fromEntries(TOKEN_USAGE_FIELDS.map((field) => [field, 0]));
+  for (const usage of byThread.values()) {
+    for (const field of TOKEN_USAGE_FIELDS) {
+      total[field] += Number(usage?.[field]) || 0;
+    }
+  }
+  return total;
 }
 
 function clearCompletionTimer(state) {
@@ -574,6 +591,12 @@ function applyTurnNotification(state, message) {
         reason: message.params.reason ?? null,
         turnId: message.params.turnId ?? null
       });
+      break;
+    case "thread/tokenUsage/updated":
+      if (message.params.tokenUsage?.total) {
+        state.tokenUsage.set(message.params.threadId, message.params.tokenUsage.total);
+        state.onProgress?.({ message: "", tokenUsage: sumTokenUsage(state.tokenUsage) });
+      }
       break;
     case "error":
       state.error = message.params.error;
@@ -1281,7 +1304,8 @@ export async function runAppServerTurn(cwd, options = {}) {
       fileChanges: turnState.fileChanges,
       touchedFiles: collectTouchedFiles(turnState.fileChanges),
       commandExecutions: turnState.commandExecutions,
-      route: buildRoute(options, threadResponse, turnState.reroutes)
+      route: buildRoute(options, threadResponse, turnState.reroutes),
+      tokenUsage: sumTokenUsage(turnState.tokenUsage)
     };
   }, { allowFreshThreadFallback: !options.resumeThreadId, signal: options.signal, onProgress: options.onProgress });
 }

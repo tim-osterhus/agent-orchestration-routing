@@ -6,7 +6,7 @@ For design `claude-plugin` only: a Claude Code controller with the agent-orch pl
 
 Every Codex and Claude catalog profile has a pinned agent named `agent-orch:<provider>-<code>` in lowercase, for example `agent-orch:codex-sm` or `agent-orch:claude-fh`. Dispatch with the Agent tool's `subagent_type` set to that name. Do not pass model or effort overrides; the agent definition fixes them. Muse has no agent and still needs its separately verified adapter.
 
-Codex agents are Haiku relays. Each starts or resumes one Codex app-server thread on the user's Codex login, then returns the companion's JSON. Under this design, never use `codex exec` or `bundle.py codex-plan`. Codex threads are native workers, not external sessions. The parallel worker limit still applies.
+Codex agents are Haiku relays. Each starts or resumes one Codex app-server thread on the user's Codex login, then returns the companion's JSON. A detached companion worker runs the turn. The relay checks on it in calls of about 100 seconds, under Claude Code's 2-minute Bash timeout, so it stays active until Codex finishes. Under this design, never use `codex exec` or `bundle.py codex-plan`. Codex threads are native workers, not external sessions. The parallel worker limit still applies.
 
 ## Work order
 
@@ -46,7 +46,8 @@ python3 <plugin-root>/scripts/bundle.py check-ownership --snapshot <private-run-
 ## Results and coordination
 
 - Codex JSON includes `route`. Treat any `route.mismatches` entry, including a reroute, as an inexact route and report it. `exact: true` means the thread reported the requested model and effort; it does not prove output quality.
-- When a Codex relay finishes, read `<work order file>.result.json`. The companion writes its JSON there, so use that file, not the relay's reply, for status, `threadId`, `route`, and `touchedFiles`. If the file is missing, the run failed before producing a result; the relay's reply should carry the exit status and stderr.
+- When a Codex relay finishes, read `<work order file>.result.json`. The companion's worker writes its JSON there when the run ends, including failures, so use that file, not the relay's reply, for status, `threadId`, `route`, `touchedFiles`, and `tokenUsage`. `tokenUsage` sums the Codex thread and its subagent threads; a resumed thread's totals include earlier turns. If the file is missing, the run failed before it started; the relay's reply should carry the exit status and stderr.
+- A relay that stops early does not stop Codex. `<work order file>.job.json` names the job. To wait for it again without starting new work, run `node <plugin-root>/runtime/codex/scripts/codex-companion.mjs task --json --attach --prompt-file <work order file>` until its status is no longer `running`. A result whose error says the worker exited without recording a result needs the reconciliation steps below before any retry.
 - Workers never message each other. The controller decides each handoff request, then sends it to the owning worker as a new work order with that worker's exact `Resume thread:` id, or reassigns ownership. Never resume a thread chosen by recency or title.
 - To cancel, run `node <plugin-root>/runtime/codex/scripts/codex-companion.mjs status --json`, then `cancel <job-id>` for jobs this assignment started. The controller enforces any user deadline this way; relays have no timer.
 

@@ -12,8 +12,8 @@ Each modified file starts with a notice line. All changes are on top of the unmo
 
 | File | Change |
 | --- | --- |
-| `scripts/codex-companion.mjs` | Accept `max` effort. Add `--resume-thread <id>` for exact-thread resume; it cannot be combined with `--resume`, `--resume-last`, or `--fresh`. Task JSON adds `jobId` and `route`. A foreground task with `--prompt-file <file>` removes any stale `<file>.result.json` before it runs and writes the task JSON there when the run returns, so a controller does not depend on the relay repeating stdout. |
-| `scripts/lib/codex.mjs` | Pass the requested effort as `model_reasoning_effort` thread configuration on start and resume. Report requested versus observed model, effort, service tier, approval policy, sandbox, and cwd from the thread response, plus any `model/rerouted` notifications, as `route`. Service name `agent_orch_router`. |
+| `scripts/codex-companion.mjs` | Accept `max` effort. Add `--resume-thread <id>` for exact-thread resume; it cannot be combined with `--resume`, `--resume-last`, or `--fresh`. Task JSON adds `jobId` and `route`. A foreground task with `--prompt-file <file>` removes any stale `<file>.result.json` before it runs and writes the task JSON there when the run returns, so a controller does not depend on the relay repeating stdout. `task --detach` and `task --attach` add bounded relay waits; see below. Task JSON adds `tokenUsage`. |
+| `scripts/lib/codex.mjs` | Pass the requested effort as `model_reasoning_effort` thread configuration on start and resume. Report requested versus observed model, effort, service tier, approval policy, sandbox, and cwd from the thread response, plus any `model/rerouted` notifications, as `route`. Record `thread/tokenUsage/updated` totals for the task thread and its subagent threads as `tokenUsage`. Service name `agent_orch_router`. |
 | `scripts/lib/app-server.mjs` | Read this plugin's manifest from the plugin root. Client title `Agent Orch Router`. Broker endpoint variable renamed. |
 | `scripts/lib/state.mjs` | State root comes from `AGENT_ORCH_CODEX_DATA`, falling back to `<tmp>/agent-orch-codex`. |
 | `scripts/session-lifecycle-hook.mjs` | Exports this plugin's `CLAUDE_PLUGIN_DATA` as `AGENT_ORCH_CODEX_DATA` instead of re-exporting `CLAUDE_PLUGIN_DATA`, so the official plugin cannot redirect state. |
@@ -21,15 +21,17 @@ Each modified file starts with a notice line. All changes are on top of the unmo
 
 Relay repair (2026-11-11): `lib/codex.mjs` retries only exact pre-forward broker-busy rejections on the same client. It never replays resumed or acknowledged work on a different server. Direct fallback is limited to explicitly rejected fresh creation. Connection loss during an accepted turn rejects with recovery identity rather than waiting for missing notifications. Cleanup errors cannot trigger replay or mask the primary failure.
 
+Bounded relay waits (2026-11-13): Claude Code moves a Bash call that outlives its timeout (120 seconds by default) to the background, so a relay holding one foreground `task` call for a long Codex turn looked finished after two minutes. `task --detach --prompt-file <file>` starts the existing detached `task-worker`, waits at most 100 seconds (less when `BASH_DEFAULT_TIMEOUT_MS` is lower; `--wait-ms` overrides it), and prints the task JSON or `{"status": "running", ...}` with the job ID, phase, elapsed time, token totals, and recent progress. `<file>.job.json` records the job and a fingerprint of the work order and task options. Rerunning the identical command, or adding `--attach`, waits on that job again and never starts a second run; `--attach` never starts one at all. A changed work order in a reused file starts a new job. The worker writes `<file>.result.json`, including failures, before it marks the job finished. A waiter that finds the worker gone with the job unfinished records a failure that keeps the thread and turn IDs. `lib/tracked-jobs.mjs` writes the latest token totals to the job file at most every 5 seconds.
+
 `lib/tracked-jobs.mjs` persists structured relay context and bounded cause chains. `codex-companion.mjs` also writes relay failures beside foreground work orders and emits their JSON with a nonzero exit. Permission and routing policy are unchanged. Read-only reconciliation is documented in the plugin dispatch reference.
 
 Offline regression command from the repository root:
 
 ```sh
-node --test plugins/agent-orch/runtime/codex/tests/relay-retry.test.mjs
+node --test plugins/agent-orch/runtime/codex/tests/relay-retry.test.mjs plugins/agent-orch/runtime/codex/tests/detached-relay.test.mjs
 ```
 
-`tests/test_plugin.py` runs this suite as part of the repository checks. Tests use fake clients and an offline broker fixture, not provider requests. They cover the public read-only/workspace-write contract rather than importing private full-access policy.
+`tests/test_plugin.py` runs these suites as part of the repository checks. Tests use fake clients and an offline broker fixture, not provider requests. They cover the public read-only/workspace-write contract rather than importing private full-access policy.
 
 `route.observed.reasoningEffort` is what the thread reports after the effort configuration. Treat any entry in `route.mismatches`, including a reroute, as an inexact route.
 

@@ -76,9 +76,12 @@ class PluginPackageTests(unittest.TestCase):
             if item["provider"] == "codex":
                 self.assertEqual((meta["model"], meta["effort"], meta["tools"]), ("haiku", "low", "Bash"))
                 command = re.search(r"```bash\n(.+)\n```", text)[1]
-                self.assertEqual(command, 'node "${CLAUDE_PLUGIN_ROOT}/runtime/codex/scripts/codex-companion.mjs" task --json '
+                self.assertEqual(command, 'node "${CLAUDE_PLUGIN_ROOT}/runtime/codex/scripts/codex-companion.mjs" task --json --detach '
                                           f'--model {item["model"]} --effort {item["effort"]} [--write] [--resume-thread <id>] '
                                           '--prompt-file "<work order file>"')
+                # One call per Codex turn was moved to the background at Claude Code's 2-minute Bash timeout.
+                self.assertIn("run the identical command again, unchanged", text)
+                self.assertIn("Do not run it in the background", text)
                 self.assertIn("Roles " + ", ".join(write_roles) + " add `--write`", text)
                 self.assertNotIn("<<", text, "Work orders travel by file, never through a heredoc")
                 self.assertIn("stdout, character for character", text, "A live relay paraphrased the JSON")
@@ -152,9 +155,9 @@ class VendoredRuntimeTests(unittest.TestCase):
         self.assertEqual((RUNTIME / "scripts/lib" / manifest).resolve(), (PLUGIN / ".claude-plugin/plugin.json").resolve())
 
     @unittest.skipUnless(NODE, "node is required")
-    def test_relay_retry_and_error_persistence_regressions(self):
-        result = subprocess.run([NODE, "--test", str(RUNTIME / "tests/relay-retry.test.mjs")],
-                                cwd=ROOT, capture_output=True, text=True, timeout=30, env=bundle.git_env())
+    def test_relay_retry_error_persistence_and_bounded_wait_regressions(self):
+        result = subprocess.run([NODE, "--test", str(RUNTIME / "tests/relay-retry.test.mjs"), str(RUNTIME / "tests/detached-relay.test.mjs")],
+                                cwd=ROOT, capture_output=True, text=True, timeout=120, env=bundle.git_env())
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     @unittest.skipUnless(NODE, "node is required")

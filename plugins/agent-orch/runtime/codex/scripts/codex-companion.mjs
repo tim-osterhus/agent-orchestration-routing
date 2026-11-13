@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-// Modified by Tim Osterhus for agent-orch (2026-11-11): exact task routes and persisted success/failure results beside work orders. See ../VENDORED.md.
+// Modified by Tim Osterhus for agent-orch (2026-11-13): exact task routes, persisted success/failure results beside work orders, and bounded detached relay waits. See ../VENDORED.md.
 
 import { spawn } from "node:child_process";
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
@@ -38,6 +39,7 @@ import {
 import {
   buildSingleJobSnapshot,
   buildStatusSnapshot,
+  enrichJob,
   readStoredJob,
   resolveCancelableJob,
   resolveResultJob,
@@ -70,6 +72,9 @@ const ROOT_DIR = path.resolve(fileURLToPath(new URL("..", import.meta.url)));
 const REVIEW_SCHEMA = path.join(ROOT_DIR, "schemas", "review-output.schema.json");
 const DEFAULT_STATUS_WAIT_TIMEOUT_MS = 240000;
 const DEFAULT_STATUS_POLL_INTERVAL_MS = 2000;
+// agent-orch: each --detach/--attach call returns within this budget, below Claude Code's 120-second default Bash timeout.
+const RELAY_WAIT_MS = 100000;
+const RELAY_POLL_INTERVAL_MS = 1000;
 const VALID_REASONING_EFFORTS = new Set(["none", "minimal", "low", "medium", "high", "xhigh", "max"]);
 const MODEL_ALIASES = new Map([["spark", "gpt-5.3-codex-spark"]]);
 const STOP_REVIEW_TASK_MARKER = "Run a stop-gate review of the previous Claude turn.";
@@ -82,6 +87,7 @@ function printUsage() {
       "  node scripts/codex-companion.mjs review [--wait|--background] [--base <ref>] [--scope <auto|working-tree|branch>]",
       "  node scripts/codex-companion.mjs adversarial-review [--wait|--background] [--base <ref>] [--scope <auto|working-tree|branch>] [focus text]",
       "  node scripts/codex-companion.mjs task [--background] [--write] [--resume-last|--resume|--fresh|--resume-thread <thread-id>] [--model <model|spark>] [--effort <none|minimal|low|medium|high|xhigh|max>] [prompt]",
+      "  node scripts/codex-companion.mjs task --detach|--attach [--wait-ms <ms>] [task options] --prompt-file <file>",
       "  node scripts/codex-companion.mjs transfer [--source <claude-jsonl>] [--json]",
       "  node scripts/codex-companion.mjs status [job-id] [--all] [--json]",
       "  node scripts/codex-companion.mjs result [job-id] [--json]",
@@ -528,7 +534,8 @@ async function executeTaskRun(request) {
     route: result.route,
     rawOutput,
     touchedFiles: result.touchedFiles,
-    reasoningSummary: result.reasoningSummary
+    reasoningSummary: result.reasoningSummary,
+    tokenUsage: result.tokenUsage ?? null
   };
 
   return {
@@ -696,6 +703,171 @@ function writeTaskResultFile(file, payload) {
   fs.renameSync(temporary, file);
 }
 
+function taskFailurePayload(jobId, error) {
+  return {
+    status: 1, jobId,
+    threadId: error.relayContext?.threadId ?? null, turnId: error.relayContext?.turnId ?? null,
+    error: serializeRelayError(error)
+  };
+}
+
+// agent-orch: a relay must not hold one Bash call open for a whole Codex turn. Claude Code moves a call
+// that outlives its Bash timeout to the background, and the relay then looks finished while Codex still
+// works. With --detach, a detached task worker runs the turn and each call waits at most the relay budget,
+// then prints {"status": "running"}. The work order file identifies the job: rerunning the identical
+// command, or adding --attach, waits on that job again and never starts a second run.
+function workOrderJobFile(cwd, options) {
+  return `${path.resolve(cwd, options["prompt-file"])}.job.json`;
+}
+
+function workOrderFingerprint(request) {
+  const { cwd, model, effort, write, resumeLast, resumeThreadId, prompt } = request;
+  return crypto.createHash("sha256")
+    .update(JSON.stringify([cwd, model, effort, write, resumeLast, resumeThreadId, prompt]))
+    .digest("hex");
+}
+
+function readJsonFileOrNull(file) {
+  try {
+    return JSON.parse(fs.readFileSync(file, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+function relayWaitMs(options, env = process.env) {
+  if (options["wait-ms"] != null) {
+    const requested = Number(options["wait-ms"]);
+    if (!Number.isFinite(requested) || requested < 0) {
+      throw new Error("--wait-ms must be a non-negative number of milliseconds.");
+    }
+    return requested;
+  }
+  const bashTimeout = Number(env.BASH_DEFAULT_TIMEOUT_MS);
+  return Number.isFinite(bashTimeout) && bashTimeout > 0
+    ? Math.max(5000, Math.min(RELAY_WAIT_MS, bashTimeout - 20000))
+    : RELAY_WAIT_MS;
+}
+
+function processIsAlive(pid) {
+  if (!Number.isInteger(pid) || pid <= 0) {
+    return true;
+  }
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    return error?.code === "EPERM";
+  }
+}
+
+// undefined: the job file is being rewritten right now; null: no such job.
+function readJobSnapshot(workspaceRoot, jobId) {
+  try {
+    return readStoredJob(workspaceRoot, jobId);
+  } catch {
+    return undefined;
+  }
+}
+
+function markDetachedWorkerLost(workspaceRoot, job) {
+  const completedAt = nowIso();
+  const errorMessage = "The Codex task worker exited without recording a result. Its turn may still be running; inspect the thread before any retry.";
+  const failed = { ...job, status: "failed", phase: "failed", pid: null, completedAt, errorMessage };
+  writeJobFile(workspaceRoot, job.id, failed);
+  upsertJob(workspaceRoot, { id: job.id, status: "failed", phase: "failed", pid: null, completedAt, errorMessage });
+  appendLogLine(job.logFile, errorMessage);
+  return failed;
+}
+
+function finishedDetachedTask(job, resultFile) {
+  let payload = readJsonFileOrNull(resultFile);
+  if (payload?.jobId !== job.id) {
+    payload = job.result ?? {
+      status: 1, jobId: job.id, threadId: job.threadId ?? null, turnId: job.turnId ?? null,
+      error: job.relayError ?? {
+        name: "Error", message: job.errorMessage ?? `Codex job ${job.status}.`,
+        code: job.status === "cancelled" ? "CANCELLED" : null, rpcCode: null
+      }
+    };
+    writeTaskResultFile(resultFile, payload);
+  }
+  return { exitStatus: payload.status === 0 ? 0 : 1, payload };
+}
+
+function runningDetachedTask(job, jobId) {
+  const enriched = job ? enrichJob(job, { maxProgressLines: 2 }) : null;
+  return {
+    exitStatus: 0,
+    payload: {
+      status: "running",
+      jobId,
+      threadId: job?.threadId ?? null,
+      phase: enriched?.phase ?? null,
+      elapsed: enriched?.elapsed ?? null,
+      tokenUsage: job?.tokenUsage ?? null,
+      progress: enriched?.progressPreview ?? [],
+      next: "Codex is still working. Run the identical command again to keep waiting."
+    }
+  };
+}
+
+async function waitForDetachedTask(workspaceRoot, jobId, resultFile, waitMs) {
+  const deadline = Date.now() + waitMs;
+  let job;
+  for (;;) {
+    const snapshot = readJobSnapshot(workspaceRoot, jobId);
+    if (snapshot === null) {
+      throw new Error(`Codex job ${jobId} for this work order is no longer recorded. Write a new work order file to start again.`);
+    }
+    job = snapshot ?? job;
+    if (job && !isActiveJobStatus(job.status)) {
+      return finishedDetachedTask(job, resultFile);
+    }
+    if (job && !processIsAlive(job.pid)) {
+      // A worker writes its final job record before it exits, so read once more before calling it lost.
+      const settled = readJobSnapshot(workspaceRoot, jobId) || job;
+      return finishedDetachedTask(isActiveJobStatus(settled.status) ? markDetachedWorkerLost(workspaceRoot, settled) : settled, resultFile);
+    }
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) {
+      return runningDetachedTask(job, jobId);
+    }
+    await sleep(Math.min(RELAY_POLL_INTERVAL_MS, remaining));
+  }
+}
+
+async function handleDetachedTask({ cwd, workspaceRoot, options, request, taskMetadata }) {
+  const resultFile = taskResultFile(cwd, options);
+  const markerFile = workOrderJobFile(cwd, options);
+  const fingerprint = workOrderFingerprint(request);
+  const marker = readJsonFileOrNull(markerFile);
+  let jobId;
+  let jobRoot;
+  if (options.attach || marker?.fingerprint === fingerprint) {
+    if (!marker?.jobId || !marker.workspaceRoot) {
+      throw new Error("No Codex job is recorded for this work order. Run the command without --attach to start one.");
+    }
+    jobId = marker.jobId;
+    jobRoot = marker.workspaceRoot;
+  } else {
+    fs.rmSync(resultFile, { force: true });
+    fs.rmSync(markerFile, { force: true });
+    ensureCodexAvailable(cwd);
+    requireTaskRequest(request.prompt, request.resumeLast || Boolean(request.resumeThreadId));
+    const job = buildTaskJob(workspaceRoot, taskMetadata, request.write);
+    writeTaskResultFile(markerFile, { jobId: job.id, workspaceRoot, fingerprint });
+    enqueueBackgroundTask(cwd, job, { ...buildTaskRequest({ ...request, jobId: job.id }), resultFile });
+    jobId = job.id;
+    jobRoot = workspaceRoot;
+  }
+  const outcome = await waitForDetachedTask(jobRoot, jobId, resultFile, relayWaitMs(options));
+  outputResult(outcome.payload, true);
+  if (outcome.exitStatus !== 0) {
+    process.exitCode = outcome.exitStatus;
+  }
+}
+
 function spawnDetachedTaskWorker(cwd, jobId) {
   const scriptPath = path.join(ROOT_DIR, "scripts", "codex-companion.mjs");
   const child = spawn(process.execPath, [scriptPath, "task-worker", "--cwd", cwd, "--job-id", jobId], {
@@ -789,8 +961,8 @@ async function handleReview(argv) {
 
 async function handleTask(argv) {
   const { options, positionals } = parseCommandInput(argv, {
-    valueOptions: ["model", "effort", "cwd", "prompt-file", "resume-thread"],
-    booleanOptions: ["json", "write", "resume-last", "resume", "fresh", "background"],
+    valueOptions: ["model", "effort", "cwd", "prompt-file", "resume-thread", "wait-ms"],
+    booleanOptions: ["json", "write", "resume-last", "resume", "fresh", "background", "detach", "attach"],
     aliasMap: {
       m: "model"
     }
@@ -816,6 +988,23 @@ async function handleTask(argv) {
     prompt,
     resumeLast: resumeLast || Boolean(resumeThreadId)
   });
+
+  if (options.detach || options.attach) {
+    if (!options["prompt-file"]) {
+      throw new Error("--detach and --attach need --prompt-file; the work order file identifies the job.");
+    }
+    if (options.background) {
+      throw new Error("Choose either --background or --detach/--attach.");
+    }
+    await handleDetachedTask({
+      cwd,
+      workspaceRoot,
+      options,
+      request: { cwd, model, effort, prompt, write, resumeLast, resumeThreadId },
+      taskMetadata
+    });
+    return;
+  }
 
   if (options.background) {
     ensureCodexAvailable(cwd);
@@ -862,11 +1051,7 @@ async function handleTask(argv) {
     );
   } catch (error) {
     if (error.relayContext) {
-      const payload = {
-        status: 1, jobId: job.id,
-        threadId: error.relayContext.threadId, turnId: error.relayContext.turnId,
-        error: serializeRelayError(error)
-      };
+      const payload = taskFailurePayload(job.id, error);
       if (resultFile) writeTaskResultFile(resultFile, payload);
       if (options.json) outputResult(payload, true);
     }
@@ -920,17 +1105,28 @@ async function handleTaskWorker(argv) {
       logFile: storedJob.logFile ?? null
     }
   );
+  // agent-orch: a --detach worker writes the result beside the work order before marking the job finished,
+  // so a waiting relay that sees the finished job also finds the file.
+  const resultFile = typeof request.resultFile === "string" ? request.resultFile : null;
   await runTrackedJob(
     {
       ...storedJob,
       workspaceRoot,
       logFile
     },
-    () =>
-      executeTaskRun({
-        ...request,
-        onProgress: progress
-      }),
+    async () => {
+      try {
+        const execution = await executeTaskRun({
+          ...request,
+          onProgress: progress
+        });
+        if (resultFile) writeTaskResultFile(resultFile, execution.payload);
+        return execution;
+      } catch (error) {
+        if (resultFile) writeTaskResultFile(resultFile, taskFailurePayload(storedJob.id, error));
+        throw error;
+      }
+    },
     { logFile }
   );
 }

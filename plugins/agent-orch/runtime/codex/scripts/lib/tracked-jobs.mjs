@@ -1,10 +1,11 @@
-// Modified by Tim Osterhus for agent-orch (2026-11-11): session environment name and persisted relay error context. See ../../VENDORED.md.
+// Modified by Tim Osterhus for agent-orch (2026-11-13): session environment name, persisted relay error context, and job token totals. See ../../VENDORED.md.
 import fs from "node:fs";
 import process from "node:process";
 
 import { readJobFile, resolveJobFile, resolveJobLogFile, upsertJob, writeJobFile } from "./state.mjs";
 
 export const SESSION_ID_ENV = "AGENT_ORCH_CODEX_SESSION_ID";
+const TOKEN_USAGE_WRITE_INTERVAL_MS = 5000;
 
 export function nowIso() {
   return new Date().toISOString();
@@ -19,7 +20,8 @@ function normalizeProgressEvent(value) {
       turnId: typeof value.turnId === "string" && value.turnId.trim() ? value.turnId.trim() : null,
       stderrMessage: value.stderrMessage == null ? null : String(value.stderrMessage).trim(),
       logTitle: typeof value.logTitle === "string" && value.logTitle.trim() ? value.logTitle.trim() : null,
-      logBody: value.logBody == null ? null : String(value.logBody).trimEnd()
+      logBody: value.logBody == null ? null : String(value.logBody).trimEnd(),
+      tokenUsage: value.tokenUsage && typeof value.tokenUsage === "object" ? value.tokenUsage : null
     };
   }
 
@@ -30,7 +32,8 @@ function normalizeProgressEvent(value) {
     turnId: null,
     stderrMessage: String(value ?? "").trim(),
     logTitle: null,
-    logBody: null
+    logBody: null,
+    tokenUsage: null
   };
 }
 
@@ -72,11 +75,21 @@ export function createJobProgressUpdater(workspaceRoot, jobId) {
   let lastPhase = null;
   let lastThreadId = null;
   let lastTurnId = null;
+  let lastTokenUsageWrite = 0;
 
   return (event) => {
     const normalized = normalizeProgressEvent(event);
     const patch = { id: jobId };
     let changed = false;
+
+    // agent-orch: token totals change on every model response, so they go to the job file only, at most every few seconds.
+    if (normalized.tokenUsage && Date.now() - lastTokenUsageWrite >= TOKEN_USAGE_WRITE_INTERVAL_MS) {
+      const jobFile = resolveJobFile(workspaceRoot, jobId);
+      if (fs.existsSync(jobFile)) {
+        lastTokenUsageWrite = Date.now();
+        writeJobFile(workspaceRoot, jobId, { ...readJobFile(jobFile), tokenUsage: normalized.tokenUsage });
+      }
+    }
 
     if (normalized.phase && normalized.phase !== lastPhase) {
       lastPhase = normalized.phase;
