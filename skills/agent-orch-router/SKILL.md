@@ -16,11 +16,11 @@ Read this file and **only the selected mode document**:
 
 Shared across variants: [Amusing](modes/amusing.md) · [Council](modes/council.md) · [Browser-3D](modes/browser-3d.md) · [Codex-burn](modes/codex-burn.md) · [Claude-burn](modes/claude-burn.md).
 
-Variant selects pool preference, not the running host. Never change the parent model. Select a stable job slot through its active-mode binding, or honor an explicit exact profile. Rebinding a slot changes its model, not its role, lifecycle, or review authority. Two slots sharing a model remain separate jobs.
+Variant selects pool preference, not the running host. Never change the parent model. Honor explicit profiles or use active-mode slot bindings. Rebinding changes models, not roles, lifecycle, or review authority. Shared models do not merge jobs.
 
 ## Standard frontier
 
-These are all **21 raw-score nondominated configurations** in the dated four-provider Standard comparison, not a curated subset. Frontier membership is comparison-specific, not proof of suitability, subscription economics, access, or an available dispatcher.
+All **21 raw-score nondominated configurations** from the dated four-provider Standard comparison. Frontier membership does not establish task suitability, subscription economics, access, or dispatcher availability.
 
 <!-- BEGIN GENERATED:catalog-frontier -->
 | Code | Exact model | Effort |
@@ -50,7 +50,7 @@ These are all **21 raw-score nondominated configurations** in the dated four-pro
 
 ## Specialist exceptions
 
-Consider these disjoint exceptions only when their task evidence fits. They do not automatically expand a mode pool or authorize spending. Evidence types, limitations, and three conditional candidates are in [model fit and specialist evidence](references/model-fit.md).
+These disjoint task-fit exceptions do not expand mode pools or authorize spending. Evidence, limitations, and three conditional candidates are in [model fit and specialist evidence](references/model-fit.md).
 
 <!-- BEGIN GENERATED:catalog-specialists -->
 | Code | Exact model | Effort | Task exception | Access |
@@ -66,16 +66,22 @@ Consider these disjoint exceptions only when their task evidence fits. They do n
 | G38FH | gemini-3.8-flash | high | Audio understanding with text output | public_api |
 <!-- END GENERATED:catalog-specialists -->
 
-Kimi's benchmark does not specify effort. Its record is documentary until an explicit supported runtime effort is selected. Wonder Full is a Muse Code subscription model, not Wonder's public API. Verify the exact adapter, account, tools, effort, and effective data handling before dispatch. Unavailable routes fail without Codex/Claude substitution. Ordinary permissions remain independently configurable.
+Kimi is documentary until a supported runtime effort is selected. Wonder Full uses Muse Code subscription, not Wonder's API. Verify adapter, account, tools, effort, and data handling before dispatch. Unavailable routes fail without substitution. Permissions remain independently configurable.
 
-Existing exact profiles outside these catalogs remain available in [compatibility profiles](references/compatibility.md). They are not specialists merely because they are retained. Retired Fast codes, `fast`, `tokenburn`, and `CMAX` fail with explicit migration guidance. `hiq` was renamed to `amusing` and requires explicit reselection.
+Other exact [compatibility profiles](references/compatibility.md) remain explicitly available, not automatic specialists. Retired Fast codes, `fast`, `tokenburn`, and `CMAX` fail with migration guidance. Retired `hiq` requires the user to explicitly reselect `amusing`.
 
-Task fits are preferences, not model limitations or measured effort-specific specialties. Assignments determine authorship, independence, and delegation.
+Task fits are preferences, not measured effort-specific specialties. Assignments determine authorship, independence, and delegation.
 
-FM/FH/FX/FMAX can reason, implement, or review when eligible. FH is the preferred selective Fable trial; FX and FMAX remain optional higher-effort comparisons.
+Eligible Fable profiles may reason, implement, or review. FH is the preferred selective Fable trial. FX/FMAX are optional higher-effort comparisons.
 
-For selected FM/FH/FX/FMAX assignments only, read [Fable prompting](references/fable-prompting.md) before briefing or dispatch. Include relevant work-order guidance. Pool eligibility alone does not trigger this read.
+For selected FM/FH/FX/FMAX only, read [Fable prompting](references/fable-prompting.md) before briefing or dispatch. Pass relevant guidance. Eligibility alone does not trigger loading.
 
-For selected Muse work only, read [Muse provider checks](references/muse.md). Other provider references are optional until selecting that route.
+For selected Muse work only, read [Muse provider checks](references/muse.md).
 
-Optional: [configuration and generation](../../docs/configuration.md), [selection evidence](references/evidence.md). `config/routing.json`, followed by selected presets/overlays, is the source of generated tables. Regenerate installed Markdown when selecting an overlay so native instructions use the same bindings.
+## Execution discipline
+
+- On failure, distinguish product, evaluator, infrastructure, provider, or missing-authority causes before changing layers or escalating. Retry only with changed inputs, a supported transient condition, or a new diagnostic hypothesis.
+- Carry raw evidence to delegates only while its inputs and assumptions hold. Run affected and required checks. Preserve mode-required candidate identity, fresh independent reviews, and same-version ratification.
+- Keep prerequisites and controls proportional to concrete risks, observed failures, or explicit requirements. Finish after requested acceptance and required verification. Continue independent ready work around blockers.
+
+Optional: [configuration/generation](../../docs/configuration.md), [selection evidence](references/evidence.md). Generate tables from `config/routing.json` plus selected presets/overlays. Native instructions must match those bindings.

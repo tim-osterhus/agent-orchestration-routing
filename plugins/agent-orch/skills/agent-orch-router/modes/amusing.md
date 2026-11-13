@@ -25,6 +25,10 @@ Define functional checks and maintainability expectations before implementation.
 
 Give a fresh independent reviewer the requirements, relevant source, candidate diff or revision, and authorized checks. Let the reviewer form findings without the author's conclusions. Record the reviewed revision or diff identity. The controller resolves findings, verifies corrections, and repeats affected checks when the candidate changes. An author cannot be the sole acceptance check.
 
+The coordinator retains resolved and rejected findings. Reopen them only for relevant changes or new material evidence. Keep prior verdicts out of fresh review packets. Use targeted verification for known corrections, without replacing required independent acceptance.
+
+If an unexplained failure follows product and evaluator changes, check the corrected evaluator against unchanged product behavior before further product edits.
+
 ## Execute
 
 Use native workers for the current host's provider with the exact catalog model/effort and required tools. For selected Claude work, load the installed Claude Delegation skill and only its relevant launch reference. Review defaults to Consultation. Authored work defaults to Implementation. For external Codex work under Claude, use the optional [controller adapter](../../../docs/controller-designs.md).

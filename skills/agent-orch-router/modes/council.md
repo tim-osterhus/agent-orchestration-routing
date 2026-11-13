@@ -34,7 +34,7 @@ Exchange actual positions and supporting evidence, not just the coordinator's su
 
 Maintain a concise, versioned proposal/evidence/dispute ledger with source pointers, objections, responses, and unresolved dissent. Do not cherry-pick objections. Each member explicitly retains or revises its position with reasons.
 
-Require openings, meaningful peer-response/revision, and separate final ratification. Continue while useful evidence or arguments can change the decision. Do not impose arbitrary round, turn, or time caps.
+Require openings, meaningful peer-response/revision, and separate final ratification. Additional deliberation rounds must address a material unresolved objection, new evidence, or a meaningful proposal change. Do not impose arbitrary round, turn, or time caps.
 
 Later rounds intentionally share debate. Continue only a supported exact session, or send fresh contexts the complete decision-relevant debate packet, evidence, and proposal version. Fresh later sessions are not blind reviews.
 
