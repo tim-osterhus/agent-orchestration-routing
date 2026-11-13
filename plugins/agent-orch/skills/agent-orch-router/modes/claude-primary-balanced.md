@@ -12,10 +12,10 @@ Use this everyday pool for low/default/high bias. Low favors the least resource-
 | haiku-max | HMAX: claude-haiku-5-5 / max | one-off | Use for a harder one-off packet that still has a narrow scope and a direct acceptance check. |
 | sonnet | SNH: claude-sonnet-5-5 / high | general | Use for scoped implementation, research synthesis, or diagnosis needing judgment beyond a small Haiku packet. |
 | opus-medium | OM: claude-opus-5-5 / medium | general | Use for everyday general-purpose implementation and integration, including work spanning related files. |
-| opus | OH: claude-opus-5-5 / high | general | Use for uncertain implementation, debugging, or integration where additional reasoning is justified. |
-| opus-deep | OX: claude-opus-5-5 / xhigh | general | Use for difficult implementation or analysis with interacting requirements and substantial ambiguity. |
-| standard | SM: gpt-6.1-sol / medium | qa, spec-review; independent review | Use for optional independent QA or specification review of a candidate, not implementation. |
-| max-code | SMAX: gpt-6.1-sol / max | qa, spec-review; independent review | Use for optional independent code or specification review when complex failure paths need sustained analysis. |
+| opus | OH: claude-opus-5-5 / high | general | Prefer for an independent Claude perspective when useful; implementation and analysis are also eligible. Use a fresh reviewer for work it authored. |
+| opus-deep | OX: claude-opus-5-5 / xhigh | general | Consider for difficult analysis, implementation, architecture, or independent review. Keep authorship separate from final acceptance. |
+| standard | SM: gpt-6.1-sol / medium | general | Consider for general implementation or verification across related components. Cross-provider review is a preference, not an implementation ban. |
+| max-code | SMAX: gpt-6.1-sol / max | general | Consider for demanding implementation, integration, or independent verification. Use Max only when the assignment warrants the additional effort. |
 <!-- END GENERATED:pool:claude-primary/balanced -->
 
 Choose the earliest suitable eligible slot, not every cheaper profile in sequence. General slots permit all task roles. Bindings never change slot eligibility. One-off slots require a fresh bounded worker, never a continuing controller. Specialist slots take precedence for their stated role. Other eligible profiles may still use those tools.

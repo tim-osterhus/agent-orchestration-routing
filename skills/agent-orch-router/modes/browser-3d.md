@@ -8,7 +8,7 @@ Run in an existing Claude Code session using **FH: `claude-fable-5-2` / `high`**
 
 FH owns the visual brief, work orders, integration decisions, and milestone acceptance. Delegate implementation, debugging, export, and routine checks. This mode permits a focused controller-authored visual prototype when direct work would clarify the intended result. Finish the prototype before dispatching writers and take a fresh ownership snapshot. Hand production work back to Codex afterward.
 
-The controller is not a delegated worker-pool entry. Do not launch another FH worker or a native Claude implementation team by default. Fable's bounded-review fences in other modes do not restrict this controller.
+The controller is not a delegated worker-pool entry. Do not launch another FH worker or a native Claude implementation team by default. Worker assignments in other modes do not restrict this controller.
 
 ## Ordered worker pool
 

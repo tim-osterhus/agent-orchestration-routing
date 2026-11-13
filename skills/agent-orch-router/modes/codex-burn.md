@@ -11,12 +11,12 @@ Restore the prior mode at the endpoint or backlog completion. Stop on quota, bil
 <!-- BEGIN GENERATED:pool:codex-burn -->
 | Slot | Exact profile | Eligibility | Task fit |
 | --- | --- | --- | --- |
-| browser | AL: gpt-6-astra / low | general | Use for a bounded authorized backlog item involving browser work, visual interpretation, or general analysis. |
+| reasoning | AL: gpt-6-astra / low | general | Consider for general analysis or implementation at Low effort. Browser assignments require verified tools and session access. Select only authorized backlog work. |
 | standard | SM: gpt-6.1-sol / medium | general | Use for ordinary authorized implementation or verification with a clear change surface and acceptance checks. |
 | deep | SH: gpt-6.1-sol / high | general | Use for backlog diagnosis or integration where uncertainty warrants additional reasoning. |
 | hard | SX: gpt-6.1-sol / xhigh | general | Use for difficult authorized implementation or debugging with multiple interacting constraints. |
-| browser-ah | AH: gpt-6-astra / high | general | Use for harder visual, browser, or general reasoning tasks that fit the remaining authorized backlog. |
-| broad | AMAX: gpt-6-astra / max | general | Use for demanding authorized analysis, implementation, or verification when task fit justifies sustained reasoning. |
+| reasoning-high | AH: gpt-6-astra / high | general | Consider for demanding reasoning, implementation, debugging, or analysis. High effort does not imply a browser specialty. Select only authorized backlog work. |
+| broad | AMAX: gpt-6-astra / max | general | Consider for demanding analysis, implementation, or verification when task fit warrants Max effort. Verify tools for interactive work. Select only authorized backlog work. |
 <!-- END GENERATED:pool:codex-burn -->
 
 Choose the earliest suitable eligible slot, not every cheaper profile in sequence. General slots permit all task roles. Bindings never change slot eligibility. One-off slots require a fresh bounded worker, never a continuing controller. Specialist slots take precedence for their stated role. Other eligible profiles may still use those tools.

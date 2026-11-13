@@ -29,22 +29,35 @@ class SlotTests(unittest.TestCase):
         self.assertEqual(len(all_codes), len(set(all_codes)))
         self.assertEqual(set(all_codes), set(self.config["profiles"]))
 
-    def test_efficient_six_choices_and_cheap_slot_variants(self):
-        for variant, cheap in (("codex-primary", "LM"), ("claude-primary", "HL")):
+    def test_efficient_provider_preferences_and_muse_gate_are_variant_specific(self):
+        for variant, codes in (("codex-primary", ["LM", "TL", "EX", "TM", "TH", "SM"]),
+                               ("claude-primary", ["HL", "TL", "HM", "TM", "SNH", "SM"])):
             pool = bundle.mode_pools(self.config, variant)["efficient"]
-            self.assertEqual([e["profile"] for e in pool], [cheap, "TL", "EX", "TM", "TH", "SM"])
+            self.assertEqual([e["profile"] for e in pool], codes)
             unavailable = bundle.resolve(self.config, variant=variant, mode="efficient")
             self.assertNotIn("EX", [c["code"] for c in unavailable["choices"]])
-            self.assertIn("EX", unavailable["unavailable_profiles"])
             verified = bundle.merge(self.config, {"adapters": {"muse:public_api_standard": {"verified": True}}})
-            self.assertIn("EX", [c["code"] for c in bundle.resolve(verified, variant=variant, mode="efficient")["choices"]])
+            if variant == "codex-primary":
+                self.assertIn("EX", unavailable["unavailable_profiles"])
+                self.assertIn("EX", [c["code"] for c in bundle.resolve(verified, variant=variant, mode="efficient")["choices"]])
+            else:
+                self.assertNotIn("unavailable_profiles", unavailable)
+                self.assertEqual([c["code"] for c in unavailable["choices"]], codes)
+                self.assertEqual([c["code"] for c in bundle.resolve(verified, variant=variant, mode="efficient")["choices"]], codes)
+                for code, model, effort in (("HM", "claude-haiku-5-5", "xhigh"), ("SNH", "claude-sonnet-5-5", "high")):
+                    choice = bundle.resolve(self.config, variant=variant, mode="efficient", code=code)["choices"][0]
+                    self.assertEqual((choice["model"], choice["effort"]), (model, effort))
+                with self.assertRaisesRegex(ValueError, "outside"):
+                    bundle.resolve(self.config, variant=variant, mode="efficient", code="EX")
+                with self.assertRaisesRegex(ValueError, "role/lifecycle"):
+                    bundle.resolve(self.config, variant=variant, mode="efficient", code="HM", assignment_kind="controller")
 
     def test_default_council_and_amusing_keep_known_code_routes_not_api_routes(self):
         for variant in self.config["variants"]:
             council = bundle.resolve(self.config, variant=variant, mode="council", role="research")
             self.assertEqual([c["code"] for c in council["choices"]], ["SMAX", "OX", "MFX", "AMAX", "FH"])
             amusing = bundle.resolve(self.config, variant=variant, mode="amusing", role="implementation")
-            self.assertEqual([c["code"] for c in amusing["choices"]], ["SM", "SX", "OM", "MFH", "MFX"])
+            self.assertEqual([c["code"] for c in amusing["choices"]], ["SM", "SX", "OM", "FH", "MFH", "MFX"])
             for result in (council, amusing):
                 self.assertNotIn("unavailable_profiles", result)
                 for choice in result["choices"]:
@@ -53,7 +66,7 @@ class SlotTests(unittest.TestCase):
                         self.assertFalse(choice["execution"]["account_access_verified"])
                         self.assertFalse(choice["execution"]["launch_plan_supported"])
             efficient = bundle.resolve(self.config, variant=variant, mode="efficient")
-            self.assertEqual(efficient["unavailable_profiles"], ["EX"])
+            self.assertEqual(efficient.get("unavailable_profiles", []), ["EX"] if variant == "codex-primary" else [])
 
     def test_provider_flag_cannot_enable_or_substitute_a_different_access_route(self):
         broad = bundle.merge(self.config, {"adapters": {"muse": {"verified": True}}})
@@ -102,13 +115,10 @@ class SlotTests(unittest.TestCase):
 
     def test_mode_specific_fit_preserves_review_scope_and_authority(self):
         cases = [
-            ("claude-primary", "balanced", "SM", "qa", "not implementation"),
-            ("claude-primary", "performance", "AMAX", "browser", "browser or computer-use"),
             ("codex-primary", "council", "OX", "planning", "simpler alternatives"),
             ("codex-primary", "council", "AMAX", "planning", "optional fourth perspective"),
             ("codex-primary", "amusing", "OX", "qa", "review maintainability and architecture"),
-            ("codex-primary", "amusing", "AMAX", "qa", "without treating this route as clean-code authority"),
-            ("codex-primary", "amusing", "FH", "spec-review", "without implementing fixes"),
+            ("codex-primary", "amusing", "AMAX", "qa", "Independently test functional behavior"),
         ]
         for variant, mode, code, role, scope in cases:
             entry = next(e for e in bundle.mode_pools(self.config, variant)[mode] if e["profile"] == code)
@@ -120,7 +130,9 @@ class SlotTests(unittest.TestCase):
         for code in ("MFH", "MFX"):
             entry = next(e for e in bundle.mode_pools(self.config)["amusing"] if e["profile"] == code)
             self.assertIn("Implement when the work order authorizes edits.", entry["fit"])
-            self.assertIn("implementation", entry["roles"])
+            self.assertNotIn("roles", entry)
+            for role in ("implementation", "frontend", "integration", "browser", "spec-review"):
+                self.assertEqual(bundle.resolve(self.config, mode="amusing", code=code, role=role)["choices"][0]["code"], code)
         burn = next(e for e in bundle.mode_pools(self.config)["claude-burn"] if e["profile"] == "OMAX")
         self.assertNotIn("escalation", burn)
         self.assertIn("not merely to consume allowance", burn["fit"])
@@ -130,6 +142,24 @@ class SlotTests(unittest.TestCase):
             bundle.profile(self.config, "CMAX")
         self.assertEqual(bundle.profile(self.config, "SNX")["effort"], "xhigh")
         self.assertEqual(bundle.profile(self.config, "SNMAX")["effort"], "max")
+
+    def test_general_mode_models_are_not_confined_to_provider_or_browser_roles(self):
+        for variant in self.config["variants"]:
+            for mode in ("balanced", "performance"):
+                pool = bundle.mode_pools(self.config, variant)[mode]
+                for entry in pool:
+                    self.assertNotIn("roles", entry)
+                    self.assertFalse(entry.get("specialist", False))
+                    self.assertFalse(entry.get("independent_review", False))
+                    for role in self.config["roles"]:
+                        result = bundle.resolve(self.config, variant=variant, mode=mode,
+                                                code=entry["profile"], role=role)
+                        self.assertEqual(result["choices"][0]["code"], entry["profile"])
+                        self.assertFalse(result["overrides"]["role_or_lifecycle"])
+        # Review authority belongs to the workflow assignment, not the shared model ID.
+        for mode, code in (("amusing", "OX"), ("amusing", "AMAX"), ("bulk", "OH")):
+            with self.assertRaisesRegex(ValueError, "role/lifecycle"):
+                bundle.resolve(self.config, mode=mode, code=code, role="implementation")
 
     def test_rebinding_preserves_mode_fences_permissions_and_exact_requests(self):
         before = deepcopy(self.config)

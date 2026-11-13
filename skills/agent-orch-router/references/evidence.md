@@ -10,7 +10,11 @@ The main catalog preserves all 21 raw-score frontier configurations from the sup
 
 [Model fit and specialist evidence](model-fit.md) records the nine disjoint specialist exceptions, three conditional records, evidence types, and limitations. Family traits appear there once. A narrow benchmark or human preference result supports a targeted comparison, not universal superiority. A retained compatibility profile is not automatically a specialist.
 
-Efficient, Balanced, Performance, Amusing, Council, and burn pools are approved workflows with role/lifecycle fences. They are not alternate measured frontiers. Efficient intentionally uses the same six job choices across variants, changing only the cheap slot's LM/HL binding. An unavailable external adapter does not authorize substitution.
+Efficient, Balanced, Performance, Amusing, Council, and burn pools are workflow choices, not alternate measured frontiers. General-mode entries allow authorship and review. Designated independent-review jobs retain their assignment boundaries. Efficient uses LM/TL/EX/TM/TH/SM under Codex-primary and HL/TL/HM/TM/SNH/SM under Claude-primary. An unavailable external adapter does not authorize substitution.
+
+Claude-primary Efficient prefers Haiku XHigh in Ember XHigh's capability band and Sonnet High near Terra High. The [Haiku XHigh](https://artificialanalysis.ai/models/claude-haiku-5-5-xhigh) and [Sonnet High](https://artificialanalysis.ai/models/claude-sonnet-5-5-high) v5.0.1 pages, checked 2026-11-12, report rounded scores 35 and 42. These are provider-preference exceptions, not claims of equivalent task fit, cost, or Pareto membership.
+
+The 2026-11-12 role cleanup removes inherited Astra browser-only and general-mode cross-provider review-only restrictions. Earlier mode recommendations did not establish model-specific capability limits. Sol effort descriptions likewise express selection preferences, not measured specialties.
 
 [OpenAI's Terra guidance](https://developers.openai.com/api/docs/guides/latest-model) supports visual reasoning, computer use, and source-grounded writing. Start at Medium and raise effort when checked gains justify extra time and tokens. No controlled comparison establishes universal Low/Medium/High task rankings.
 

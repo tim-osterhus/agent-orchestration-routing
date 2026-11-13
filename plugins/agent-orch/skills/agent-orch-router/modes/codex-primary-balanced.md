@@ -10,12 +10,12 @@ Use this everyday pool for low/default/high bias. Low favors the least resource-
 | routine | SL: gpt-6.1-sol / low | general | Use for routine, clearly specified edits whose output is easy to check. |
 | visual | TM: gpt-6.1-terra / medium | general | Execute established implementation or screen-based workflows and structure source-rich writing, including substantial multi-step work. Supply relevant patterns, decision boundaries, and acceptance checks, and surface unresolved choices instead of narrowing the task. |
 | visual-deep | TH: gpt-6.1-terra / high | general | Handle harder bounded diagnosis, implementation, synthesis, or visual analysis with explicit ownership and checks. Ask the coordinator to reframe unresolved problems rather than assuming more Terra effort will resolve them. |
-| standard | SM: gpt-6.1-sol / medium | general | Use for general implementation, related-file changes, or independent verification with moderate ambiguity. |
+| standard | SM: gpt-6.1-sol / medium | general | Consider for general implementation or verification across related components. Cross-provider review is a preference, not an implementation ban. |
 | deep | SH: gpt-6.1-sol / high | general | Use for debugging, unclear behavior, or integration where controller repair would otherwise be substantial. |
 | hard | SX: gpt-6.1-sol / xhigh | general | Use for difficult implementation or debugging with interacting constraints and explicit acceptance checks. |
-| max-code | SMAX: gpt-6.1-sol / max | general | Use for demanding implementation or independent code verification when the task warrants sustained reasoning. |
-| browser | AL: gpt-6-astra / low | browser; specialist | Start here for browser interaction or visual inspection. Confirm the worker has the required browser tools and session. |
-| opus | OH: claude-opus-5-5 / high | qa, spec-review; independent review | Use for an optional independent QA or specification review of a completed candidate, not implementation. |
+| max-code | SMAX: gpt-6.1-sol / max | general | Consider for demanding implementation, integration, or independent verification. Use Max only when the assignment warrants the additional effort. |
+| reasoning | AL: gpt-6-astra / low | general | Consider for general analysis or implementation at Low effort. Browser assignments require verified tools and session access. |
+| opus | OH: claude-opus-5-5 / high | general | Prefer for an independent Claude perspective when useful; implementation and analysis are also eligible. Use a fresh reviewer for work it authored. |
 <!-- END GENERATED:pool:codex-primary/balanced -->
 
 Known patterns can span long workflows. A clear outcome alone does not make the solution path known.

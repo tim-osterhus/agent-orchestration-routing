@@ -59,7 +59,7 @@ Keep your edits in an ignored `config/local.json` and pass `--overlay config/loc
 
 Both variants have seven base modes with one shared catalog. The [router entrypoint](../skills/agent-orch-router/SKILL.md) links each self-contained mode. Bundled pool order and task-fit guidance are available there without reading JSON. Pool sizes are bundled choices, not hard limits on custom configuration.
 
-Fable `FM`, `FX`, and `FMAX` remain on-call. `FH` is eligible for bounded Performance and Bulk reasoning/review escalation, Amusing specification review, and Council advice. No Fable profile appears in the Opus/Haiku preset. `FH`/`FX` now select Fable 5.2, not 5.1. Ultracode is not supported. All model IDs require account/runtime verification.
+Fable `FM`, `FX`, and `FMAX` remain on-call. `FH` can reason, implement, integrate, or review in Performance, Bulk, and Amusing. Council keeps its advisory assignment. No Fable profile appears in the Opus/Haiku preset. `FH`/`FX` select Fable 5.2, not 5.1. Ultracode is not supported. All model IDs require account/runtime verification.
 
 [Council](../skills/agent-orch-router/modes/council.md) is shared and opt-in for decision deliberation. Required members default to SMAX, OX, and MFX. AMAX is optional. FH advises without a vote unless explicitly appointed.
 
@@ -147,7 +147,7 @@ python3 scripts/bundle.py validate --preset opus-haiku
 python3 scripts/bundle.py resolve --preset opus-haiku --mode opus-haiku --profile OH --role implementation --claude-mode orchestration
 ```
 
-`resolve` returns eligible candidates, not the final suitability or dispatch decision. Efficient's EX slot requires a verified adapter for automatic eligibility. An explicit EX request stays exact and reports unsupported launch planning without substitution. The agent evaluates task complexity and tool fit before choosing one. Entries marked `specialist` take precedence for their stated roles. Amusing uses nonpreemptive role restrictions instead. Unknown profiles, alias cycles, ineligible roles, and disabled orchestration fail rather than silently selecting something else. An empty eligible set is a blocker.
+`resolve` returns eligible candidates, not the final suitability or dispatch decision. Codex-primary Efficient's EX slot requires a verified adapter. Claude-primary Efficient instead uses HL/TL/HM/TM/SNH/SM, with no Muse slot. An explicit EX request stays exact and reports unsupported launch planning without substitution. The agent evaluates task complexity and tool fit before choosing one. Entries marked `specialist` take precedence for their stated roles. Amusing uses nonpreemptive role restrictions instead. Unknown profiles, alias cycles, ineligible roles, and disabled orchestration fail rather than silently selecting something else. An empty eligible set is a blocker.
 
 An explicit out-of-pool profile requires both `--allow-out-of-pool` and `--role-override`. The active pool has no entry defining that profile's role/lifecycle eligibility. The second flag acknowledges this unspecified eligibility, not a global model restriction inferred from another mode.
 

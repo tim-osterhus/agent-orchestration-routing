@@ -29,15 +29,15 @@
     "TM": {"provider": "codex", "model": "gpt-6.1-terra", "effort": "medium", "service_tier": "standard", "description": "Execute established implementation or screen-based workflows and structure source-rich writing, including substantial multi-step work. Supply relevant patterns, decision boundaries, and acceptance checks, and surface unresolved choices instead of narrowing the task."},
     "TH": {"provider": "codex", "model": "gpt-6.1-terra", "effort": "high", "service_tier": "standard", "description": "Handle harder bounded diagnosis, implementation, synthesis, or visual analysis with explicit ownership and checks. Ask the coordinator to reframe unresolved problems rather than assuming more Terra effort will resolve them."},
     "SL": {"provider": "codex", "model": "gpt-6.1-sol", "effort": "low", "service_tier": "standard", "description": "Candidate for routine bounded work with clear acceptance checks."},
-    "SM": {"provider": "codex", "model": "gpt-6.1-sol", "effort": "medium", "service_tier": "standard", "description": "General-purpose implementation or independent verification candidate, depending on the active pool."},
-    "SH": {"provider": "codex", "model": "gpt-6.1-sol", "effort": "high", "service_tier": "standard", "description": "Candidate for assignments where uncertainty or likely repair work justifies additional reasoning."},
-    "SX": {"provider": "codex", "model": "gpt-6.1-sol", "effort": "xhigh", "service_tier": "standard", "description": "Candidate for difficult implementation, debugging, or integration with explicit acceptance checks."},
-    "SMAX": {"provider": "codex", "model": "gpt-6.1-sol", "effort": "max", "service_tier": "standard", "description": "Candidate for demanding implementation or independent code verification, not an automatic escalation requirement."},
-    "AL": {"provider": "codex", "model": "gpt-6-astra", "effort": "low", "service_tier": "standard", "description": "Browser-specialist candidate in Codex-primary Balanced and a general candidate in Codex-burn. Verify the actual worker has required tools."},
+    "SM": {"provider": "codex", "model": "gpt-6.1-sol", "effort": "medium", "service_tier": "standard", "description": "General implementation, analysis, debugging, and verification candidate at Medium effort."},
+    "SH": {"provider": "codex", "model": "gpt-6.1-sol", "effort": "high", "service_tier": "standard", "description": "General implementation, analysis, debugging, and verification candidate at High effort. Additional effort is a routing choice, not a proven task-specific advantage."},
+    "SX": {"provider": "codex", "model": "gpt-6.1-sol", "effort": "xhigh", "service_tier": "standard", "description": "General implementation, analysis, debugging, and verification candidate at XHigh effort. Choose it when the assignment justifies testing additional reasoning."},
+    "SMAX": {"provider": "codex", "model": "gpt-6.1-sol", "effort": "max", "service_tier": "standard", "description": "General implementation, analysis, debugging, and verification candidate at Max effort. Max does not imply review-only work or guaranteed improvement."},
+    "AL": {"provider": "codex", "model": "gpt-6-astra", "effort": "low", "service_tier": "standard", "description": "General reasoning, implementation, and analysis candidate at Low effort. Browser work requires verified tools, not an Astra-specific assignment."},
     "AM": {"provider": "codex", "model": "gpt-6-astra", "effort": "medium", "service_tier": "standard", "description": "Retained Astra Medium profile for explicit selection or custom pools."},
-    "AH": {"provider": "codex", "model": "gpt-6-astra", "effort": "high", "service_tier": "standard", "description": "Browser-specialist candidate in Codex-primary Performance and a general candidate in Codex-burn. Verify required tools before dispatch."},
-    "AX": {"provider": "codex", "model": "gpt-6-astra", "effort": "xhigh", "service_tier": "standard", "description": "Retained Astra XHigh profile for explicit selection or custom pools."},
-    "AMAX": {"provider": "codex", "model": "gpt-6-astra", "effort": "max", "service_tier": "standard", "description": "Candidate for demanding work or specialist verification where its tools and task fit justify the route. Independent QA/browser candidate in Amusing; verify required tools and observed behavior, not clean-code authority."},
+    "AH": {"provider": "codex", "model": "gpt-6-astra", "effort": "high", "service_tier": "standard", "description": "General reasoning, implementation, debugging, and analysis candidate at High effort. No browser-only specialization is implied."},
+    "AX": {"provider": "codex", "model": "gpt-6-astra", "effort": "xhigh", "service_tier": "standard", "description": "General reasoning, implementation, and analysis candidate at XHigh effort. Compare checked results rather than assuming a distinct task specialty."},
+    "AMAX": {"provider": "codex", "model": "gpt-6-astra", "effort": "max", "service_tier": "standard", "description": "General reasoning, implementation, and verification candidate at Max effort. Particular modes may assign independent review, without limiting the model to that role."},
     "HMED": {"provider": "claude", "model": "claude-haiku-5-5", "effort": "medium", "context_target_tokens": null, "description": "Candidate for small, well-scoped worker assignments with concrete checks."},
     "HH": {"provider": "claude", "model": "claude-haiku-5-5", "effort": "high", "context_target_tokens": null, "description": "Candidate for bounded delegation when additional Haiku reasoning may reduce controller repair work."},
     "HM": {"provider": "claude", "model": "claude-haiku-5-5", "effort": "xhigh", "context_target_tokens": null, "description": "Bounded Haiku XHigh worker candidate, also used by the optional Opus/Haiku preset."},
@@ -46,13 +46,13 @@
     "SNH": {"provider": "claude", "model": "claude-sonnet-5-5", "effort": "high", "context_target_tokens": null, "description": "Middle-pool candidate for work needing stronger judgment than a bounded Haiku assignment."},
     "SNX": {"provider": "claude", "model": "claude-sonnet-5-5", "effort": "xhigh", "context_target_tokens": null, "description": "Exact retained Sonnet XHigh option for economical knowledge-work comparison."},
     "OM": {"provider": "claude", "model": "claude-opus-5-5", "effort": "medium", "context_target_tokens": null, "description": "General-purpose implementation and integration candidate in Claude-primary pools."},
-    "OH": {"provider": "claude", "model": "claude-opus-5-5", "effort": "high", "context_target_tokens": null, "description": "General-purpose Claude-primary candidate or independent review candidate in Codex-primary Balanced. Role restrictions come from the active pool.", "specialty": "Agentic frontend and full-stack implementation", "evidence_type": "human_preference_agentic", "access_mode": "public_api"},
-    "OX": {"provider": "claude", "model": "claude-opus-5-5", "effort": "xhigh", "context_target_tokens": null, "description": "General-purpose Claude-primary candidate or independent review candidate in Codex-primary Performance. Role restrictions come from the active pool."},
+    "OH": {"provider": "claude", "model": "claude-opus-5-5", "effort": "high", "context_target_tokens": null, "description": "General implementation, analysis, and independent review candidate. Separate frontend preference evidence supports a targeted trial, not exclusive eligibility.", "specialty": "Agentic frontend and full-stack implementation", "evidence_type": "human_preference_agentic", "access_mode": "public_api"},
+    "OX": {"provider": "claude", "model": "claude-opus-5-5", "effort": "xhigh", "context_target_tokens": null, "description": "General implementation, architecture, debugging, and independent review candidate at XHigh effort."},
     "OMAX": {"provider": "claude", "model": "claude-opus-5-5", "effort": "max", "context_target_tokens": null, "description": "Candidate for demanding Claude-primary work or a justified Codex-primary Performance escalation."},
-    "FM": {"provider": "claude", "model": "claude-fable-5-2", "effort": "medium", "context_target_tokens": null, "description": "Selective high-capability candidate for a bounded comparison, not an automatic escalation."},
-    "FH": {"provider": "claude", "model": "claude-fable-5-2", "effort": "high", "context_target_tokens": null, "description": "Preferred Fable candidate for difficult reasoning, specification analysis, or independent review. Verify findings against source and acceptance checks."},
-    "FX": {"provider": "claude", "model": "claude-fable-5-2", "effort": "xhigh", "context_target_tokens": null, "description": "Explicit trial for the hardest long-running analysis when additional reasoning is justified, not the default Fable escalation."},
-    "FMAX": {"provider": "claude", "model": "claude-fable-5-2", "effort": "max", "context_target_tokens": null, "description": "Exceptional on-call escalation when a stronger attempt justifies additional usage, not a routine worker."},
+    "FM": {"provider": "claude", "model": "claude-fable-5-2", "effort": "medium", "context_target_tokens": null, "description": "Selective candidate for open-ended reasoning, architecture, implementation, and review at Medium effort."},
+    "FH": {"provider": "claude", "model": "claude-fable-5-2", "effort": "high", "context_target_tokens": null, "description": "Preferred Fable trial for demanding reasoning, architecture, implementation, or independent review. The work order determines authorship and delegation authority."},
+    "FX": {"provider": "claude", "model": "claude-fable-5-2", "effort": "xhigh", "context_target_tokens": null, "description": "Optional XHigh comparison for demanding reasoning, implementation, or review. Higher effort is not a demonstrated universal advantage over High."},
+    "FMAX": {"provider": "claude", "model": "claude-fable-5-2", "effort": "max", "context_target_tokens": null, "description": "Exceptional on-call comparison for demanding reasoning, implementation, or review when the expected benefit warrants its cost."},
     "MFH": {"provider": "muse", "model": "muse-wonder-full-1.0", "effort": "high", "description": "Investigate repository structure, existing fixes, and root causes using source evidence. Default to diagnosis and focused checks. Implement when the work order authorizes edits.", "access_mode": "muse_code_subscription", "api_model_id": null, "adapter_required": true},
     "MFX": {"provider": "muse", "model": "muse-wonder-full-1.0", "effort": "xhigh", "description": "Examine cross-system failures with competing hypotheses and challenge a proposed plan against evidence. Default to discriminating checks, not a second dispatcher. Implement when the work order authorizes edits.", "access_mode": "muse_code_subscription", "api_model_id": null, "adapter_required": true},
     "LL": {"provider": "codex", "model": "gpt-6-luna", "effort": "low", "service_tier": "standard", "description": "Trivial extraction and mechanical edits with cheap checks."},
@@ -88,35 +88,35 @@
           {"slot": "routine", "fit": "Use for routine, clearly specified edits whose output is easy to check."},
           {"slot": "visual", "fit": "Execute established implementation or screen-based workflows and structure source-rich writing, including substantial multi-step work. Supply relevant patterns, decision boundaries, and acceptance checks, and surface unresolved choices instead of narrowing the task."},
           {"slot": "visual-deep", "fit": "Handle harder bounded diagnosis, implementation, synthesis, or visual analysis with explicit ownership and checks. Ask the coordinator to reframe unresolved problems rather than assuming more Terra effort will resolve them."},
-          {"slot": "standard", "fit": "Use for general implementation, related-file changes, or independent verification with moderate ambiguity."},
+          {"slot": "standard", "fit": "Consider for general implementation or verification across related components. Cross-provider review is a preference, not an implementation ban."},
           {"slot": "deep", "fit": "Use for debugging, unclear behavior, or integration where controller repair would otherwise be substantial."},
           {"slot": "hard", "fit": "Use for difficult implementation or debugging with interacting constraints and explicit acceptance checks."},
-          {"slot": "max-code", "fit": "Use for demanding implementation or independent code verification when the task warrants sustained reasoning."},
-          {"slot": "browser", "roles": ["browser"], "specialist": true, "fit": "Start here for browser interaction or visual inspection. Confirm the worker has the required browser tools and session."},
-          {"slot": "opus", "roles": ["qa", "spec-review"], "independent_review": true, "fit": "Use for an optional independent QA or specification review of a completed candidate, not implementation."}
+          {"slot": "max-code", "fit": "Consider for demanding implementation, integration, or independent verification. Use Max only when the assignment warrants the additional effort."},
+          {"slot": "reasoning", "fit": "Consider for general analysis or implementation at Low effort. Browser assignments require verified tools and session access."},
+          {"slot": "opus", "fit": "Prefer for an independent Claude perspective when useful; implementation and analysis are also eligible. Use a fresh reviewer for work it authored."}
         ],
         "performance": [
           {"slot": "deep", "fit": "Use for substantive implementation or diagnosis when a routine route would leave material uncertainty."},
           {"slot": "hard", "fit": "Use for difficult debugging, integration, or implementation with several interacting constraints."},
-          {"slot": "max-code", "fit": "Use for demanding code changes or independent verification requiring sustained reasoning across a large change surface."},
-          {"slot": "broad", "fit": "Use for demanding analysis, visual reasoning, or implementation where Astra's task and tool fit justify the route."},
-          {"slot": "browser", "roles": ["browser"], "specialist": true, "fit": "Start here for difficult browser or computer-use assignments. Confirm actual tools and session access."},
-          {"slot": "opus-deep", "roles": ["qa", "spec-review"], "independent_review": true, "fit": "Use for optional independent QA or specification review of complex work, not authored fixes."},
+          {"slot": "max-code", "fit": "Consider for demanding implementation, integration, or independent verification. Use Max only when the assignment warrants the additional effort."},
+          {"slot": "broad", "fit": "Consider for demanding analysis, implementation, or verification when task fit warrants Max effort. Verify tools for interactive work."},
+          {"slot": "reasoning", "fit": "Consider for demanding reasoning, implementation, debugging, or analysis. High effort does not imply a browser specialty."},
+          {"slot": "opus-deep", "fit": "Consider for difficult analysis, implementation, architecture, or independent review. Keep authorship separate from final acceptance."},
           {"slot": "opus-max", "escalation": true, "fit": "Use as a justified escalation for demanding analysis or implementation when earlier eligible choices do not fit."},
-          {"slot": "fable-review", "roles": ["research", "planning", "qa", "spec-review"], "independent_review": true, "escalation": true, "one_off_only": true, "fit": "Selectively escalate difficult reasoning, specification analysis, or independent review. Use a bounded worker, not authored fixes or team management."}
+          {"slot": "fable", "escalation": true, "one_off_only": true, "fit": "Consider for demanding reasoning, architecture, implementation, or independent review as a bounded worker. State whether the assignment authors a change or reviews an existing candidate."}
         ],
         "bulk": [
           {"slot": "routine", "fit": "Use for routine, clearly specified edits whose output is easy to check."},
           {"slot": "visual", "fit": "Execute established implementation or screen-based workflows and structure source-rich writing, including substantial multi-step work. Supply relevant patterns, decision boundaries, and acceptance checks, and surface unresolved choices instead of narrowing the task."},
           {"slot": "visual-deep", "fit": "Handle harder bounded diagnosis, implementation, synthesis, or visual analysis with explicit ownership and checks. Ask the coordinator to reframe unresolved problems rather than assuming more Terra effort will resolve them."},
-          {"slot": "standard", "fit": "Use for general implementation, related-file changes, or independent verification with moderate ambiguity."},
+          {"slot": "standard", "fit": "Consider for general implementation or verification across related components. Cross-provider review is a preference, not an implementation ban."},
           {"slot": "deep", "fit": "Use for debugging, unclear behavior, or integration where controller repair would otherwise be substantial."},
           {"slot": "hard", "fit": "Use for difficult implementation or debugging with interacting constraints and explicit acceptance checks."},
-          {"slot": "max-code", "fit": "Use for demanding implementation or independent code verification when the task warrants sustained reasoning."},
-          {"slot": "browser", "roles": ["browser"], "specialist": true, "fit": "Start here for browser interaction or visual inspection. Confirm the worker has the required browser tools and session."},
+          {"slot": "max-code", "fit": "Consider for demanding implementation, integration, or independent verification. Use Max only when the assignment warrants the additional effort."},
+          {"slot": "reasoning", "fit": "Consider for general analysis or implementation at Low effort. Browser assignments require verified tools and session access."},
           {"slot": "opus-max", "escalation": true, "fit": "Escalate hard or quality-sensitive implementation or analysis after an unconvincing Codex attempt or when errors would be costly."},
           {"slot": "opus", "roles": ["qa", "spec-review"], "independent_review": true, "fit": "Use for independent QA or specification review of a Codex-authored candidate, not implementation."},
-          {"slot": "fable-review", "roles": ["research", "planning", "qa", "spec-review"], "independent_review": true, "escalation": true, "one_off_only": true, "fit": "Selectively escalate difficult reasoning, specification analysis, or independent review. Use a bounded worker, not authored fixes or team management."}
+          {"slot": "fable", "escalation": true, "one_off_only": true, "fit": "Consider for demanding reasoning, architecture, implementation, or independent review as a bounded worker. State whether the assignment authors a change or reviews an existing candidate."}
         ]
       }
     },
@@ -125,9 +125,9 @@
         "efficient": [
           {"slot": "cheap", "one_off_only": true, "fit": "Use for a tiny one-off extraction, lookup, or specified edit with a cheap acceptance check."},
           {"slot": "small", "fit": "Use for small, specified changes, source transformations, or straightforward visual interpretation following an established pattern, with inexpensive checks. Prefer another eligible profile when substantial interpretation or reframing is needed."},
-          {"slot": "ember", "requires_verified_adapter": true, "fit": "Use for bounded reasoning only after verifying the exact Muse API adapter and account route."},
+          {"slot": "haiku-xhigh", "one_off_only": true, "fit": "Use for bounded analysis, implementation, or verification with concrete inputs and inexpensive acceptance checks. This Claude-preferred bridge is not a task-specific equivalence to Ember."},
           {"slot": "visual", "fit": "Execute established implementation or screen-based workflows and structure source-rich writing, including substantial multi-step work. Supply relevant patterns, decision boundaries, and acceptance checks, and surface unresolved choices instead of narrowing the task."},
-          {"slot": "visual-deep", "fit": "Handle harder bounded diagnosis, implementation, synthesis, or visual analysis with explicit ownership and checks. Ask the coordinator to reframe unresolved problems rather than assuming more Terra effort will resolve them."},
+          {"slot": "sonnet", "fit": "Use for scoped implementation, diagnosis, or synthesis when stronger judgment is warranted. Sonnet High fills the Claude-preferred capability band, without inheriting Terra-specific visual guidance."},
           {"slot": "standard", "fit": "Use for general implementation spanning related files or a bounded integration with explicit checks."}
         ],
         "balanced": [
@@ -136,19 +136,19 @@
           {"slot": "haiku-max", "one_off_only": true, "fit": "Use for a harder one-off packet that still has a narrow scope and a direct acceptance check."},
           {"slot": "sonnet", "fit": "Use for scoped implementation, research synthesis, or diagnosis needing judgment beyond a small Haiku packet."},
           {"slot": "opus-medium", "fit": "Use for everyday general-purpose implementation and integration, including work spanning related files."},
-          {"slot": "opus", "fit": "Use for uncertain implementation, debugging, or integration where additional reasoning is justified."},
-          {"slot": "opus-deep", "fit": "Use for difficult implementation or analysis with interacting requirements and substantial ambiguity."},
-          {"slot": "standard", "roles": ["qa", "spec-review"], "independent_review": true, "fit": "Use for optional independent QA or specification review of a candidate, not implementation."},
-          {"slot": "max-code", "roles": ["qa", "spec-review"], "independent_review": true, "fit": "Use for optional independent code or specification review when complex failure paths need sustained analysis."}
+          {"slot": "opus", "fit": "Prefer for an independent Claude perspective when useful; implementation and analysis are also eligible. Use a fresh reviewer for work it authored."},
+          {"slot": "opus-deep", "fit": "Consider for difficult analysis, implementation, architecture, or independent review. Keep authorship separate from final acceptance."},
+          {"slot": "standard", "fit": "Consider for general implementation or verification across related components. Cross-provider review is a preference, not an implementation ban."},
+          {"slot": "max-code", "fit": "Consider for demanding implementation, integration, or independent verification. Use Max only when the assignment warrants the additional effort."}
         ],
         "performance": [
           {"slot": "opus-medium", "fit": "Use for substantive general-purpose implementation or integration with sufficiently clear requirements."},
-          {"slot": "opus", "fit": "Use for difficult implementation or diagnosis involving uncertain behavior and related components."},
-          {"slot": "opus-deep", "fit": "Use for complex debugging, architecture analysis, or integration with several interacting constraints."},
+          {"slot": "opus", "fit": "Prefer for an independent Claude perspective when useful; implementation and analysis are also eligible. Use a fresh reviewer for work it authored."},
+          {"slot": "opus-deep", "fit": "Consider for difficult analysis, implementation, architecture, or independent review. Keep authorship separate from final acceptance."},
           {"slot": "opus-max", "fit": "Use for demanding implementation or analysis when sustained reasoning is justified by the assignment."},
-          {"slot": "max-code", "roles": ["qa", "spec-review"], "independent_review": true, "fit": "Use for optional independent QA or specification review of difficult code, not authored fixes."},
-          {"slot": "broad", "roles": ["browser"], "specialist": true, "fit": "Start here for demanding browser or computer-use work. Confirm the actual worker's tools and session access."},
-          {"slot": "fable-review", "roles": ["research", "planning", "qa", "spec-review"], "independent_review": true, "escalation": true, "one_off_only": true, "fit": "Selectively escalate difficult reasoning, specification analysis, or independent review. Use a bounded worker, not authored fixes or team management."}
+          {"slot": "max-code", "fit": "Consider for demanding implementation, integration, or independent verification. Use Max only when the assignment warrants the additional effort."},
+          {"slot": "broad", "fit": "Consider for demanding analysis, implementation, or verification when task fit warrants Max effort. Verify tools for interactive work."},
+          {"slot": "fable", "escalation": true, "one_off_only": true, "fit": "Consider for demanding reasoning, architecture, implementation, or independent review as a bounded worker. State whether the assignment authors a change or reviews an existing candidate."}
         ]
       }
     }
@@ -169,12 +169,12 @@
       {"slot": "fable-review", "roles": ["research", "planning", "spec-review"], "fit": "Advise on requirements, overlooked constraints, and alternative hypotheses without an additional vote."}
     ],
     "codex-burn": [
-      {"slot": "browser", "fit": "Use for a bounded authorized backlog item involving browser work, visual interpretation, or general analysis."},
+      {"slot": "reasoning", "fit": "Consider for general analysis or implementation at Low effort. Browser assignments require verified tools and session access. Select only authorized backlog work."},
       {"slot": "standard", "fit": "Use for ordinary authorized implementation or verification with a clear change surface and acceptance checks."},
       {"slot": "deep", "fit": "Use for backlog diagnosis or integration where uncertainty warrants additional reasoning."},
       {"slot": "hard", "fit": "Use for difficult authorized implementation or debugging with multiple interacting constraints."},
-      {"slot": "browser-ah", "fit": "Use for harder visual, browser, or general reasoning tasks that fit the remaining authorized backlog."},
-      {"slot": "broad", "fit": "Use for demanding authorized analysis, implementation, or verification when task fit justifies sustained reasoning."}
+      {"slot": "reasoning-high", "fit": "Consider for demanding reasoning, implementation, debugging, or analysis. High effort does not imply a browser specialty. Select only authorized backlog work."},
+      {"slot": "broad", "fit": "Consider for demanding analysis, implementation, or verification when task fit warrants Max effort. Verify tools for interactive work. Select only authorized backlog work."}
     ],
     "claude-burn": [
       {"slot": "haiku-max", "one_off_only": true, "fit": "Use for a bounded one-off backlog packet with concrete inputs, ownership, and acceptance checks."},
@@ -189,10 +189,10 @@
       {"slot": "hard", "fit": "Debug difficult invariants or integrate changes with interacting constraints. Require evidence that the fix addresses the cause without expanding scope."},
       {"slot": "opus-medium", "fit": "Prefer for substantial scoped implementation or refactoring when the task fits Opus Medium. Medium is not a universal optimum, so compare the actual candidate and checks."},
       {"slot": "opus-deep", "roles": ["planning", "qa", "spec-review"], "independent_review": true, "fit": "Independently review maintainability and architecture against the repository's existing design. Propose concrete simpler alternatives where they preserve the required behavior."},
-      {"slot": "broad", "roles": ["qa", "browser"], "independent_review": true, "fit": "Perform demanding functional or adversarial verification with checked tool access. Report observed behavior and failures without treating this route as clean-code authority."},
-      {"slot": "fable-review", "roles": ["spec-review"], "independent_review": true, "fit": "Selectively review conformance to explicit requirements and acceptance criteria. Cite mismatches and omissions without implementing fixes or requiring this reviewer for every change."},
-      {"slot": "investigate", "roles": ["research", "planning", "qa", "implementation"], "fit": "Investigate repository structure, existing fixes, and root causes using source evidence. Default to diagnosis and focused checks. Implement when the work order authorizes edits."},
-      {"slot": "investigate-deep", "roles": ["research", "planning", "qa", "implementation"], "fit": "Examine cross-system failures with competing hypotheses and challenge a proposed plan against evidence. Default to discriminating checks, not a second dispatcher. Implement when the work order authorizes edits."}
+      {"slot": "broad", "roles": ["qa", "browser"], "independent_review": true, "fit": "Independently test functional behavior, failure cases, and implementation assumptions against the requirements. Report evidence and maintainability concerns without claiming model-specific code-quality authority."},
+      {"slot": "fable", "fit": "Consider for demanding reasoning, architecture, implementation, or independent review. State whether the assignment authors a change or reviews an existing candidate."},
+      {"slot": "investigate", "fit": "Investigate repository structure, existing fixes, and root causes using source evidence. Default to diagnosis and focused checks. Implement when the work order authorizes edits."},
+      {"slot": "investigate-deep", "fit": "Examine cross-system failures with competing hypotheses and challenge a proposed plan against evidence. Default to discriminating checks, not a second dispatcher. Implement when the work order authorizes edits."}
     ]
   },
   "codex": {
@@ -294,8 +294,11 @@
     "sonnet": {"description": "Scoped implementation or analysis needing stronger judgment than a small worker packet."},
     "opus-medium": {"description": "Substantive scoped implementation and integration."},
     "investigate-deep": {"description": "Examine cross-system failures with competing hypotheses and discriminating checks."},
-    "browser-ah": {"description": "Browser-specialist candidate in Codex-primary Performance and a general candidate in Codex-burn. Verify required tools before dispatch."},
-    "investigate": {"description": "Investigate repository structure, existing fixes, and root causes using source evidence."}
+    "browser-ah": {"description": "Legacy slot for general reasoning, implementation, or analysis. Browser work requires verified tools, not an AH-specific specialty."},
+    "investigate": {"description": "Investigate repository structure, existing fixes, and root causes using source evidence."},
+    "reasoning": {"description": "General reasoning, analysis, or implementation with task-appropriate tools."},
+    "fable": {"description": "Demanding reasoning, architecture, implementation, or independent review."},
+    "reasoning-high": {"description": "General reasoning, implementation, or analysis within the authorized backlog."}
   },
   "bindings": {
     "codex-primary": {
@@ -315,18 +318,18 @@
         "deep": "SH",
         "hard": "SX",
         "max-code": "SMAX",
-        "browser": "AL",
-        "opus": "OH"
+        "opus": "OH",
+        "reasoning": "AL"
       },
       "performance": {
         "deep": "SH",
         "hard": "SX",
         "max-code": "SMAX",
         "broad": "AMAX",
-        "browser": "AH",
         "opus-deep": "OX",
         "opus-max": "OMAX",
-        "fable-review": "FH"
+        "reasoning": "AH",
+        "fable": "FH"
       },
       "bulk": {
         "routine": "SL",
@@ -336,19 +339,19 @@
         "deep": "SH",
         "hard": "SX",
         "max-code": "SMAX",
-        "browser": "AL",
         "opus-max": "OX",
         "opus": "OH",
-        "fable-review": "FH"
+        "reasoning": "AL",
+        "fable": "FH"
       }
     },
     "claude-primary": {
       "efficient": {
         "cheap": "HL",
         "small": "TL",
-        "ember": "EX",
+        "haiku-xhigh": "HM",
         "visual": "TM",
-        "visual-deep": "TH",
+        "sonnet": "SNH",
         "standard": "SM"
       },
       "balanced": {
@@ -369,7 +372,7 @@
         "opus-max": "OMAX",
         "max-code": "SMAX",
         "broad": "AMAX",
-        "fable-review": "FH"
+        "fable": "FH"
       }
     },
     "shared": {
@@ -388,12 +391,12 @@
         "fable-review": "FH"
       },
       "codex-burn": {
-        "browser": "AL",
         "standard": "SM",
         "deep": "SH",
         "hard": "SX",
-        "browser-ah": "AH",
-        "broad": "AMAX"
+        "broad": "AMAX",
+        "reasoning": "AL",
+        "reasoning-high": "AH"
       },
       "claude-burn": {
         "haiku-max": "HMAX",
@@ -409,9 +412,9 @@
         "opus-medium": "OM",
         "opus-deep": "OX",
         "broad": "AMAX",
-        "fable-review": "FH",
         "investigate": "MFH",
-        "investigate-deep": "MFX"
+        "investigate-deep": "MFX",
+        "fable": "FH"
       }
     }
   }

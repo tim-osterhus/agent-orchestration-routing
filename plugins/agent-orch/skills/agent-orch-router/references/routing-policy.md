@@ -6,7 +6,7 @@ For a burn assignment, retain the selected mode's account, endpoint, backlog, pr
 
 For an explicit on-call trial outside the selected pool, select the exact catalog profile with user-authorized pool and role/lifecycle exceptions. The optional inspector records these as `--allow-out-of-pool --role-override`.
 
-FH is eligible for bounded Performance and Bulk reasoning/review escalation, Amusing specification review, and Council research, planning, and specification-review advice. Those roles need no overrides. Council defaults to SMAX/OX/MFX members. FH advises unless explicitly appointed as a member. FM, FX, and FMAX remain on-call outside bundled pools.
+FH can reason, implement, integrate, or review in Performance, Bulk, and Amusing without a role override. Council remains a decision-only workflow: FH advises unless explicitly appointed as a member. Required members default to SMAX/OX/MFX. FM, FX, and FMAX remain on-call outside bundled pools.
 
 Other in-pool role/lifecycle exceptions require an explicit profile and user-authorized `--role-override`. Do not use standalone `--direct` calls to evade an active router.
 

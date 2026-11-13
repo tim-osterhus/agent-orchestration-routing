@@ -43,8 +43,8 @@ class RoutingTests(unittest.TestCase):
 
     def test_role_boundary_is_not_waived_by_model_code(self):
         with self.assertRaisesRegex(ValueError, "role/lifecycle"):
-            self.resolve(code="OH", role="implementation")
-        allowed = self.resolve(code="OH", role="implementation", role_override=True)
+            self.resolve(mode="amusing", code="OX", role="implementation")
+        allowed = self.resolve(mode="amusing", code="OX", role="implementation", role_override=True)
         self.assertTrue(allowed["overrides"]["role_or_lifecycle"])
 
     def test_explicit_permission_role_is_independent_of_review_routing(self):
@@ -65,12 +65,17 @@ class RoutingTests(unittest.TestCase):
         result = self.resolve(mode="restricted-review", code="OX", role="qa", ongoing=True, final=True)
         self.assertEqual(result["choices"][0]["claude_mode"], "consultation")
 
-    def test_browser_specialists(self):
-        self.assertEqual(self.resolve(mode="balanced", role="browser")["choices"][0]["code"], "AL")
-        self.assertEqual(self.resolve(mode="performance", role="browser")["choices"][0]["code"], "AH")
-        self.assertEqual(self.resolve(mode="performance", role="browser", variant="claude-primary")["choices"][0]["code"], "AMAX")
-        # Browser-specialist preference is not an assertion that other models lack browser capability.
-        self.assertEqual(self.resolve(mode="balanced", role="browser", code="SM")["choices"][0]["code"], "SM")
+    def test_astra_has_general_eligibility_without_browser_preemption(self):
+        for variant, mode, code in (("codex-primary", "balanced", "AL"),
+                                    ("codex-primary", "performance", "AH"),
+                                    ("claude-primary", "performance", "AMAX")):
+            pool = bundle.mode_pools(self.config, variant)[mode]
+            browser = self.resolve(mode=mode, variant=variant, role="browser")
+            self.assertEqual([c["code"] for c in browser["choices"]], [e["profile"] for e in pool])
+            for role in self.config["roles"]:
+                choice = self.resolve(mode=mode, variant=variant, code=code, role=role)["choices"][0]
+                self.assertEqual(choice["code"], code)
+                self.assertNotIn("specialist", choice)
         self.assertEqual(self.resolve(mode="codex-burn", role="browser", burn_account="codex-work",
                                       burn_endpoint="next reset")["choices"][0]["code"], "AL")
 
@@ -157,9 +162,9 @@ class RoutingTests(unittest.TestCase):
                 self.assertEqual(result["overrides"], {"out_of_pool": True, "role_or_lifecycle": True})
 
     def test_pool_override_does_not_waive_in_pool_role_or_lifecycle_fences(self):
-        for kwargs in ({"code": "OH", "role": "implementation"},
+        for kwargs in ({"code": "OX", "mode": "amusing", "role": "implementation"},
                        {"code": "HM", "variant": "claude-primary", "assignment_kind": "controller"},
-                       {"code": "OX", "mode": "performance", "role": "implementation"}):
+                       {"code": "OH", "mode": "bulk", "role": "implementation"}):
             with self.subTest(**kwargs):
                 with self.assertRaisesRegex(ValueError, "role/lifecycle restrictions"):
                     self.resolve(**kwargs, allow_out_of_pool=True)
@@ -229,7 +234,7 @@ class VariantTests(unittest.TestCase):
                 "performance": ["SH", "SX", "SMAX", "AMAX", "AH", "OX", "OMAX", "FH"],
                 "bulk": ["SL", "TM", "TH", "SM", "SH", "SX", "SMAX", "AL", "OX", "OH", "FH"]},
             "claude-primary": {
-                "efficient": ["HL", "TL", "EX", "TM", "TH", "SM"],
+                "efficient": ["HL", "TL", "HM", "TM", "SNH", "SM"],
                 "balanced": ["HH", "HM", "HMAX", "SNH", "OM", "OH", "OX", "SM", "SMAX"],
                 "performance": ["OM", "OH", "OX", "OMAX", "SMAX", "AMAX", "FH"]}}
         for variant, modes in expected.items():
@@ -310,9 +315,9 @@ class VariantTests(unittest.TestCase):
                 self.assertEqual(result["choices"][0]["claude_mode"], "implementation")
                 self.assertFalse(result["overrides"]["role_or_lifecycle"])
         review = bundle.resolve(self.config, variant="claude-primary", code="SM", role="qa")
-        self.assertTrue(review["choices"][0]["independent_review"])
-        with self.assertRaisesRegex(ValueError, "role/lifecycle"):
-            bundle.resolve(self.config, variant="claude-primary", code="SM", role="implementation")
+        self.assertNotIn("independent_review", review["choices"][0])
+        implementation = bundle.resolve(self.config, variant="claude-primary", code="SM", role="implementation")
+        self.assertEqual(implementation["choices"][0]["code"], "SM")
         authored = bundle.resolve(self.config, variant="claude-primary", code="OH")
         self.assertNotIn("independent_review", authored["choices"][0])
         escalation = bundle.resolve(self.config, mode="performance", code="OMAX")
@@ -340,27 +345,23 @@ class VariantTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "shared top-level"):
             bundle.validate(bundle.merge(self.config, {"variants": {"codex-primary": {"modes": {"codex-burn": [{"profile": "SH"}]}}}}))
 
-    def test_fable_performance_escalation_preserves_roles_and_leaf_lifecycle(self):
+    def test_fable_performance_supports_authorship_and_review_without_role_override(self):
         for variant in self.config["variants"]:
             entry = next(e for e in bundle.mode_pools(self.config, variant)["performance"]
                          if e["profile"] == "FH")
-            self.assertEqual({k: v for k, v in entry.items() if k not in {"slot", "fit"}}, {"profile": "FH",
-                                    "roles": ["research", "planning", "qa", "spec-review"],
-                                    "independent_review": True, "escalation": True, "one_off_only": True})
+            self.assertEqual({k: v for k, v in entry.items() if k not in {"slot", "fit"}},
+                             {"profile": "FH", "escalation": True, "one_off_only": True})
             for design, dispatch in (("codex-first", "external-claude"),
                                      ("claude-first", "native-claude")):
-                for role in entry["roles"]:
+                for role in self.config["roles"]:
                     result = bundle.resolve(self.config, variant=variant, mode="performance",
                                             code="FH", role=role, design=design)
                     self.assertEqual(result["choices"][0]["dispatch"], dispatch)
                     self.assertEqual(result["choices"][0]["effort"], "high")
-                for role in ("implementation", "frontend", "integration", "browser"):
-                    with self.assertRaisesRegex(ValueError, "role/lifecycle"):
-                        bundle.resolve(self.config, variant=variant, mode="performance",
-                                       code="FH", role=role, design=design)
+                    self.assertFalse(result["overrides"]["role_or_lifecycle"])
                 with self.assertRaisesRegex(ValueError, "role/lifecycle"):
-                    bundle.resolve(self.config, variant=variant, mode="performance",
-                                   code="FH", role="planning", design=design, assignment_kind="controller")
+                    bundle.resolve(self.config, variant=variant, mode="performance", code="FH",
+                                   role="planning", design=design, assignment_kind="controller")
 
     def test_removed_au_fails_without_substitution(self):
         self.assertNotIn("AU", self.config["profiles"])
@@ -397,12 +398,12 @@ class VariantTests(unittest.TestCase):
             self.assertNotIn("amusing", self.config["variants"][variant]["modes"])
             self.assertFalse(any(entry.get("specialist") for entry in pool))
             for role, codes in {
-                "implementation": ["SM", "SX", "OM", "MFH", "MFX"],
-                "research": ["SM", "SX", "OM", "MFH", "MFX"],
-                "planning": ["SM", "SX", "OM", "OX", "MFH", "MFX"],
-                "qa": ["SM", "SX", "OM", "OX", "AMAX", "MFH", "MFX"],
-                "spec-review": ["SM", "SX", "OM", "OX", "FH"],
-                "browser": ["SM", "SX", "OM", "AMAX"]}.items():
+                "implementation": ["SM", "SX", "OM", "FH", "MFH", "MFX"],
+                "research": ["SM", "SX", "OM", "FH", "MFH", "MFX"],
+                "planning": ["SM", "SX", "OM", "OX", "FH", "MFH", "MFX"],
+                "qa": ["SM", "SX", "OM", "OX", "AMAX", "FH", "MFH", "MFX"],
+                "spec-review": ["SM", "SX", "OM", "OX", "FH", "MFH", "MFX"],
+                "browser": ["SM", "SX", "OM", "AMAX", "FH", "MFH", "MFX"]}.items():
                 result = bundle.resolve(self.config, mode="amusing", variant=variant, role=role)
                 self.assertEqual([choice["code"] for choice in result["choices"]], codes)
                 self.assertNotIn("burn", result)
@@ -412,7 +413,7 @@ class VariantTests(unittest.TestCase):
                 self.assertTrue(choice["independent_review"])
                 with self.assertRaisesRegex(ValueError, "outside"):
                     bundle.resolve(self.config, mode="amusing", variant=variant, code="AX", role=role)
-        for code in ("OX", "AMAX", "FH"):
+        for code in ("OX", "AMAX"):
             with self.assertRaisesRegex(ValueError, "role/lifecycle"):
                 bundle.resolve(self.config, mode="amusing", code=code, role="implementation")
         with self.assertRaisesRegex(ValueError, "only to burn"):

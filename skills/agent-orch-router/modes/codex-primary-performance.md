@@ -9,15 +9,15 @@ Prioritize task success and turnaround. Escalation is available when justified, 
 | --- | --- | --- | --- |
 | deep | SH: gpt-6.1-sol / high | general | Use for substantive implementation or diagnosis when a routine route would leave material uncertainty. |
 | hard | SX: gpt-6.1-sol / xhigh | general | Use for difficult debugging, integration, or implementation with several interacting constraints. |
-| max-code | SMAX: gpt-6.1-sol / max | general | Use for demanding code changes or independent verification requiring sustained reasoning across a large change surface. |
-| broad | AMAX: gpt-6-astra / max | general | Use for demanding analysis, visual reasoning, or implementation where Astra's task and tool fit justify the route. |
-| browser | AH: gpt-6-astra / high | browser; specialist | Start here for difficult browser or computer-use assignments. Confirm actual tools and session access. |
-| opus-deep | OX: claude-opus-5-5 / xhigh | qa, spec-review; independent review | Use for optional independent QA or specification review of complex work, not authored fixes. |
+| max-code | SMAX: gpt-6.1-sol / max | general | Consider for demanding implementation, integration, or independent verification. Use Max only when the assignment warrants the additional effort. |
+| broad | AMAX: gpt-6-astra / max | general | Consider for demanding analysis, implementation, or verification when task fit warrants Max effort. Verify tools for interactive work. |
+| reasoning | AH: gpt-6-astra / high | general | Consider for demanding reasoning, implementation, debugging, or analysis. High effort does not imply a browser specialty. |
+| opus-deep | OX: claude-opus-5-5 / xhigh | general | Consider for difficult analysis, implementation, architecture, or independent review. Keep authorship separate from final acceptance. |
 | opus-max | OMAX: claude-opus-5-5 / max | escalation | Use as a justified escalation for demanding analysis or implementation when earlier eligible choices do not fit. |
-| fable-review | FH: claude-fable-5-2 / high | research, planning, qa, spec-review; independent review; escalation; one-off | Selectively escalate difficult reasoning, specification analysis, or independent review. Use a bounded worker, not authored fixes or team management. |
+| fable | FH: claude-fable-5-2 / high | escalation; one-off | Consider for demanding reasoning, architecture, implementation, or independent review as a bounded worker. State whether the assignment authors a change or reviews an existing candidate. |
 <!-- END GENERATED:pool:codex-primary/performance -->
 
-FH is a one-off escalation, not a required stage. Review assignments remain independent of the author.
+FH may reason, implement, integrate, or review as a bounded worker, not an automatic controller or required stage. Independent review needs a fresh assignment separate from authorship.
 
 Choose the earliest suitable eligible slot, not every cheaper profile in sequence. General slots permit all task roles. Bindings never change slot eligibility. One-off slots require a fresh bounded worker, never a continuing controller. Specialist slots take precedence for their stated role. Other eligible profiles may still use those tools.
 

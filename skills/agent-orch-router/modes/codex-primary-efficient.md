@@ -1,6 +1,6 @@
 # codex-primary / efficient
 
-Minimize resources per accepted task, including retries and controller repair. The six choices share one workflow across variants. Only the cheap slot differs: LM under Codex-primary, HL under Claude-primary. EX requires a verified exact Muse adapter and account access. Otherwise report EX unavailable, without substituting for an explicit EX request.
+Minimize resources per accepted task, including retries and controller repair. This Codex-primary pool retains LM/TL/EX/TM/TH/SM. EX requires a verified exact Muse adapter and account access. Otherwise report EX unavailable, without substituting for an explicit EX request.
 
 ## Ordered pool
 

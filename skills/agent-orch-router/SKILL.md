@@ -70,7 +70,9 @@ Kimi's benchmark does not specify effort. Its record is documentary until an exp
 
 Existing exact profiles outside these catalogs remain available in [compatibility profiles](references/compatibility.md). They are not specialists merely because they are retained. Retired Fast codes, `fast`, `tokenburn`, and `CMAX` fail with explicit migration guidance. `hiq` was renamed to `amusing` and requires explicit reselection.
 
-FM is a selective on-call comparison. FH is the preferred Fable reasoning/specification/review trial. FX is an explicit hardest long-running trial. FMAX is exceptional and on-call. These are task-fit proposals, not guaranteed effort rankings.
+Task fits are preferences, not model limitations or measured effort-specific specialties. Assignments determine authorship, independence, and delegation.
+
+FM/FH/FX/FMAX can reason, implement, or review when eligible. FH is the preferred selective Fable trial; FX and FMAX remain optional higher-effort comparisons.
 
 For selected FM/FH/FX/FMAX assignments only, read [Fable prompting](references/fable-prompting.md) before briefing or dispatch. Include relevant work-order guidance. Pool eligibility alone does not trigger this read.
 

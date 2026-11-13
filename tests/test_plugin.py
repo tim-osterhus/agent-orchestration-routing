@@ -117,7 +117,7 @@ class PluginPackageTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Native routes require"):
                 bundle.launch_plan(resolved, directory, str(prompt), str(Path(directory) / "runs"))
         bulk = bundle.resolve(self.config, mode="bulk", design="claude-plugin")
-        self.assertEqual([c["code"] for c in bulk["choices"]], ["SL", "TM", "TH", "SM", "SH", "SX", "SMAX", "OX"])
+        self.assertEqual([c["code"] for c in bulk["choices"]], ["SL", "TM", "TH", "SM", "SH", "SX", "SMAX", "AL", "OX", "FH"])
         self.assertEqual(bulk["limits"]["max_parallel_workers"], 3)
 
     def test_hooks_only_manage_session_state(self):

@@ -6,11 +6,13 @@ Read only when comparing model families or selecting a specialist. Evidence chec
 
 - Luna and Haiku: small bounded packets with inexpensive checks. Cheap attempts are not efficient when retries or controller repair dominate.
 - Terra: established-pattern implementation, source-rich writing, synthesis, and visual analysis. Start at Medium, choosing effort by checked results rather than assuming High resolves a framing problem.
-- Sol: implementation, debugging, and integration. Higher effort is a task-dependent tradeoff, not a guaranteed quality ladder.
-- Astra: visual/browser work and demanding reasoning. Tool availability belongs to the actual worker, not the model name.
+- Sol: general implementation, analysis, debugging, integration, and verification. Effort-specific task assignments are routing heuristics, not measured specialties.
+- Astra: general reasoning, implementation, analysis, and verification. Browser work requires the actual worker's tools. AH has no established browser-specific advantage here.
 - Ember and Gemini Carbon: general reasoning candidates on the supplied frontier. Use only through a verified exact provider route.
 - Opus and Sonnet: general implementation and knowledge work. Their specialist evidence below is narrower than general repository superiority.
-- Fable: demanding reasoning and requirements review. FH is the preferred selective trial. FX is not strictly dominated by FH on unrounded AAI scores.
+- Fable: demanding reasoning, architecture, implementation, and review. FH is the preferred selective trial. FX is not strictly dominated by FH on unrounded AAI scores.
+
+Mode preferences do not establish model limitations. A designated reviewer remains independent for that assignment. A general entry may author or review.
 
 The [OpenAI Terra guidance](https://developers.openai.com/api/docs/guides/latest-model), [Muse model documentation](https://dev.meta.ai/docs/muse-ember), and [Gemini Carbon documentation](https://aistudio.google.com/docs/models/gemini-4-carbon) support capabilities and configuration contracts, not local account access.
 
