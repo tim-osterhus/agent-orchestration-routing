@@ -17,7 +17,7 @@ Use this pool when Codex should author most work and Claude should take hard or 
 | reasoning | AL: gpt-6-astra / low | general | Consider for general analysis or implementation at Low effort. Browser assignments require verified tools and session access. |
 | opus-max | OX: claude-opus-5-5 / xhigh | escalation | Escalate hard or quality-sensitive implementation or analysis after an unconvincing Codex attempt or when errors would be costly. |
 | opus | OH: claude-opus-5-5 / high | qa, spec-review; independent review | Use for independent QA or specification review of a Codex-authored candidate, not implementation. |
-| fable | FH: claude-fable-5-2 / high | escalation; one-off | Consider for demanding reasoning, architecture, implementation, or independent review as a bounded worker. State whether the assignment authors a change or reviews an existing candidate. |
+| fable | FH: claude-fable-5-2 / high | escalation; one-off | Consider for demanding reasoning, implementation, or fresh architectural framing when an approach stalls or offers too-similar alternatives. Return a candidate checked against the same acceptance criteria, or an independent review, within the bounded assignment. |
 <!-- END GENERATED:pool:codex-primary/bulk -->
 
 Known patterns can span long workflows. A clear outcome alone does not make the solution path known.

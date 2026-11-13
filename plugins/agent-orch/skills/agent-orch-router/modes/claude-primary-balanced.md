@@ -12,8 +12,8 @@ Use this everyday pool for low/default/high bias. Low favors the least resource-
 | haiku-max | HMAX: claude-haiku-5-5 / max | one-off | Use for a harder one-off packet that still has a narrow scope and a direct acceptance check. |
 | sonnet | SNH: claude-sonnet-5-5 / high | general | Use for scoped implementation, research synthesis, or diagnosis needing judgment beyond a small Haiku packet. |
 | opus-medium | OM: claude-opus-5-5 / medium | general | Use for everyday general-purpose implementation and integration, including work spanning related files. |
-| opus | OH: claude-opus-5-5 / high | general | Prefer for an independent Claude perspective when useful; implementation and analysis are also eligible. Use a fresh reviewer for work it authored. |
-| opus-deep | OX: claude-opus-5-5 / xhigh | general | Consider for difficult analysis, implementation, architecture, or independent review. Keep authorship separate from final acceptance. |
+| opus | OH: claude-opus-5-5 / high | general | Consider for thorough implementation, investigation, or independent review when reproductions and edge-case coverage warrant additional diligence. Use a fresh reviewer for work it authored. |
+| opus-deep | OX: claude-opus-5-5 / xhigh | general | Consider for difficult analysis, implementation, architecture, or independent review, especially when exhaustive investigation or extensive testing is warranted. Keep authorship separate from final acceptance. |
 | standard | SM: gpt-6.1-sol / medium | general | Consider for general implementation or verification across related components. Cross-provider review is a preference, not an implementation ban. |
 | max-code | SMAX: gpt-6.1-sol / max | general | Consider for demanding implementation, integration, or independent verification. Use Max only when the assignment warrants the additional effort. |
 <!-- END GENERATED:pool:claude-primary/balanced -->

@@ -45,7 +45,7 @@ Regenerate it with the same `plugin` action without `--check`. Generation copies
 | `adapters` | Availability by exact `provider:access_mode` route. A known adapter does not establish current account access, tools, or permissions. |
 | `profiles` | One master catalog of exact model, provider, effort, target tier, soft context target, and descriptions. Aliases use `alias_of`. |
 | `default_variant`, `variants` | Select `codex-primary` or `claude-primary` pools for Efficient, Balanced, and Performance. |
-| `modes` | Shared Amusing, Council, and burn pools, plus custom/preset pools. Entries carry role/lifecycle, specialist, independent-review, and escalation markers. |
+| `modes` | Shared UI-Pro, Amusing, Council, Browser-3D, and burn pools, plus custom/preset pools. Entries carry role/lifecycle, specialist, independent-review, and escalation markers. |
 | `selection.bias` | Low/default/high selection preference. It never changes model effort or sorts unknown benchmark values. |
 | `execution_style` | Pure orchestration or supporting delegation. |
 | `max_parallel_workers` | Scheduling ceiling, further limited by the actual runtime. |
@@ -55,9 +55,11 @@ Regenerate it with the same `plugin` action without `--check`. Generation copies
 
 Keep your edits in an ignored `config/local.json` and pass `--overlay config/local.json`, or pass a complete replacement with `--config`. Recursive object merge preserves unspecified fields. Arrays replace rather than append. Later presets/overlays win. Presets load before overlays, so local policy can narrow a preset. Validate the final merged configuration.
 
-`--variant` selects pool preference independently of controller design, permissions, and bias. Codex-primary is the default. `variants.NAME.modes` defines each variant's normal pools. Top-level `modes` supplies shared Amusing, Council, burns, and custom/preset pools. A legacy top-level normal-mode override takes precedence for every variant. Prefer a variant-specific overlay when only one variant should change. Complete legacy configs without `variants` still use their top-level modes.
+`--variant` selects pool preference independently of controller design, permissions, and bias. Codex-primary is the default. `variants.NAME.modes` defines each variant's normal pools. Top-level `modes` supplies shared UI-Pro, Amusing, Council, Browser-3D, burns, and custom/preset pools. A legacy top-level normal-mode override takes precedence for every variant. Prefer a variant-specific overlay when only one variant should change. Complete legacy configs without `variants` still use their top-level modes.
 
-Both variants have seven base modes with one shared catalog. The [router entrypoint](../skills/agent-orch-router/SKILL.md) links each self-contained mode. Bundled pool order and task-fit guidance are available there without reading JSON. Pool sizes are bundled choices, not hard limits on custom configuration.
+Both variants use one shared catalog. The [router entrypoint](../skills/agent-orch-router/SKILL.md) links each self-contained mode. Bundled pool order and task-fit guidance are available there without reading JSON. Pool sizes are bundled choices, not hard limits on custom configuration.
+
+[UI-Pro](../skills/agent-orch-router/modes/ui-pro.md) adds independent visual critique, focused implementation, and a required same-candidate SMAX/OX/MFX final council. TM supplies the default browser binding; TH handles baseline/intermediate critique, and SM/OM implement. TH's eligibility in a final-review resolution does not make it a council member. The inspector resolves roles and bindings, not browser access, context isolation, council completion, or acceptance. Permission/tool profiles remain configurable; broader review access does not authorize edits.
 
 Fable `FM`, `FX`, and `FMAX` remain on-call. `FH` can reason, implement, integrate, or review in Performance, Bulk, and Amusing. Council keeps its advisory assignment. No Fable profile appears in the Opus/Haiku preset. `FH`/`FX` select Fable 5.2, not 5.1. Ultracode is not supported. All model IDs require account/runtime verification.
 
@@ -69,7 +71,7 @@ Amusing is shared and opt-in. Its eight profiles are eligible choices, not requi
 
 `resolve` returns exact external-provider labels with adapter-required metadata. Bundled launch plans reject providers other than Codex and Claude. Use a separately verified adapter rather than substituting Codex or Claude settings. Configure Muse permissions through that adapter independently of model and role. Honor and read back the selected profile. This bundle imposes neither read-only nor maximum access.
 
-The existing `muse:muse_code_subscription` adapter route keeps MFH/MFX eligible in Council and Amusing. Its known route does not verify the current account or model entitlement. Perform the selected mode's dispatch preflight. `muse:public_api_standard` remains unavailable by default, so Code availability cannot enable EX or other Muse API profiles. Provider-wide flags do not override an explicit access route.
+The existing `muse:muse_code_subscription` adapter route keeps MFH/MFX eligible in Council and Amusing, and MFX in UI-Pro. Its known route does not verify the current account or model entitlement. Perform the selected mode's dispatch preflight. `muse:public_api_standard` remains unavailable by default, so Code availability cannot enable EX or other Muse API profiles. Provider-wide flags do not override an explicit access route.
 
 Bundled Codex profiles target Standard tier without enforcing it. Launch plans do not set a tier and may inherit runtime settings. Verify and report the effective or inherited tier, or disclose unavailable verification. Do not change global speed settings.
 
@@ -176,7 +178,7 @@ The optional preset defaults to permission bypass and full tools. Its approvals 
 
 Consultation and Implementation default to 60 minutes with no turn limit. Orchestration defaults to no timeout and no turn limit. `null` is deliberate, not a missing value. A plan's timeout is metadata: the caller must enforce a non-null deadline across its owned process tree. Actual execution limits and account errors still apply. Resumes share the original assignment deadline if one exists.
 
-Balanced under Claude-primary permits general-purpose Opus implementation. Under Codex-primary, Balanced's OH entry is an optional independent-review route. An authored OH assignment there needs an explicit role exception. Standalone `--direct` calls have no router pool. They use the companion's configured default model and the user's assigned role, not an exception to an active router. Do not add `--direct` to evade restrictions while the router remains active.
+Balanced permits general-purpose Opus implementation and independent review under either variant's eligible bindings. An author needs fresh independent acceptance, not a provider-based implementation exception. Standalone `--direct` calls have no router pool. They use the companion's configured default model and the user's assigned role, not an exception to an active router. Do not add `--direct` to evade restrictions while the router remains active.
 
 CLI plans apply only to external routes. A native dispatch label now fails launch planning instead of producing a second CLI controller. Use the host's native worker controls. `--design` must describe the actual controller host, not serve as a way to evade this check.
 

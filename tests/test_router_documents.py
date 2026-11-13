@@ -93,8 +93,8 @@ class RouterDocumentTests(unittest.TestCase):
             self.assertNotRegex(mode, r"\]\([^)]*modes/|\]\([^)]*routing\.json|references/(execution|routing-policy)")
             self.assertIn("Use native workers", mode)
             self.assertIn("installed Claude Delegation skill", mode)
-            # Council's opening/critique/ratification protocol needs more than a routing pool.
-            self.assertLess(len((entrypoint + mode).split()), 2100 if target == "modes/council.md" else 1750)
+            # Council and UI-Pro carry explicit multi-review acceptance protocols.
+            self.assertLess(len((entrypoint + mode).split()), 2100 if target in {"modes/council.md", "modes/ui-pro.md"} else 1750)
 
     def test_muse_task_fit_matches_catalog(self):
         fits = {slot: task_fit for slot, _, _, task_fit in rows(SKILL / "modes/amusing.md")[1:]}

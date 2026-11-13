@@ -93,7 +93,7 @@
           {"slot": "hard", "fit": "Use for difficult implementation or debugging with interacting constraints and explicit acceptance checks."},
           {"slot": "max-code", "fit": "Consider for demanding implementation, integration, or independent verification. Use Max only when the assignment warrants the additional effort."},
           {"slot": "reasoning", "fit": "Consider for general analysis or implementation at Low effort. Browser assignments require verified tools and session access."},
-          {"slot": "opus", "fit": "Prefer for an independent Claude perspective when useful; implementation and analysis are also eligible. Use a fresh reviewer for work it authored."}
+          {"slot": "opus", "fit": "Consider for thorough implementation, investigation, or independent review when reproductions and edge-case coverage warrant additional diligence. Use a fresh reviewer for work it authored."}
         ],
         "performance": [
           {"slot": "deep", "fit": "Use for substantive implementation or diagnosis when a routine route would leave material uncertainty."},
@@ -101,9 +101,9 @@
           {"slot": "max-code", "fit": "Consider for demanding implementation, integration, or independent verification. Use Max only when the assignment warrants the additional effort."},
           {"slot": "broad", "fit": "Consider for demanding analysis, implementation, or verification when task fit warrants Max effort. Verify tools for interactive work."},
           {"slot": "reasoning", "fit": "Consider for demanding reasoning, implementation, debugging, or analysis. High effort does not imply a browser specialty."},
-          {"slot": "opus-deep", "fit": "Consider for difficult analysis, implementation, architecture, or independent review. Keep authorship separate from final acceptance."},
+          {"slot": "opus-deep", "fit": "Consider for difficult analysis, implementation, architecture, or independent review, especially when exhaustive investigation or extensive testing is warranted. Keep authorship separate from final acceptance."},
           {"slot": "opus-max", "escalation": true, "fit": "Use as a justified escalation for demanding analysis or implementation when earlier eligible choices do not fit."},
-          {"slot": "fable", "escalation": true, "one_off_only": true, "fit": "Consider for demanding reasoning, architecture, implementation, or independent review as a bounded worker. State whether the assignment authors a change or reviews an existing candidate."}
+          {"slot": "fable", "escalation": true, "one_off_only": true, "fit": "Consider for demanding reasoning, implementation, or fresh architectural framing when an approach stalls or offers too-similar alternatives. Return a candidate checked against the same acceptance criteria, or an independent review, within the bounded assignment."}
         ],
         "bulk": [
           {"slot": "routine", "fit": "Use for routine, clearly specified edits whose output is easy to check."},
@@ -116,7 +116,7 @@
           {"slot": "reasoning", "fit": "Consider for general analysis or implementation at Low effort. Browser assignments require verified tools and session access."},
           {"slot": "opus-max", "escalation": true, "fit": "Escalate hard or quality-sensitive implementation or analysis after an unconvincing Codex attempt or when errors would be costly."},
           {"slot": "opus", "roles": ["qa", "spec-review"], "independent_review": true, "fit": "Use for independent QA or specification review of a Codex-authored candidate, not implementation."},
-          {"slot": "fable", "escalation": true, "one_off_only": true, "fit": "Consider for demanding reasoning, architecture, implementation, or independent review as a bounded worker. State whether the assignment authors a change or reviews an existing candidate."}
+          {"slot": "fable", "escalation": true, "one_off_only": true, "fit": "Consider for demanding reasoning, implementation, or fresh architectural framing when an approach stalls or offers too-similar alternatives. Return a candidate checked against the same acceptance criteria, or an independent review, within the bounded assignment."}
         ]
       }
     },
@@ -136,24 +136,33 @@
           {"slot": "haiku-max", "one_off_only": true, "fit": "Use for a harder one-off packet that still has a narrow scope and a direct acceptance check."},
           {"slot": "sonnet", "fit": "Use for scoped implementation, research synthesis, or diagnosis needing judgment beyond a small Haiku packet."},
           {"slot": "opus-medium", "fit": "Use for everyday general-purpose implementation and integration, including work spanning related files."},
-          {"slot": "opus", "fit": "Prefer for an independent Claude perspective when useful; implementation and analysis are also eligible. Use a fresh reviewer for work it authored."},
-          {"slot": "opus-deep", "fit": "Consider for difficult analysis, implementation, architecture, or independent review. Keep authorship separate from final acceptance."},
+          {"slot": "opus", "fit": "Consider for thorough implementation, investigation, or independent review when reproductions and edge-case coverage warrant additional diligence. Use a fresh reviewer for work it authored."},
+          {"slot": "opus-deep", "fit": "Consider for difficult analysis, implementation, architecture, or independent review, especially when exhaustive investigation or extensive testing is warranted. Keep authorship separate from final acceptance."},
           {"slot": "standard", "fit": "Consider for general implementation or verification across related components. Cross-provider review is a preference, not an implementation ban."},
           {"slot": "max-code", "fit": "Consider for demanding implementation, integration, or independent verification. Use Max only when the assignment warrants the additional effort."}
         ],
         "performance": [
           {"slot": "opus-medium", "fit": "Use for substantive general-purpose implementation or integration with sufficiently clear requirements."},
-          {"slot": "opus", "fit": "Prefer for an independent Claude perspective when useful; implementation and analysis are also eligible. Use a fresh reviewer for work it authored."},
-          {"slot": "opus-deep", "fit": "Consider for difficult analysis, implementation, architecture, or independent review. Keep authorship separate from final acceptance."},
+          {"slot": "opus", "fit": "Consider for thorough implementation, investigation, or independent review when reproductions and edge-case coverage warrant additional diligence. Use a fresh reviewer for work it authored."},
+          {"slot": "opus-deep", "fit": "Consider for difficult analysis, implementation, architecture, or independent review, especially when exhaustive investigation or extensive testing is warranted. Keep authorship separate from final acceptance."},
           {"slot": "opus-max", "fit": "Use for demanding implementation or analysis when sustained reasoning is justified by the assignment."},
           {"slot": "max-code", "fit": "Consider for demanding implementation, integration, or independent verification. Use Max only when the assignment warrants the additional effort."},
           {"slot": "broad", "fit": "Consider for demanding analysis, implementation, or verification when task fit warrants Max effort. Verify tools for interactive work."},
-          {"slot": "fable", "escalation": true, "one_off_only": true, "fit": "Consider for demanding reasoning, architecture, implementation, or independent review as a bounded worker. State whether the assignment authors a change or reviews an existing candidate."}
+          {"slot": "fable", "escalation": true, "one_off_only": true, "fit": "Consider for demanding reasoning, implementation, or fresh architectural framing when an approach stalls or offers too-similar alternatives. Return a candidate checked against the same acceptance criteria, or an independent review, within the bounded assignment."}
         ]
       }
     }
   },
   "modes": {
+    "ui-pro": [
+      {"slot":"browser","roles":["browser"],"specialist":true,"fit":"Capture screenshots and run interaction, keyboard, and focus checks with verified browser/computer-control tools. Record build, route, viewport, theme, and state."},
+      {"slot":"visual-deep","roles":["research","planning","qa","spec-review"],"fit":"Diagnose concrete defects in baseline and intermediate screenshots. Return unresolved framing to the coordinator; this critique does not replace the final council."},
+      {"slot":"standard","roles":["implementation","frontend","integration"],"fit":"Own focused UI implementation in the project's existing design system and idioms."},
+      {"slot":"opus-medium","roles":["implementation","frontend","integration"],"fit":"Own substantial scoped UI implementation or refactoring across related components."},
+      {"slot":"max-code","roles":["qa","spec-review"],"independent_review":true,"fit":"Review the final candidate independently against the requirements, rubric, and functional evidence. Fresh intermediate reviews are also eligible."},
+      {"slot":"opus-deep","roles":["qa","spec-review"],"independent_review":true,"fit":"Critique visual design, interaction, and rendering code from a separate model's perspective. Fresh intermediate reviews are also eligible."},
+      {"slot":"investigate-deep","roles":["qa","spec-review"],"independent_review":true,"fit":"Critique the candidate against existing components, tokens, and repository patterns. Fresh intermediate reviews are also eligible."}
+    ],
     "browser-3d": [
       {"slot": "standard", "fit": "Implement conventional UI, interactions, asset manifests, automation, and tests. Also handle routine browser journeys and screenshot collection with verified tool access."},
       {"slot": "deep", "fit": "Build scene-generation and export pipelines, browser rendering, and asset integration. Diagnose performance problems while preserving the approved visual direction."},
@@ -166,7 +175,7 @@
       {"slot": "opus-deep", "roles": ["research", "planning", "qa", "spec-review"], "fit": "Challenge architectural choices against requirements, source evidence, and simpler alternatives."},
       {"slot": "investigate-deep", "roles": ["research", "planning", "qa", "spec-review"], "fit": "Investigate competing hypotheses and identify evidence that distinguishes proposed approaches."},
       {"slot": "broad", "roles": ["research", "planning", "qa", "spec-review"], "fit": "Add an optional fourth perspective on assumptions, alternatives, and decision criteria."},
-      {"slot": "fable-review", "roles": ["research", "planning", "spec-review"], "fit": "Advise on requirements, overlooked constraints, and alternative hypotheses without an additional vote."}
+      {"slot": "fable-review", "roles": ["research", "planning", "spec-review"], "fit": "Advise on requirements and overlooked constraints, challenging the premise when useful and proposing materially distinct alternatives. This advisory slot adds no vote."}
     ],
     "codex-burn": [
       {"slot": "reasoning", "fit": "Consider for general analysis or implementation at Low effort. Browser assignments require verified tools and session access. Select only authorized backlog work."},
@@ -190,7 +199,7 @@
       {"slot": "opus-medium", "fit": "Prefer for substantial scoped implementation or refactoring when the task fits Opus Medium. Medium is not a universal optimum, so compare the actual candidate and checks."},
       {"slot": "opus-deep", "roles": ["planning", "qa", "spec-review"], "independent_review": true, "fit": "Independently review maintainability and architecture against the repository's existing design. Propose concrete simpler alternatives where they preserve the required behavior."},
       {"slot": "broad", "roles": ["qa", "browser"], "independent_review": true, "fit": "Independently test functional behavior, failure cases, and implementation assumptions against the requirements. Report evidence and maintainability concerns without claiming model-specific code-quality authority."},
-      {"slot": "fable", "fit": "Consider for demanding reasoning, architecture, implementation, or independent review. State whether the assignment authors a change or reviews an existing candidate."},
+      {"slot": "fable", "fit": "Consider for demanding implementation or a fresh framing when the current approach overcomplicates the task or offers too-similar alternatives. Preserve acceptance criteria and distinguish authorship from independent review."},
       {"slot": "investigate", "fit": "Investigate repository structure, existing fixes, and root causes using source evidence. Default to diagnosis and focused checks. Implement when the work order authorizes edits."},
       {"slot": "investigate-deep", "fit": "Examine cross-system failures with competing hypotheses and challenge a proposed plan against evidence. Default to discriminating checks, not a second dispatcher. Implement when the work order authorizes edits."}
     ]
@@ -376,6 +385,7 @@
       }
     },
     "shared": {
+      "ui-pro": {"browser": "TM", "visual-deep": "TH", "standard": "SM", "opus-medium": "OM", "max-code": "SMAX", "opus-deep": "OX", "investigate-deep": "MFX"},
       "browser-3d": {
         "standard": "SM",
         "deep": "SH",

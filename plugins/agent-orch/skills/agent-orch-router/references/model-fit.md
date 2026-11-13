@@ -1,6 +1,6 @@
 # Model fit and specialist evidence
 
-Read only when comparing model families or selecting a specialist. Evidence checked 2026-11-10. A narrow result can justify a trial, not a universal preference or new execution authority.
+Read only when comparing model families or selecting a specialist. Benchmark evidence was checked 2026-11-10; practitioner notes were checked 2026-11-13. A narrow result can justify a trial, not a universal preference or new execution authority.
 
 ## Family traits
 
@@ -9,10 +9,12 @@ Read only when comparing model families or selecting a specialist. Evidence chec
 - Sol: general implementation, analysis, debugging, integration, and verification. Effort-specific task assignments are routing heuristics, not measured specialties.
 - Astra: general reasoning, implementation, analysis, and verification. Browser work requires the actual worker's tools. AH has no established browser-specific advantage here.
 - Ember and Gemini Carbon: general reasoning candidates on the supplied frontier. Use only through a verified exact provider route.
-- Opus and Sonnet: general implementation and knowledge work. Their specialist evidence below is narrower than general repository superiority.
-- Fable: demanding reasoning, architecture, implementation, and review. FH is the preferred selective trial. FX is not strictly dominated by FH on unrounded AAI scores.
+- Opus and Sonnet: general implementation and knowledge work. For Opus, consider OH when reproductions and edge-case coverage warrant extra diligence; OX is a candidate for deliberately exhaustive investigation. These are practitioner-informed preferences, not measured effort-specific specialties.
+- Fable: demanding reasoning, implementation, and review, including a fresh-framing trial when an approach stalls or alternatives are too similar. Check candidates against the same acceptance criteria and risk-appropriate tests. FH remains the preferred selective trial; raw AAI scores do not establish strict FH dominance over FX.
 
 Mode preferences do not establish model limitations. A designated reviewer remains independent for that assignment. A general entry may author or review.
+
+OM remains an everyday scoped-work candidate. See [Opus/Fable practitioner evidence](evidence.md#opusfable-practitioner-anecdote) for the preferences above; API benchmark costs are not subscription economics.
 
 The [OpenAI Terra guidance](https://developers.openai.com/api/docs/guides/latest-model), [Muse model documentation](https://dev.meta.ai/docs/muse-ember), and [Gemini Carbon documentation](https://aistudio.google.com/docs/models/gemini-4-carbon) support capabilities and configuration contracts, not local account access.
 

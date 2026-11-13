@@ -15,7 +15,7 @@ Use this everyday pool for low/default/high bias. Low favors the least resource-
 | hard | SX: gpt-6.1-sol / xhigh | general | Use for difficult implementation or debugging with interacting constraints and explicit acceptance checks. |
 | max-code | SMAX: gpt-6.1-sol / max | general | Consider for demanding implementation, integration, or independent verification. Use Max only when the assignment warrants the additional effort. |
 | reasoning | AL: gpt-6-astra / low | general | Consider for general analysis or implementation at Low effort. Browser assignments require verified tools and session access. |
-| opus | OH: claude-opus-5-5 / high | general | Prefer for an independent Claude perspective when useful; implementation and analysis are also eligible. Use a fresh reviewer for work it authored. |
+| opus | OH: claude-opus-5-5 / high | general | Consider for thorough implementation, investigation, or independent review when reproductions and edge-case coverage warrant additional diligence. Use a fresh reviewer for work it authored. |
 <!-- END GENERATED:pool:codex-primary/balanced -->
 
 Known patterns can span long workflows. A clear outcome alone does not make the solution path known.

@@ -41,3 +41,11 @@ Native behavior and external planning follow [OpenAI subagents](https://learn.ch
 Muse Wonder API and Muse Wonder Full Code subscription are distinct routes. Read [Muse provider checks](muse.md) only for selected Muse work. Effective privacy and permissions require separate verification.
 
 Refresh this registry only when requested. Record source/date, exact model and effort, comparison scope, benchmark version, fallback behavior, and measured values when available. Leave missing measurements unknown. Review registry changes, regenerate table blocks from the selected overlays, and run drift checks before replacing installed instructions.
+
+## Opus/Fable practitioner anecdote
+
+Theo describes complementary workflows in [I think I figured it out](https://youtu.be/XtykeVoSmP8): [High for his everyday Opus work](https://youtu.be/XtykeVoSmP8?t=463), [XHigh for exhaustive checks](https://youtu.be/XtykeVoSmP8?t=799), and [Fable for materially different approaches](https://youtu.be/XtykeVoSmP8?t=2141).
+
+In his [T3 Code retrospective](https://youtu.be/XtykeVoSmP8?t=1667), Opus built a more complete reproduction environment. Fable found a different state projection that reportedly reduced transferred data roughly 150-fold in some cases, despite building the weaker test environment. That comparison does not specify effort. His [review-loop warning](https://youtu.be/XtykeVoSmP8?t=1864) supports triaging material findings before requesting fixes, not approving unverified code.
+
+Reviewed 2026-11-13 using captions and all 20 sampled frames of the 42-minute video. Captions cover the full talk; visual coverage is sparse. The account is retrospective, not a controlled comparison, and he reports only two days with Fable. These anecdotes inform task-fit trials without changing model pools, role fences, permission settings, or required acceptance evidence. Subscription-value and universal-ranking claims were not independently established.

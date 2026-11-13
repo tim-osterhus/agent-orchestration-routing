@@ -113,6 +113,55 @@ class SlotTests(unittest.TestCase):
         self.assertEqual(bundle.resolve(changed, mode="browser-3d", design="claude-first")["limits"],
                          {"max_parallel_workers": 2, "max_external_sessions_per_assignment": 2})
 
+    def test_ui_pro_bindings_roles_and_review_independence(self):
+        expected = ["TM", "TH", "SM", "OM", "SMAX", "OX", "MFX"]
+        for variant in self.config["variants"]:
+            pool = bundle.mode_pools(self.config, variant)["ui-pro"]
+            self.assertEqual([e["profile"] for e in pool], expected)
+            self.assertNotIn("ui-pro", self.config["variants"][variant]["modes"])
+            for design in self.config["designs"]:
+                kwargs = dict(mode="ui-pro", variant=variant, design=design)
+                browser = bundle.resolve(self.config, role="browser", **kwargs)
+                self.assertEqual([c["code"] for c in browser["choices"]], ["TM"])
+                authors = bundle.resolve(self.config, role="implementation", **kwargs)
+                self.assertEqual([c["code"] for c in authors["choices"]], ["SM", "OM"])
+                reviews = bundle.resolve(self.config, role="qa", final=True, **kwargs)
+                self.assertEqual([c["code"] for c in reviews["choices"]], ["TH", "SMAX", "OX", "MFX"])
+                # Eligibility is not a council vote; the three named final members remain independent.
+                for code in ("SMAX", "OX", "MFX"):
+                    choice = bundle.resolve(self.config, code=code, role="qa", final=True, **kwargs)["choices"][0]
+                    self.assertTrue(choice["independent_review"])
+                    with self.assertRaisesRegex(ValueError, "role/lifecycle"):
+                        bundle.resolve(self.config, code=code, role="implementation", **kwargs)
+                with self.assertRaisesRegex(ValueError, "role/lifecycle"):
+                    bundle.resolve(self.config, code="SM", role="browser", **kwargs)
+        changed = bundle.merge(self.config, {"bindings": {"shared": {"ui-pro": {"opus-deep": "OH"}}}})
+        choice = bundle.resolve(changed, mode="ui-pro", slot="opus-deep", role="qa")["choices"][0]
+        self.assertEqual(choice["code"], "OH")
+        self.assertTrue(choice["independent_review"])
+        with self.assertRaisesRegex(ValueError, "role/lifecycle"):
+            bundle.resolve(changed, mode="ui-pro", slot="opus-deep", role="implementation")
+
+    def test_ui_pro_access_and_permissions_remain_separate(self):
+        changed = bundle.merge(self.config, {
+            "adapters": {"muse:muse_code_subscription": {"verified": False}},
+            "claude": {"modes": {"implementation": {"permission_mode": "acceptEdits"}}},
+            "codex": {"approval_policy": "on-request"},
+            "max_parallel_workers": 2, "max_external_sessions_per_assignment": 2})
+        result = bundle.resolve(changed, mode="ui-pro", role="qa")
+        self.assertIn("MFX", result["unavailable_profiles"])
+        self.assertNotIn("MFX", [c["code"] for c in result["choices"]])
+        self.assertEqual(result["limits"], {"max_parallel_workers": 2, "max_external_sessions_per_assignment": 2})
+        codex = bundle.resolve(changed, mode="ui-pro", code="TM", role="browser")["choices"][0]
+        self.assertEqual(codex["execution"]["approval_policy"], "on-request")
+        claude = bundle.resolve(changed, mode="ui-pro", code="OX", role="qa", claude_mode="implementation")["choices"][0]
+        self.assertEqual(claude["execution"]["permission_mode"], "acceptEdits")
+        self.assertTrue(claude["independent_review"])
+        explicit = bundle.resolve(changed, mode="ui-pro", code="MFX", role="qa")["choices"][0]
+        self.assertEqual(explicit["code"], "MFX")
+        self.assertFalse(explicit["execution"]["adapter_route_available"])
+        self.assertFalse(explicit["execution"]["launch_plan_supported"])
+
     def test_mode_specific_fit_preserves_review_scope_and_authority(self):
         cases = [
             ("codex-primary", "council", "OX", "planning", "simpler alternatives"),
