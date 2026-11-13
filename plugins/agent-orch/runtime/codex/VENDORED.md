@@ -4,6 +4,8 @@ Source: [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc) v1.0
 
 Included: `scripts/` (companion, broker, session hook, `lib/`), `prompts/adversarial-review.md`, and `schemas/review-output.schema.json`, so the copied companion still loads every module it imports.
 
+Added for agent-orch, not vendored: `scripts/subagent-status.mjs` and `scripts/lib/relay-activity.mjs`. The plugin's `settings.json` names the first as Claude Code's `subagentStatusLine` command. About every 5 seconds it maps each running Codex relay to its job, through the relay's transcript (`<project>/<session>/subagents/agent-<task id>.jsonl`, whose first line carries the work order path) and the work order's marker. It then prints that row's Codex activity, Codex token total, and elapsed time. Rows it cannot resolve keep Claude Code's default rendering.
+
 Not included: the Stop-hook review gate and its prompt, the `/codex:*` slash commands, the `codex-rescue` agent, and the bundled prompting skills. The agent-orch plugin dispatches through its own generated profile agents instead.
 
 ## Modifications
@@ -23,12 +25,14 @@ Relay repair (2026-11-11): `lib/codex.mjs` retries only exact pre-forward broker
 
 Bounded relay waits (2026-11-13): Claude Code moves a Bash call that outlives its timeout (120 seconds by default) to the background, so a relay holding one foreground `task` call for a long Codex turn looked finished after two minutes. `task --detach --prompt-file <file>` starts the existing detached `task-worker`, waits at most 100 seconds (less when `BASH_DEFAULT_TIMEOUT_MS` is lower; `--wait-ms` overrides it), and prints the task JSON or `{"status": "running", ...}` with the job ID, phase, elapsed time, token totals, and recent progress. `<file>.job.json` records the job and a fingerprint of the work order and task options. Rerunning the identical command, or adding `--attach`, waits on that job again and never starts a second run; `--attach` never starts one at all. A changed work order in a reused file starts a new job. The worker writes `<file>.result.json`, including failures, before it marks the job finished. A waiter that finds the worker gone with the job unfinished records a failure that keeps the thread and turn IDs. `lib/tracked-jobs.mjs` writes the latest token totals to the job file at most every 5 seconds.
 
+Live relay progress (2026-11-13): a `--detach` or `--attach` call that has waited at least 30 seconds (`AGENT_ORCH_CODEX_RELAY_HOLD_MS`) returns as soon as the job log grows, otherwise at the 100-second budget. The running JSON is now `{"status": "running", "jobId", "description", "next"}`. `description` reads `Codex · <latest activity> · <tokens> · <elapsed>`. Relays copy it into their next Bash call's description, which Claude Code shows as the subagent's activity. The marker also records `jobFile` and `logFile`.
+
 `lib/tracked-jobs.mjs` persists structured relay context and bounded cause chains. `codex-companion.mjs` also writes relay failures beside foreground work orders and emits their JSON with a nonzero exit. Permission and routing policy are unchanged. Read-only reconciliation is documented in the plugin dispatch reference.
 
 Offline regression command from the repository root:
 
 ```sh
-node --test plugins/agent-orch/runtime/codex/tests/relay-retry.test.mjs plugins/agent-orch/runtime/codex/tests/detached-relay.test.mjs
+node --test plugins/agent-orch/runtime/codex/tests/*.test.mjs
 ```
 
 `tests/test_plugin.py` runs these suites as part of the repository checks. Tests use fake clients and an offline broker fixture, not provider requests. They cover the public read-only/workspace-write contract rather than importing private full-access policy.

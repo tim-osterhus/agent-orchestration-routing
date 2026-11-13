@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Modified by Tim Osterhus for agent-orch (2026-11-13): exact task routes, persisted success/failure results beside work orders, and bounded detached relay waits. See ../VENDORED.md.
+// Modified by Tim Osterhus for agent-orch (2026-11-13): exact task routes, persisted success/failure results beside work orders, and bounded, event-driven detached relay waits. See ../VENDORED.md.
 
 import { spawn } from "node:child_process";
 import crypto from "node:crypto";
@@ -32,6 +32,8 @@ import {
   generateJobId,
   getConfig,
   listJobs,
+  resolveJobFile,
+  resolveJobLogFile,
   setConfig,
   upsertJob,
   writeJobFile
@@ -39,7 +41,6 @@ import {
 import {
   buildSingleJobSnapshot,
   buildStatusSnapshot,
-  enrichJob,
   readStoredJob,
   resolveCancelableJob,
   resolveResultJob,
@@ -57,6 +58,7 @@ import {
   SESSION_ID_ENV
 } from "./lib/tracked-jobs.mjs";
 import { resolveWorkspaceRoot } from "./lib/workspace.mjs";
+import { compactTokens, formatElapsed, latestActivity } from "./lib/relay-activity.mjs";
 import {
   renderNativeReviewResult,
   renderReviewResult,
@@ -72,8 +74,10 @@ const ROOT_DIR = path.resolve(fileURLToPath(new URL("..", import.meta.url)));
 const REVIEW_SCHEMA = path.join(ROOT_DIR, "schemas", "review-output.schema.json");
 const DEFAULT_STATUS_WAIT_TIMEOUT_MS = 240000;
 const DEFAULT_STATUS_POLL_INTERVAL_MS = 2000;
-// agent-orch: each --detach/--attach call returns within this budget, below Claude Code's 120-second default Bash timeout.
+// agent-orch: each --detach/--attach call returns within this budget, below Claude Code's 120-second default Bash timeout,
+// or earlier once it has held for RELAY_HOLD_MS and Codex has logged new activity. Each return costs one relay turn.
 const RELAY_WAIT_MS = 100000;
+const RELAY_HOLD_MS = 30000;
 const RELAY_POLL_INTERVAL_MS = 1000;
 const VALID_REASONING_EFFORTS = new Set(["none", "minimal", "low", "medium", "high", "xhigh", "max"]);
 const MODEL_ALIASES = new Map([["spark", "gpt-5.3-codex-spark"]]);
@@ -749,6 +753,31 @@ function relayWaitMs(options, env = process.env) {
     : RELAY_WAIT_MS;
 }
 
+function relayHoldMs(env = process.env) {
+  const configured = Number(env.AGENT_ORCH_CODEX_RELAY_HOLD_MS);
+  return env.AGENT_ORCH_CODEX_RELAY_HOLD_MS != null && Number.isFinite(configured) && configured >= 0 ? configured : RELAY_HOLD_MS;
+}
+
+function fileSize(file) {
+  try {
+    return fs.statSync(file).size;
+  } catch {
+    return 0;
+  }
+}
+
+// The relay copies this into its next Bash call's description, which Claude Code shows as the subagent's activity.
+function relayDescription(job) {
+  let activity = null;
+  try {
+    activity = job?.logFile ? latestActivity(job.logFile) : null;
+  } catch {}
+  const started = Date.parse(job?.startedAt ?? job?.createdAt ?? "");
+  const tokens = compactTokens(job?.tokenUsage?.totalTokens);
+  return ["Codex", shorten(activity ?? job?.phase ?? "starting", 72), tokens ? `${tokens} tokens` : null,
+    Number.isFinite(started) ? formatElapsed(started) : null].filter(Boolean).join(" \u00b7 ");
+}
+
 function processIsAlive(pid) {
   if (!Number.isInteger(pid) || pid <= 0) {
     return true;
@@ -796,25 +825,22 @@ function finishedDetachedTask(job, resultFile) {
 }
 
 function runningDetachedTask(job, jobId) {
-  const enriched = job ? enrichJob(job, { maxProgressLines: 2 }) : null;
   return {
     exitStatus: 0,
     payload: {
       status: "running",
       jobId,
-      threadId: job?.threadId ?? null,
-      phase: enriched?.phase ?? null,
-      elapsed: enriched?.elapsed ?? null,
-      tokenUsage: job?.tokenUsage ?? null,
-      progress: enriched?.progressPreview ?? [],
-      next: "Codex is still working. Run the identical command again to keep waiting."
+      description: relayDescription(job),
+      next: "Codex is still working. Run the identical command again, with this description."
     }
   };
 }
 
-async function waitForDetachedTask(workspaceRoot, jobId, resultFile, waitMs) {
-  const deadline = Date.now() + waitMs;
+async function waitForDetachedTask(workspaceRoot, jobId, resultFile, waitMs, holdMs = relayHoldMs()) {
+  const startedAt = Date.now();
+  const deadline = startedAt + waitMs;
   let job;
+  let logSizeAtStart = null;
   for (;;) {
     const snapshot = readJobSnapshot(workspaceRoot, jobId);
     if (snapshot === null) {
@@ -828,6 +854,12 @@ async function waitForDetachedTask(workspaceRoot, jobId, resultFile, waitMs) {
       // A worker writes its final job record before it exits, so read once more before calling it lost.
       const settled = readJobSnapshot(workspaceRoot, jobId) || job;
       return finishedDetachedTask(isActiveJobStatus(settled.status) ? markDetachedWorkerLost(workspaceRoot, settled) : settled, resultFile);
+    }
+    if (job?.logFile) {
+      logSizeAtStart ??= fileSize(job.logFile);
+      if (Date.now() - startedAt >= holdMs && fileSize(job.logFile) > logSizeAtStart) {
+        return runningDetachedTask(job, jobId);
+      }
     }
     const remaining = deadline - Date.now();
     if (remaining <= 0) {
@@ -856,7 +888,11 @@ async function handleDetachedTask({ cwd, workspaceRoot, options, request, taskMe
     ensureCodexAvailable(cwd);
     requireTaskRequest(request.prompt, request.resumeLast || Boolean(request.resumeThreadId));
     const job = buildTaskJob(workspaceRoot, taskMetadata, request.write);
-    writeTaskResultFile(markerFile, { jobId: job.id, workspaceRoot, fingerprint });
+    // jobFile and logFile let the subagent status line find this job without resolving the state directory.
+    writeTaskResultFile(markerFile, {
+      jobId: job.id, workspaceRoot, fingerprint,
+      jobFile: resolveJobFile(workspaceRoot, job.id), logFile: resolveJobLogFile(workspaceRoot, job.id)
+    });
     enqueueBackgroundTask(cwd, job, { ...buildTaskRequest({ ...request, jobId: job.id }), resultFile });
     jobId = job.id;
     jobRoot = workspaceRoot;

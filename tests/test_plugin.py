@@ -81,6 +81,8 @@ class PluginPackageTests(unittest.TestCase):
                                           '--prompt-file "<work order file>"')
                 # One call per Codex turn was moved to the background at Claude Code's 2-minute Bash timeout.
                 self.assertIn("run the identical command again, unchanged", text)
+                # Claude Code shows each Bash description as the subagent's activity.
+                self.assertIn("set that Bash call's description to the JSON's `description` value, copied exactly", text)
                 self.assertIn("Do not run it in the background", text)
                 self.assertIn("Roles " + ", ".join(write_roles) + " add `--write`", text)
                 self.assertNotIn("<<", text, "Work orders travel by file, never through a heredoc")
@@ -123,6 +125,15 @@ class PluginPackageTests(unittest.TestCase):
         self.assertEqual([c["code"] for c in bulk["choices"]], ["SL", "TM", "TH", "SM", "SH", "SX", "SMAX", "AL", "OX", "FH"])
         self.assertEqual(bulk["limits"]["max_parallel_workers"], 3)
 
+    def test_plugin_settings_only_supply_the_codex_status_line(self):
+        # Claude Code 2.1.322 accepts only these keys from a plugin's settings.json.
+        settings = json.loads((PLUGIN / "settings.json").read_text())
+        self.assertLessEqual(set(settings), {"agent", "subagentStatusLine"})
+        status = settings["subagentStatusLine"]
+        self.assertEqual(status["type"], "command")
+        self.assertEqual(status["command"], 'node "${CLAUDE_PLUGIN_ROOT}/runtime/codex/scripts/subagent-status.mjs"')
+        self.assertTrue((RUNTIME / "scripts/subagent-status.mjs").is_file())
+
     def test_hooks_only_manage_session_state(self):
         hooks = json.loads((PLUGIN / "hooks/hooks.json").read_text())["hooks"]
         self.assertEqual(set(hooks), {"SessionStart", "SessionEnd"})
@@ -155,8 +166,8 @@ class VendoredRuntimeTests(unittest.TestCase):
         self.assertEqual((RUNTIME / "scripts/lib" / manifest).resolve(), (PLUGIN / ".claude-plugin/plugin.json").resolve())
 
     @unittest.skipUnless(NODE, "node is required")
-    def test_relay_retry_error_persistence_and_bounded_wait_regressions(self):
-        result = subprocess.run([NODE, "--test", str(RUNTIME / "tests/relay-retry.test.mjs"), str(RUNTIME / "tests/detached-relay.test.mjs")],
+    def test_runtime_node_suites(self):
+        result = subprocess.run([NODE, "--test", *map(str, sorted((RUNTIME / "tests").glob("*.test.mjs")))],
                                 cwd=ROOT, capture_output=True, text=True, timeout=120, env=bundle.git_env())
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 

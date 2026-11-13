@@ -6,7 +6,7 @@ For design `claude-plugin` only: a Claude Code controller with the agent-orch pl
 
 Every Codex and Claude catalog profile has a pinned agent named `agent-orch:<provider>-<code>` in lowercase, for example `agent-orch:codex-sm` or `agent-orch:claude-fh`. Dispatch with the Agent tool's `subagent_type` set to that name. Do not pass model or effort overrides; the agent definition fixes them. Muse has no agent and still needs its separately verified adapter.
 
-Codex agents are Haiku relays. Each starts or resumes one Codex app-server thread on the user's Codex login, then returns the companion's JSON. A detached companion worker runs the turn. The relay checks on it in calls of about 100 seconds, under Claude Code's 2-minute Bash timeout, so it stays active until Codex finishes. Under this design, never use `codex exec` or `bundle.py codex-plan`. Codex threads are native workers, not external sessions. The parallel worker limit still applies.
+Codex agents are Haiku relays. Each starts or resumes one Codex app-server thread on the user's Codex login, then returns the companion's JSON. A detached companion worker runs the turn. The relay checks on it in calls of 30 to 100 seconds, under Claude Code's 2-minute Bash timeout, so it stays active until Codex finishes. In the terminal UI, each Codex relay's agent row shows Codex's current action, Codex token total, and elapsed time. It refreshes about every 5 seconds in a trusted workspace. Elsewhere the relay's activity line carries the same text at each check-in. Under this design, never use `codex exec` or `bundle.py codex-plan`. Codex threads are native workers, not external sessions. The parallel worker limit still applies.
 
 ## Work order
 

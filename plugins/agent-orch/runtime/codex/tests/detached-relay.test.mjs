@@ -14,8 +14,8 @@ import { createBrokerEndpoint, parseBrokerEndpoint } from "../scripts/lib/broker
 const companion = fileURLToPath(new URL("../scripts/codex-companion.mjs", import.meta.url));
 const usage = (total) => ({ inputTokens: total - 10, cachedInputTokens: 5, outputTokens: 10, reasoningOutputTokens: 4, totalTokens: total });
 
-// finishAfterMs: null keeps the turn running until the test ends.
-async function fakeBroker(root, { finishAfterMs }) {
+// finishAfterMs: null keeps the turn running until the test ends. commandAtMs: when Codex starts a command.
+async function fakeBroker(root, { finishAfterMs, commandAtMs = null }) {
   const endpoint = createBrokerEndpoint(root + randomUUID().slice(0, 8));
   const target = parseBrokerEndpoint(endpoint).path;
   const methods = [];
@@ -46,6 +46,9 @@ async function fakeBroker(root, { finishAfterMs }) {
           notify("turn/started", { threadId: "thread-1", turn: { id: "turn-1", status: "inProgress" } });
           notify("thread/tokenUsage/updated", { threadId: "thread-1", turnId: "turn-1", tokenUsage: { total: usage(100), last: usage(100) } });
         });
+        if (commandAtMs !== null) {
+          later(commandAtMs, () => notify("item/started", { threadId: "thread-1", turnId: "turn-1", item: { type: "commandExecution", id: "c1", command: "npm test", status: "inProgress" } }));
+        }
         if (finishAfterMs === null) continue;
         later(finishAfterMs, () => {
           notify("thread/tokenUsage/updated", { threadId: "thread-1", turnId: "turn-1", tokenUsage: { total: usage(250), last: usage(150) } });
@@ -80,6 +83,7 @@ function workspace(broker) {
   const env = { ...process.env, PATH: path.join(root, "bin") + path.delimiter + process.env.PATH,
     [BROKER_ENDPOINT_ENV]: broker.endpoint, AGENT_ORCH_CODEX_DATA: path.join(root, "state") };
   delete env.BASH_DEFAULT_TIMEOUT_MS;
+  delete env.AGENT_ORCH_CODEX_RELAY_HOLD_MS;
   return { root, order, env };
 }
 
@@ -119,7 +123,7 @@ test("detached relay returns within its wait budget, then the identical command 
     assert.equal(latest.json.jobId, first.json.jobId);
     assert.equal(latest.json.rawOutput, "Finished the bounded task.");
     assert.equal(latest.json.tokenUsage.totalTokens, 250);
-    assert.ok(seen.some(payload => payload.status === "running" && payload.tokenUsage?.totalTokens === 100),
+    assert.ok(seen.some(payload => payload.status === "running" && payload.description.includes("100 tokens")),
       "running status reports the latest Codex token totals");
     assert.deepEqual(JSON.parse(fs.readFileSync(space.order + ".result.json", "utf8")), latest.json);
 
@@ -187,5 +191,37 @@ test("a worker that dies mid-turn is reported as lost, with its thread, instead 
   } finally {
     await broker.close();
     fs.rmSync(space.root, { recursive: true, force: true });
+  }
+});
+
+test("a held call returns early on new Codex activity, with a description the relay can show", { timeout: 20000 }, async () => {
+  const broker = await fakeBroker(os.tmpdir(), { finishAfterMs: null, commandAtMs: 1500 });
+  const space = workspace(broker);
+  space.env.AGENT_ORCH_CODEX_RELAY_HOLD_MS = "300";
+  const args = ["--json", "--detach", "--wait-ms", "2500", "--model", "gpt-6.1-sol", "--effort", "high", "--prompt-file", space.order];
+  const timed = async () => { const started = Date.now(); const result = await run(args, space); return { ...result, ms: Date.now() - started }; };
+  try {
+    const calls = [await timed()];
+    while (!calls.at(-1).json.description.includes("npm test") && calls.length < 6) calls.push(await timed());
+    const active = calls.at(-1);
+    assert.equal(active.json.status, "running", active.stderr);
+    assert.match(active.json.description, /^Codex \u00b7 Running command: npm test \u00b7 100 tokens \u00b7 \d+s$/);
+    assert.ok(active.ms < 2400, `new activity returns before the wait budget (${active.ms} ms)`);
+    assert.deepEqual(Object.keys(active.json).sort(), ["description", "jobId", "next", "status"]);
+    assert.equal(active.stderr, "");
+
+    const quiet = await timed();
+    assert.equal(quiet.json.status, "running");
+    assert.ok(quiet.ms >= 2400, `a quiet job holds until the wait budget (${quiet.ms} ms)`);
+    assert.equal(new Set([...calls, quiet].map(call => call.json.jobId)).size, 1);
+    assert.equal(broker.methods.filter(method => method === "turn/start").length, 1);
+  } finally {
+    // This turn never finishes, so stop its worker before removing the state it writes to.
+    try {
+      const { jobFile } = JSON.parse(fs.readFileSync(space.order + ".job.json", "utf8"));
+      process.kill(JSON.parse(fs.readFileSync(jobFile, "utf8")).pid, "SIGKILL");
+    } catch {}
+    await broker.close();
+    fs.rmSync(space.root, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });

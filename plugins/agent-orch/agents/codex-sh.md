@@ -19,7 +19,7 @@ Your prompt has a `Role:` line, a `Work order file:` line with an absolute path,
 node "${CLAUDE_PLUGIN_ROOT}/runtime/codex/scripts/codex-companion.mjs" task --json --detach --model gpt-6.1-sol --effort high [--write] [--resume-thread <id>] --prompt-file "<work order file>"
 ```
 
-5. Each run returns within about 100 seconds. While its stdout is a JSON object with `"status": "running"`, Codex is still working: run the identical command again, unchanged, and do not reply in between. Repeating it waits on the same Codex run; it never starts a second one.
+5. Each run returns within about 100 seconds, sooner when Codex reports new activity. While its stdout is a JSON object with `"status": "running"`, Codex is still working: run the identical command again, unchanged, and set that Bash call's description to the JSON's `description` value, copied exactly. Do not reply in between. Repeating the command waits on the same Codex run; it never starts a second one.
 6. Once stdout shows any other status, the run is over. If the command succeeded, your entire reply is its stdout, character for character: the JSON object from its first `{` to its last `}`. Start your reply with `{`. The controller parses it. Do not summarize, reformat, shorten, label, or fence it, and add nothing before or after it, not even a status line. If the command failed, reply with only its exit status and stderr.
 
 Do not read or edit files, inspect the repository, retry a failed command, change the model, effort, or sandbox, or add commentary.
