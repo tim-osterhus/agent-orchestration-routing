@@ -1,10 +1,10 @@
 # Browser-3D
 
-Use for browser-based 3D experiences: interactive scenes, games, product viewers, simulations, and visualizations. Fable directs the work. Codex workers perform most production and verification. The mode does not require a particular scene, engine, asset tool, or host machine.
+Use for browser-based 3D scenes, games, viewers, simulations, and visualizations. Fable directs Codex production and verification. No engine, asset tool, or host is required.
 
 ## Controller
 
-Run in an existing Claude Code session using **FH: `claude-fable-5-2` / `high`**, unless the user explicitly selects another controller. Verify the actual model and effort. Selecting this mode never changes the running parent or starts a second controller. Report a host mismatch before dispatch.
+Use an existing Claude Code **FH: `claude-fable-5-2` / `high`** session unless explicitly overridden. Verify model/effort and report host mismatches. Mode selection never changes the running parent or starts another controller.
 
 FH owns the visual brief, work orders, integration decisions, and milestone acceptance. Delegate implementation, debugging, export, and routine checks. This mode permits a focused controller-authored visual prototype when direct work would clarify the intended result. Finish the prototype before dispatching writers and take a fresh ownership snapshot. Hand production work back to Codex afterward.
 
@@ -22,11 +22,11 @@ The controller is not a delegated worker-pool entry. Do not launch another FH wo
 | broad | AMAX: gpt-6-astra / max | general | Create and refine geometry, materials, lighting, and spatial composition through the available 3D toolchain. Inspect actual browser output for visual fidelity and interaction defects, separately from authored work when reviewing. |
 <!-- END GENERATED:pool:browser-3d -->
 
-Choose by task fit, not a mandatory escalation ladder. SM handles routine browser work. AMAX handles demanding visual production and inspection. Verify actual tools and session access before either assignment. No Terra profiles belong to this pool.
+Choose by task fit, not an escalation ladder. SM handles routine browser work. AMAX handles demanding visuals. Verify tools and session access. Terra is outside this pool.
 
 ## Produce and inspect
 
-Define the visual and interaction brief from the project's references, goals, and constraints. Record target devices, loading and runtime budgets, and the evidence needed for acceptance. Keep these choices project-specific.
+Define the visual/interaction brief from project references, goals, and constraints. Record target devices, loading/runtime budgets, and acceptance evidence.
 
 Resolve scale, camera, navigation, and major rendering risks in an early blockout or prototype. Finish one representative browser slice before expanding asset production. Compare real-time rendering, pre-rendered views, or a hybrid only when the product permits those choices.
 
@@ -34,7 +34,7 @@ Keep editable sources and reproducible build/export steps. When using Blender or
 
 Review the actual browser build against the brief. Use consistent cameras, lighting states, viewport, and quality settings for comparisons. Check exported transforms, materials, lighting, animation, and interaction where applicable. A successful export or attractive offline render is not proof of browser fidelity.
 
-Workers return a compact evidence packet: build identity, screenshots or recordings, check results, measured performance, and remaining defects. Fable ranks corrections by visual or functional impact and reviews meaningful milestones, not every build log. Return unresolved design choices to Fable rather than narrowing the brief.
+Workers return build identity, screenshots/recordings, checks, measured performance, and defects. Fable ranks corrections by impact and reviews milestones, not every build log. Return unresolved design choices rather than narrowing the brief.
 
 Use a fresh independent reviewer for significant candidates. Supply the brief and raw evidence without the author's verdict. Verify affected checks after corrections. An author cannot be the sole acceptance check, including for controller-authored prototypes. Stop iteration when criteria pass, or report the blocker or exhausted configured budget without inventing a pass.
 
@@ -44,10 +44,10 @@ By default, `qa` and `spec-review` run read-only and review supplied evidence. F
 
 Use native workers through the verified host route. With the Claude plugin, select design `claude-plugin` and use pinned Codex agents under the existing [plugin dispatch](../references/claude-plugin.md) contract. Resume continuing workers by exact thread ID. Without the plugin, explicitly select the [Claude-first controller adapter](../../../docs/controller-designs.md) (`--design claude-first`), not the repository's Codex-first default. Never silently substitute accounts, profiles, or billing routes.
 
-Default limits are three parallel workers and one parent-owned active external session across descendants. Under `claude-first`, every Codex worker counts against both limits, so default to one active Codex session. Under `claude-plugin`, Codex relays count as native workers. Honor configured overrides and stricter host limits.
+Honor runtime/provider/project and positive configured limits, without default router ceilings. Pass fences, limits, and allocated capacity to descendants. Under `claude-first`, Codex consumes worker/external capacity; plugin relays are native. Native Codex workers remain leaves unless assigned team roles. Claude helpers stay within permissions/tools/pool/scope/roles. External workers cannot recursively launch opposite controllers.
 
-Give each worker the objective, references, disjoint write ownership, and acceptance checks. Sequence dependent or overlapping changes. Workers remain leaves. SH may integrate assigned components but does not become another controller. Keep existing configured concurrency and lifecycle controls.
+Give workers objectives, references, disjoint write ownership, and acceptance checks. Sequence dependent or overlapping changes. Codex workers remain leaves. SH may integrate assigned components, not become another controller. Preserve configured concurrency and lifecycle controls.
 
 An explicitly authorized Claude worker is an out-of-pool exception, dispatched through the native Agent route on this Claude host. Under the plugin, use its pinned Claude agent. The installed Claude Delegation skill applies only from a Codex controller, not this FH host. Preserve user-selected tools, permissions, approvals, and timeouts independently of routing.
 
-Run tools on the designated build host and measure the intended browser/device targets. Resolve missing tool dependencies within task authority. Report unavailable device measurements rather than estimating passes. On quota exhaustion, save session IDs, artifacts, and the next action. Do not enable paid extra usage, switch providers, or promise automatic resumption without authorization and a verified mechanism.
+Run tools on the designated build host and measure intended browser/device targets. Resolve missing tools within task authority. Report unavailable measurements, not estimated passes. On quota exhaustion, save session IDs, artifacts, and next actions. The entrypoint's Fable fallback covers owned delegated assignments, not automatic replacement of this running FH parent. Do not enable paid extra usage or promise resumption without authorization and a verified mechanism.

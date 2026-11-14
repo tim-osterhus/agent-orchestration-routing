@@ -15,13 +15,13 @@ Shared Amusing also permits Muse investigation or authorized implementation thro
 
 The primary host is not a claim that its models are always cheaper or better. Both provider-primary variants work with either host design. For example, `--variant claude-primary --design claude-first --profile OH` resolves a native Claude worker. The variant alone leaves the current design unchanged. An author cannot be the sole acceptance check, but cross-provider review is optional.
 
-Burn mode names select the allowance provider, not the controller. `codex-burn` uses native Codex workers under Codex-first and external Codex workers under Claude-first. `claude-burn` uses external Claude workers under Codex-first and native Claude workers, including bounded Haiku, under Claude-first. Each requires explicit account and endpoint identifiers. Neither changes authentication or enables Orchestration. The parent owns the one external-session slot across descendants.
+Burn mode names select the allowance provider, not the controller. `codex-burn` uses native Codex workers under Codex-first and external Codex workers under Claude-first. `claude-burn` uses external Claude workers under Codex-first and native Claude workers, including bounded Haiku, under Claude-first. Each requires explicit account and endpoint identifiers. Neither changes authentication or enables Orchestration. The parent tracks active external sessions across descendants and honors actual runtime, provider, project, and explicit configured limits. The router adds no default concurrency ceiling.
 
 ## Codex-first
 
 This is the default and follows the source router's architecture. Invoke the router in a Codex chat. Use native model/effort controls for eligible Codex workers. Use the Claude companion for independent Claude consultation or authored work. The optional Opus/Haiku preset permits a Claude-led subtree only when explicitly requested.
 
-The Codex controller retains task authority and final acceptance. Give an external team a bounded packet, disjoint write ownership, and an evidence contract. Do not let it start a second Codex controller or delegate through unrelated chats. Native service-tier inheritance and browser access must be checked rather than assumed.
+The Codex controller retains task authority and final acceptance. Give Claude assignments bounded packets, disjoint write ownership, and evidence contracts. Claude helpers may delegate within selected permissions, tools, pool, and role fences without a router-imposed leaf-only rule. Do not let them start a second Codex controller or delegate through unrelated chats. Native service-tier inheritance and browser access must be checked rather than assumed.
 
 ## Claude-first
 
@@ -37,7 +37,7 @@ python3 scripts/bundle.py codex-plan --design claude-first --profile SM --role i
 
 The plan uses `codex exec` with an exact model/effort and JSONL output. Sandbox and approval choices come from the separate Codex configuration. The supplied defaults use read-only or workspace-write sandboxing and no interactive prompts. An operator can override them or explicitly configure bypass. The caller verifies that the unattended route supports the configured approval policy, records the session ID, and checks results independently. Sandbox restrictions do not authorize connector side effects or prove that every tool is read-only.
 
-Cross-provider Codex workers are leaves by default. They must not reopen this router, recursively call Claude, or broaden ownership. Claude retains integration and acceptance. The primary session owns cancellation, any user deadline, and the external-session slot.
+Cross-provider Codex workers are leaves by default. They must not reopen this router, recursively call Claude, or broaden ownership. Claude retains integration and acceptance. The primary session owns cancellation, any user deadline, and accounting for configured external-session limits across descendants.
 
 ## Claude plugin
 

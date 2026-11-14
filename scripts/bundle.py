@@ -29,6 +29,7 @@ RETIRED_PROFILES = {"LF": "L", "SF": "SM", "SMF": "SM", "SHF": "SH", "SXF": "SX"
                     "ALF": "AL", "AMF": "AM", "AHF": "AH", "AXF": "AX",
                     "AUF": "a verified current Astra profile", "CMAX": "SNX (XHigh) or SNMAX (Max)"}
 BURN_PROVIDERS = {"codex-burn": "codex", "claude-burn": "claude"}
+LIMIT_KEYS = ("max_parallel_workers", "max_external_sessions_per_assignment")
 
 
 def check_mode(mode):
@@ -110,8 +111,9 @@ def validate(config):
     check_mode(config["default_mode"])
     require(config["default_mode"] in mode_pools(config), "Unknown default mode")
     require(config["execution_style"] in {"pure-orchestration", "supporting"}, "Invalid execution style")
-    for key in ("max_parallel_workers", "max_external_sessions_per_assignment"):
-        require(type(config[key]) is int and config[key] > 0, f"Invalid {key}")
+    for key in LIMIT_KEYS:
+        value = config.get(key)
+        require(value is None or type(value) is int and value > 0, f"Invalid {key}")
     require(config["selection"]["bias"] in config["selection"]["bias_options"], "Invalid selection bias")
     for name, design in config["designs"].items():
         require(design["controller"] in {"codex", "claude"}, f"Invalid controller in {name}")
@@ -318,7 +320,7 @@ def resolve(config, *, mode=None, code=None, slot=None, role="implementation", d
             "routing_variant": variant, "routing_mode": mode, "role": role, "selection_bias": bias,
             "execution_style": config["execution_style"], "choices": choices,
             "overrides": {"out_of_pool": allow_out_of_pool, "role_or_lifecycle": role_override},
-            "limits": {key: config[key] for key in ("max_parallel_workers", "max_external_sessions_per_assignment")},
+            "limits": {key: config.get(key) for key in LIMIT_KEYS},
             "notice": "Eligibility only, not measured suitability, account access, or dispatch verification."}
     if unavailable:
         result["unavailable_profiles"] = unavailable
@@ -412,7 +414,7 @@ def launch_plan(resolved, cwd, prompt_file, artifacts, resume=None):
                 if settings["max_turns"] is not None:
                     definition["maxTurns"] = settings["max_turns"]
                 args += ["--agents", json.dumps({"haiku-worker": definition})]
-                plan["work_order_requirement"] = "Delegate basic and parallelizable work to haiku-worker at the configured model/effort. The Opus controller retains very complex work and integration."
+                plan["work_order_requirement"] = "Delegate basic and parallelizable work to haiku-worker at the configured model/effort. The Opus controller retains very complex work and integration. Pass inherited mode/pool/role, scope, ownership, permissions, tools, context isolation, neutral-review requirements, remaining deadlines, assignment-wide limits, and allocated delegation capacity to descendants. Under positive caps, use only parent-allocated remaining worker/external-session capacity; without allocation, return a capacity request instead of launching helpers. Null/omitted caps impose no allocation gate or quota. Helpers add no votes."
                 plan["required_checks"] += ["explicit user authorization for orchestration", "worker model and effort"]
         if settings["permission_mode"] == "bypassPermissions":
             args += ["--dangerously-skip-permissions"]
@@ -496,7 +498,7 @@ You are an agent-orch-router worker for profile {code}: `{item['model']}` at eff
 - If the work needs a change outside your `Write:` list, stop and return a handoff request naming the file, the change, and the reason. Do not make the change.
 - Roles {", ".join(role for role in config["roles"] if role in REVIEW_ROLES)} do not edit files unless the work order explicitly authorizes edits.
 - Run the listed acceptance checks. Return changed files, checks with results, findings, handoff requests, and anything unverified.
-- Do not start other workers unless the work order assigns you a team role.
+- Claude helpers may delegate within inherited variant, mode, pool, role, scope, ownership, permissions, tools, context isolation, and remaining limits/deadlines. Pass these fences to descendants. Review helpers receive neutral packets and add no votes. Under positive assignment-wide concurrency caps, use only coordinator-allocated remaining capacity; without an allocation, return a capacity request instead of launching helpers. Null/omitted caps add no quota or allocation gate. Do not start nested Codex controllers or another top-level coordinator.
 """
 
 

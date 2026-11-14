@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Agent Orchestration Router
 
-Activate only on explicit invocation for this assignment. Default to **codex-primary / balanced / default bias** and **pure orchestration**: delegate substantive work, then integrate and accept results. Use supporting delegation when requested. Retain these choices through compaction.
+Activate only by explicit invocation. Default to **codex-primary / balanced / default bias**, **pure orchestration**: delegate substantive work, integrate, and accept. Use supporting delegation when requested. Retain choices through compaction.
 
 Read this file and **only the selected mode document**:
 
@@ -17,11 +17,11 @@ Read this file and **only the selected mode document**:
 
 Shared across variants: [Amusing](modes/amusing.md) · [UI-Pro](modes/ui-pro.md) · [Council](modes/council.md) · [Browser-3D](modes/browser-3d.md) · [Codex-burn](modes/codex-burn.md) · [Claude-burn](modes/claude-burn.md).
 
-Variant selects pool preference, not the running host. Never change the parent model. Honor explicit profiles or use active-mode slot bindings. Rebinding changes models, not roles, lifecycle, or review authority. Shared models do not merge jobs.
+Variant selects pool preference, not host. Never change the parent model. Honor explicit profiles or active-mode bindings. Rebinding preserves roles, lifecycle, and review authority. Shared models do not merge jobs.
 
 ## Standard frontier
 
-All **21 raw-score nondominated configurations** from the dated four-provider Standard comparison. Frontier membership does not establish task suitability, subscription economics, access, or dispatcher availability.
+All **21 raw-score nondominated configurations** from the dated four-provider Standard comparison. Membership establishes neither suitability, subscription economics, access, nor dispatch availability.
 
 <!-- BEGIN GENERATED:catalog-frontier -->
 | Code | Exact model | Effort |
@@ -51,7 +51,7 @@ All **21 raw-score nondominated configurations** from the dated four-provider St
 
 ## Specialist exceptions
 
-These disjoint task-fit exceptions do not expand mode pools or authorize spending. Evidence, limitations, and three conditional candidates are in [model fit and specialist evidence](references/model-fit.md).
+These disjoint exceptions neither expand pools nor authorize spending. See [model fit and specialist evidence](references/model-fit.md) for evidence, limitations, and conditional candidates.
 
 <!-- BEGIN GENERATED:catalog-specialists -->
 | Code | Exact model | Effort | Task exception | Access |
@@ -67,24 +67,30 @@ These disjoint task-fit exceptions do not expand mode pools or authorize spendin
 | G38FH | gemini-3.8-flash | high | Audio understanding with text output | public_api |
 <!-- END GENERATED:catalog-specialists -->
 
-Kimi is documentary until a supported runtime effort is selected. Wonder Full uses Muse Code subscription, not Wonder's API. Verify adapter, account, tools, effort, and data handling before dispatch. Unavailable routes fail without substitution. Permissions remain independently configurable.
+Kimi needs a supported runtime effort. Wonder Full uses Muse Code subscription, not Wonder's API. Verify adapter, account, tools, effort, and data handling. Unavailable routes fail without substitution except the Fable usage-cap fallback. Permissions remain independently configurable.
 
-Other exact [compatibility profiles](references/compatibility.md) remain explicitly available, not automatic specialists. Retired Fast codes, `fast`, `tokenburn`, and `CMAX` fail with migration guidance. Retired `hiq` requires the user to explicitly reselect `amusing`.
+Other exact [compatibility profiles](references/compatibility.md) require explicit selection. Retired Fast codes, `fast`, `tokenburn`, and `CMAX` fail with migration guidance. Retired `hiq` requires explicit `amusing` reselection.
 
 Task fits are preferences, not measured effort-specific specialties. Assignments determine authorship, independence, and delegation.
 
-Eligible Fable profiles may reason, implement, or review. FH is the preferred selective Fable trial. FX/FMAX are optional higher-effort comparisons.
+Eligible Fable profiles may reason, implement, or review. Prefer FH for selective trials. FX/FMAX are optional higher-effort comparisons.
 
 For selected FM/FH/FX/FMAX only, read [Fable prompting](references/fable-prompting.md) before briefing or dispatch. Pass relevant guidance. Eligibility alone does not trigger loading.
+
+Usage-cap fallback is preauthorized: **FM→OH, FH→OX, FX/FMAX→OMAX** (supported Max). Follow that reference's trigger, stop, receipt, independence, and diversity rules. Its narrow exception overrides pool, required-profile, mapped-role/lifecycle, and no-alternate fences without expanding original authority.
 
 For selected Muse work only, read [Muse provider checks](references/muse.md).
 
 ## Execution discipline
 
-- On failure, distinguish product, evaluator, infrastructure, provider, or missing-authority causes before changing layers or escalating. Retry only with changed inputs, a supported transient condition, or a new diagnostic hypothesis.
-- Carry raw evidence to delegates only while its inputs and assumptions hold. Run affected and required checks. Preserve mode-required candidate identity, fresh independent reviews, and same-version ratification.
-- Keep prerequisites and controls proportional to concrete risks, observed failures, or explicit requirements. Finish after requested acceptance and required verification. Continue independent ready work around blockers.
+No default concurrency ceiling applies. Honor runtime/provider/project and positive assignment-wide caps across descendants. Idle threads consume no active capacity.
+
+Claude helpers may delegate within permissions, tools, pool, role, scope, ownership, and context isolation. Pass fences, limits, and allocations to descendants. With positive caps, return capacity requests without allocations; null/omitted caps require none. Helpers add no votes or coordinators. Native Codex workers remain leaves unless assigned team roles. External workers cannot recursively launch opposite controllers.
+
+- Diagnose product, evaluator, infrastructure, provider, or authority failures before escalating. Retry only with changed inputs, supported transient conditions, or new diagnostic hypotheses.
+- Transfer evidence only while its assumptions hold. Run required checks. Preserve candidate identity, fresh independent reviews, and same-version ratification.
+- Keep controls proportional to actual risks and requirements. Finish after acceptance and verification. Continue independent ready work around blockers.
 
 In Claude Code with the agent-orch plugin, use design `claude-plugin` and read [Claude plugin dispatch](references/claude-plugin.md) before the first dispatch.
 
-Optional: [configuration/generation](../../docs/configuration.md), [selection evidence](references/evidence.md). Generate tables from `config/routing.json` plus selected presets/overlays. Native instructions must match those bindings.
+Optional: [configuration/generation](../../docs/configuration.md), [selection evidence](references/evidence.md). Generate tables from `config/routing.json` plus presets/overlays. Native instructions must match bindings.

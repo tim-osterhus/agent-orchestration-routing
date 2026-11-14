@@ -8,9 +8,11 @@ The included agent-file recipes need Claude Code 2.1.281 or later. Check the req
 
 Generate an external plan with `scripts/bundle.py claude-plan` from the bundle root. Supply the config, variant, optional preset, task role, cwd, prompt file, and artifact directory. Native routes require host worker controls instead. For direct companion use without the router, add `--direct`. It uses the configured default Claude profile and Consultation when the role is omitted. Explicit authored roles select Implementation. Router-driven calls retain active-pool role/lifecycle restrictions. The output contains arguments, child-environment removals, optional agent definitions, a timeout, and required checks. It does not launch anything.
 
-For Claude-burn plans, pass `--mode claude-burn --burn-account ACCOUNT --burn-endpoint ENDPOINT`. Establish explicit invocation, the intended account, endpoint, and authorized backlog before launch. Use available instructions or evidence and ask only for missing required inputs. These non-secret identifiers are offline metadata, not quota verification. Pool Sonnet uses `SNH` for High. Retained `SNX` selects XHigh only through explicit overrides or custom configuration. `CMAX` and retired Fast codes fail. Preserve task-role/lifecycle fences independently of Claude workflow. Burn mode does not enable Orchestration, bypass, or another external session.
+For Claude-burn plans, pass `--mode claude-burn --burn-account ACCOUNT --burn-endpoint ENDPOINT`. Establish explicit invocation, the intended account, endpoint, and authorized backlog before launch. Use available instructions or evidence and ask only for missing required inputs. These non-secret identifiers are offline metadata, not quota verification. Pool Sonnet uses `SNH` for High. Retained `SNX` selects XHigh only through explicit overrides or custom configuration. `CMAX` and retired Fast codes fail. Preserve task-role/lifecycle fences independently of Claude workflow. Burn mode does not enable Orchestration or bypass. Honor actual runtime, provider, project, and explicit configured concurrency limits.
 
 The controlling agent creates a private artifact directory and saves the task packet. It runs the argument vector without shell interpolation, feeds the prompt file through stdin, and saves stdout/stderr/exit status. On Windows, prefer native `claude.exe`; do not silently change the execution environment to WSL. Do not use `--bare` with subscription login or combine `--bg` with `-p`.
+
+Every native or external Claude work order carries assignment-wide limits and any parent-allocated remaining worker/external-session capacity. Pass inherited mode/pool/role, scope, ownership, permissions, tools, context isolation, neutral-review requirements, remaining deadlines, and limits to descendants. Under positive caps, missing allocation means return a capacity request, not launch helpers. Null/omitted caps add no quota or allocation gate. Helpers add no votes.
 
 ## Permission recipes
 
@@ -29,6 +31,11 @@ difficult debugging, and integration with the Opus controller. Give workers
 disjoint ownership and acceptance checks. Share an explicit deadline only when
 provided; otherwise there is no default timeout. Return worker evidence and
 check it independently. Stop owned workers when completed or cancelled.
+Pass all assignment fences, limits, and remaining deadlines to descendants.
+Under positive caps, delegate only within parent-allocated remaining capacity;
+without allocation, return a capacity request instead of launching helpers.
+Null/omitted caps impose no allocation gate. Review helpers receive neutral
+packets and add no votes.
 ```
 
 ## Deadlines and recovery
@@ -37,7 +44,7 @@ The configuration is the single timeout source. `timeout_seconds: null` means no
 
 The caller must enforce a configured deadline on the exact owned process group/tree and stop its descendants on expiry or cancellation. An output-yield interval is not a job deadline. Do not promise detached lifetime or automatic continuation without a tested owner-specific callback. When no safe lifetime mechanism exists, report the limitation rather than inventing one.
 
-Check saved session ID and terminal state before resuming. Reapply mode, tools, model, effort, and configuration. Preserve normal history for recovery. If configuration changes during an assignment, do not silently broaden the saved session's permissions. Stop on auth, billing, quota, rate-limit, and exact-model errors; preserve partial work.
+Check saved session ID and terminal state before resuming. Reapply mode, tools, model, effort, and configuration. Preserve normal history for recovery. If configuration changes during an assignment, do not silently broaden the saved session's permissions. Preserve partial work and stop on auth, billing, quota, rate-limit, and exact-model errors, except for the invoked router's preauthorized Fable usage-cap fallback. Follow its trigger, terminal-run, neutral-review, diversity, and disclosure rules. Standalone companion calls have no automatic fallback.
 
 Validate returned model metadata instead of self-identification. Effective effort and context limits may not be observable. HK's 100K target is soft unless supported controls are independently verified; do not advertise a hard cap. This initial plan generator does not enable Ultracode or auto-refresh benchmarks.
 

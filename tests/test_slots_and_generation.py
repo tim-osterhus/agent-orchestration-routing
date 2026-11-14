@@ -108,7 +108,7 @@ class SlotTests(unittest.TestCase):
         self.assertEqual(result["controller"], "claude")
         self.assertEqual([c["code"] for c in result["choices"]], ["SM", "SH", "SX", "SMAX", "AMAX"])
         self.assertTrue(all(c["dispatch"] == "external-codex" for c in result["choices"]))
-        self.assertEqual(result["limits"], {"max_parallel_workers": 3, "max_external_sessions_per_assignment": 1})
+        self.assertEqual(result["limits"], {"max_parallel_workers": None, "max_external_sessions_per_assignment": None})
         changed = bundle.merge(self.config, {"max_parallel_workers": 2, "max_external_sessions_per_assignment": 2})
         self.assertEqual(bundle.resolve(changed, mode="browser-3d", design="claude-first")["limits"],
                          {"max_parallel_workers": 2, "max_external_sessions_per_assignment": 2})

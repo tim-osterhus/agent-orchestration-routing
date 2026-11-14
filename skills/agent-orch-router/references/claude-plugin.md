@@ -6,7 +6,7 @@ For design `claude-plugin` only: a Claude Code controller with the agent-orch pl
 
 Every Codex and Claude catalog profile has a pinned agent named `agent-orch:<provider>-<code>` in lowercase, for example `agent-orch:codex-sm` or `agent-orch:claude-fh`. Dispatch with the Agent tool's `subagent_type` set to that name. Do not pass model or effort overrides; the agent definition fixes them. Muse has no agent and still needs its separately verified adapter.
 
-Codex agents are Haiku relays. Each starts or resumes one Codex app-server thread on the user's Codex login, then returns the companion's JSON. A detached companion worker runs the turn. The relay checks on it in calls of 30 to 100 seconds, under Claude Code's 2-minute Bash timeout, so it stays active until Codex finishes. In the terminal UI, each Codex relay's agent row shows Codex's current action, Codex token total, and elapsed time. It refreshes about every 5 seconds in a trusted workspace. Elsewhere the relay's activity line carries the same text at each check-in. Under this design, never use `codex exec` or `bundle.py codex-plan`. Codex threads are native workers, not external sessions. The parallel worker limit still applies.
+Codex agents are Haiku relays. Each starts or resumes one Codex app-server thread on the user's Codex login, then returns the companion's JSON. A detached companion worker runs the turn. The relay checks on it in calls of 30 to 100 seconds, under Claude Code's 2-minute Bash timeout, so it stays active until Codex finishes. In the terminal UI, each Codex relay's agent row shows Codex's current action, Codex token total, and elapsed time. It refreshes about every 5 seconds in a trusted workspace. Elsewhere the relay's activity line carries the same text at each check-in. Under this design, never use `codex exec` or `bundle.py codex-plan`. Codex threads are native workers, not external sessions. Honor actual runtime, provider, project, and explicit configured concurrency limits across descendants. The router adds no default ceiling. Claude helpers may delegate within selected permissions, tools, pool, scope, and role fences. Codex workers remain leaves unless assigned a team role. Do not start nested Codex controllers.
 
 ## Work order
 
@@ -16,17 +16,24 @@ Give each worker one self-contained work order in this shape. Send Claude agents
 Role: implementation
 Profile: SM
 Assignment: <originating assignment id>
+Variant / mode: <selected variant and mode>
+Pool / role fences: <eligible exact profiles and inherited role/lifecycle restrictions>
 Objective: <outcome>
 Write: <files or patterns this worker may change>
 Read: <inputs and context>
 Forbidden: <paths that must not change, including pre-existing uncommitted changes>
 Acceptance checks: <commands or criteria>
+Context isolation: <required isolation; neutral review inputs without author conversations or prior verdicts>
+Assignment limits: <actual runtime/provider/project and explicit configured limits, or no router ceiling>
+Delegation capacity: <optional coordinator allocation under positive assignment-wide caps>
 Deadline: <only when the user supplied one>
 Rules: Change only Write paths. If the work needs any other change, stop and return a handoff request naming the file, the change, and the reason. Return changed files, checks with results, findings, handoff requests, and unverified items.
 Resume thread: <exact thread id, only when continuing that worker's thread>
 ```
 
 Patterns ending in `/` own a directory tree. Other patterns use shell-style matching, where `*` also crosses `/`.
+
+Pass variant, mode, pool, role, scope, ownership, permissions, tools, context isolation, remaining deadlines, and limits to descendants. Review helpers receive neutral packets and add no votes. Under positive assignment-wide caps, the parent allocates remaining worker/external-session capacity across descendants. Without allocation, return a capacity request instead of launching helpers. Null/omitted caps impose no quota or allocation gate. Do not infer extra authority from available capacity.
 
 ## Ownership without worktrees
 

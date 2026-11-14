@@ -41,6 +41,29 @@ class RoutingTests(unittest.TestCase):
             self.assertEqual(self.resolve(code="SM", design=design)["choices"][0]["dispatch"], codex)
             self.assertEqual(self.resolve(code="OH", role="qa", design=design)["choices"][0]["dispatch"], claude)
 
+    def test_optional_concurrency_limits_preserve_explicit_overlays(self):
+        for design in self.config["designs"]:
+            result = self.resolve(design=design)
+            self.assertEqual(result["limits"], {key: None for key in bundle.LIMIT_KEYS})
+        for key in bundle.LIMIT_KEYS:
+            for value in (None, 1, 2, 12):
+                config = bundle.merge(self.config, {key: value})
+                bundle.validate(config)
+                self.assertEqual(bundle.resolve(config)["limits"][key], value)
+            config = deepcopy(self.config)
+            del config[key]
+            bundle.validate(config)
+            self.assertIsNone(bundle.resolve(config)["limits"][key])
+            for value in (0, -1, True, False, 1.5, "3", []):
+                with self.subTest(key=key, value=value), self.assertRaisesRegex(ValueError, key):
+                    bundle.validate(bundle.merge(self.config, {key: value}))
+        with tempfile.TemporaryDirectory() as directory:
+            overlay = Path(directory) / "limits.json"
+            overlay.write_text(json.dumps({"max_parallel_workers": 7, "max_external_sessions_per_assignment": 4}))
+            config = bundle.load_config(presets=["opus-haiku"], overlays=[overlay])
+            self.assertEqual(bundle.resolve(config)["limits"],
+                             {"max_parallel_workers": 7, "max_external_sessions_per_assignment": 4})
+
     def test_role_boundary_is_not_waived_by_model_code(self):
         with self.assertRaisesRegex(ValueError, "role/lifecycle"):
             self.resolve(mode="amusing", code="OX", role="implementation")
@@ -435,7 +458,7 @@ class VariantTests(unittest.TestCase):
                     result = bundle.resolve(self.config, mode="council", role=role, variant=variant, design=design)
                     codes = expected[:-1] if role == "qa" else expected
                     self.assertEqual([c["code"] for c in result["choices"]], codes)
-                    self.assertEqual(result["limits"], {"max_parallel_workers": 3, "max_external_sessions_per_assignment": 1})
+                    self.assertEqual(result["limits"], {"max_parallel_workers": None, "max_external_sessions_per_assignment": None})
                     self.assertNotIn("burn", result)
                     for choice in result["choices"]:
                         catalog = bundle.profile(self.config, choice["code"])
@@ -506,6 +529,78 @@ class PlanTests(unittest.TestCase):
     @staticmethod
     def value(args, flag):
         return args[args.index(flag) + 1]
+
+    def test_documented_fable_fallbacks_are_exact_offline_plans_not_pool_expansion(self):
+        path = ROOT / "skills/agent-orch-router/references/fable-prompting.md"
+        mapping = [tuple(cell.strip() for cell in line.strip("|").split("|"))
+                   for line in path.read_text().splitlines()
+                   if re.match(r"\| (?:FM|FH|FX|FMAX) \|", line)]
+        self.assertEqual(mapping, [("FM", "OH", "claude-opus-5-5", "high"),
+                                   ("FH", "OX", "claude-opus-5-5", "xhigh"),
+                                   ("FX", "OMAX", "claude-opus-5-5", "max"),
+                                   ("FMAX", "OMAX", "claude-opus-5-5", "max")])
+        before = deepcopy(self.config)
+        for requested, actual, model, effort in mapping:
+            self.assertEqual(bundle.profile(self.config, requested)["model"], "claude-fable-5-2")
+            for role in ("implementation", "qa"):
+                # Efficient contains none of the mapped profiles: the narrow policy exception
+                # must be recorded explicitly, not installed into the pool or auto-executed.
+                with self.assertRaisesRegex(ValueError, "outside the active pool"):
+                    self.plan(mode="efficient", code=actual, role=role)
+                plan = self.plan(mode="efficient", code=actual, role=role,
+                                 allow_out_of_pool=True, role_override=True)
+                self.assertFalse(plan["executes"])
+                self.assertEqual(self.value(plan["argv"], "--model"), model)
+                self.assertEqual(self.value(plan["argv"], "--effort"), effort)
+                selected_mode = "consultation" if role == "qa" else "implementation"
+                self.assertEqual(plan["profile"]["execution"], self.config["claude"]["modes"][selected_mode])
+                self.assertNotIn("--dangerously-skip-permissions", plan["argv"])
+        self.assertEqual(self.config, before)
+
+    def test_amusing_fh_usage_fallback_preserves_original_role_and_permissions(self):
+        before = deepcopy(self.config)
+        blocked_roles = {"implementation", "frontend", "integration", "browser", "research"}
+        for role in self.config["roles"]:
+            # Also exercise an explicitly selected workflow independently of task role.
+            for workflow in (None, "implementation"):
+                original = bundle.resolve(self.config, mode="amusing", code="FH", role=role,
+                                          claude_mode=workflow)
+                if role in blocked_roles:
+                    with self.assertRaisesRegex(ValueError, "role/lifecycle"):
+                        bundle.resolve(self.config, mode="amusing", code="OX", role=role,
+                                       claude_mode=workflow)
+                mapped = bundle.resolve(self.config, mode="amusing", code="OX", role=role,
+                                        claude_mode=workflow, role_override=True)
+                self.assertEqual(mapped["role"], original["role"])
+                self.assertEqual(mapped["limits"], original["limits"])
+                self.assertEqual(mapped["overrides"], {"out_of_pool": False, "role_or_lifecycle": True})
+                source, target = original["choices"][0], mapped["choices"][0]
+                self.assertEqual(target["execution"], source["execution"])
+                self.assertEqual(target["claude_mode"], source["claude_mode"])
+                plan = bundle.launch_plan(mapped, self.cwd, self.prompt, self.artifacts)
+                self.assertFalse(plan["executes"])
+                self.assertEqual(self.value(plan["argv"], "--model"), "claude-opus-5-5")
+                self.assertEqual(self.value(plan["argv"], "--effort"), "xhigh")
+                self.assertNotIn("--dangerously-skip-permissions", plan["argv"])
+        self.assertEqual(self.config, before)
+
+    def test_orchestration_plan_requires_assignment_wide_capacity_handoff(self):
+        base = bundle.load_config(presets=["opus-haiku"])
+        for caps in ({key: None for key in bundle.LIMIT_KEYS},
+                     {"max_parallel_workers": 4, "max_external_sessions_per_assignment": 2}):
+            config = bundle.merge(base, caps)
+            plan = self.plan(config=config, mode="opus-haiku", code="OH",
+                             role="implementation", claude_mode="orchestration")
+            self.assertFalse(plan["executes"])
+            contract = plan["work_order_requirement"]
+            for required in ("assignment-wide limits", "allocated delegation capacity",
+                             "parent-allocated remaining worker/external-session capacity",
+                             "without allocation, return a capacity request instead of launching helpers",
+                             "Null/omitted caps impose no allocation gate", "context isolation",
+                             "neutral-review requirements", "remaining deadlines"):
+                self.assertIn(required, contract)
+            self.assertTrue(config["claude"]["modes"]["orchestration"]["nested_delegation"])
+            self.assertEqual(bundle.resolve(config)["limits"], caps)
 
     def test_consultation_tools_and_spawn_restrictions(self):
         plan = self.plan(code="OH", role="qa")

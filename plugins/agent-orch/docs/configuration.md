@@ -48,12 +48,14 @@ Regenerate it with the same `plugin` action without `--check`. Generation copies
 | `modes` | Shared UI-Pro, Amusing, Council, Browser-3D, and burn pools, plus custom/preset pools. Entries carry role/lifecycle, specialist, independent-review, and escalation markers. |
 | `selection.bias` | Low/default/high selection preference. It never changes model effort or sorts unknown benchmark values. |
 | `execution_style` | Pure orchestration or supporting delegation. |
-| `max_parallel_workers` | Scheduling ceiling, further limited by the actual runtime. |
-| `max_external_sessions_per_assignment` | External-session ceiling across the controller and descendants. |
+| `max_parallel_workers` | Optional positive assignment-wide worker ceiling across descendants. Null or omitted adds no router ceiling. |
+| `max_external_sessions_per_assignment` | Optional positive active external-session ceiling across descendants and providers. Null or omitted adds no router ceiling. |
 | `claude.modes` | Tools, permission mode, timeout, turn cap, and optional worker policy. |
 | `codex` | Sandbox by task role, approval policy, explicit bypass, and optional timeout. |
 
 Keep your edits in an ignored `config/local.json` and pass `--overlay config/local.json`, or pass a complete replacement with `--config`. Recursive object merge preserves unspecified fields. Arrays replace rather than append. Later presets/overlays win. Presets load before overlays, so local policy can narrow a preset. Validate the final merged configuration.
+
+Bundled concurrency caps are null. Actual runtime, provider, project, and explicit assignment limits still apply. Existing positive numeric overlays remain assignment-wide ceilings. Idle persistent threads consume no active-session capacity. Claude helpers may delegate within selected permissions, tools, pool, role, and ownership. This does not enable disabled Orchestration, change permission defaults, or authorize nested Codex controllers.
 
 `--variant` selects pool preference independently of controller design, permissions, and bias. Codex-primary is the default. `variants.NAME.modes` defines each variant's normal pools. Top-level `modes` supplies shared UI-Pro, Amusing, Council, Browser-3D, burns, and custom/preset pools. A legacy top-level normal-mode override takes precedence for every variant. Prefer a variant-specific overlay when only one variant should change. Complete legacy configs without `variants` still use their top-level modes.
 
@@ -62,6 +64,8 @@ Both variants use one shared catalog. The [router entrypoint](../skills/agent-or
 [UI-Pro](../skills/agent-orch-router/modes/ui-pro.md) adds independent visual critique, focused implementation, and a required same-candidate SMAX/OX/MFX final council. TM supplies the default browser binding; TH handles baseline/intermediate critique, and SM/OM implement. TH's eligibility in a final-review resolution does not make it a council member. The inspector resolves roles and bindings, not browser access, context isolation, council completion, or acceptance. Permission/tool profiles remain configurable; broader review access does not authorize edits.
 
 Fable `FM`, `FX`, and `FMAX` remain on-call. `FH` can reason, implement, integrate, or review in Performance, Bulk, and Amusing. Council keeps its advisory assignment. No Fable profile appears in the Opus/Haiku preset. `FH`/`FX` select Fable 5.2, not 5.1. Ultracode is not supported. All model IDs require account/runtime verification.
+
+The [Fable usage-cap policy](../skills/agent-orch-router/references/fable-prompting.md#automatic-usage-cap-fallback) preauthorizes FM→OH, FH→OX, FX→OMAX, and FMAX→OMAX only after explicit provider usage exhaustion. Pool catalogs remain unchanged. Coordinators apply the trigger, terminal-run, neutral-review, diversity, and disclosure rules. The mapped Opus profile continues the original authorized Fable role/lifecycle, overriding its normal eligibility fences without expanding authority or capabilities. Offline tools neither detect exhaustion nor execute retries. Record mapped role/lifecycle exceptions with `--role-override` even in-pool. Add `--allow-out-of-pool` when needed, retaining the original role and selected Claude workflow.
 
 [Council](../skills/agent-orch-router/modes/council.md) is shared and opt-in for decision deliberation. Required members default to SMAX, OX, and MFX. AMAX is optional. FH advises without a vote unless explicitly appointed.
 

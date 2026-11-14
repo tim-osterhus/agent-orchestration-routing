@@ -4,8 +4,8 @@
   "default_mode": "balanced",
   "default_variant": "codex-primary",
   "execution_style": "pure-orchestration",
-  "max_parallel_workers": 3,
-  "max_external_sessions_per_assignment": 1,
+  "max_parallel_workers": null,
+  "max_external_sessions_per_assignment": null,
   "roles": ["research", "planning", "implementation", "frontend", "integration", "qa", "spec-review", "browser"],
   "designs": {
     "codex-first": {"controller": "codex", "native_workers": "codex", "external_workers": "claude"},

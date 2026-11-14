@@ -50,14 +50,14 @@ Stop at consensus, a configured budget/deadline, or a blocker. Also stop when no
 
 ## Execute within existing authority
 
-The active host coordinator owns the brief, ledger, proposal versions, and consensus record. Workers are bounded leaves, not additional dispatchers. Analysis does not authorize implementation, deployment, messages, purchases, commits, or publication. Those actions require separate task authority.
+The active host coordinator owns the brief, ledger, proposal versions, and consensus record. Helpers do not become coordinators. Native Codex workers remain leaves unless assigned team roles. Analysis does not authorize implementation, deployment, messages, purchases, commits, or publication. Those actions require separate task authority.
 
 Use native workers for the host's provider with exact catalog model/effort and checked tools. For selected Claude work, load the installed Claude Delegation skill and its relevant launch reference. Use its configured permission/tool profile independently of review scope. Preserve authentication, owned-process, result-metadata, and lifecycle checks. For external Codex under Claude, use the optional [controller adapter](../../../docs/controller-designs.md).
 
 For selected Muse work, read the provider checks linked from the entrypoint. Use a verified adapter, including a local CLI or configured durable adapter. Preserve exact MFX `xhigh`, account, privacy, effective permissions, owned-session, and result-metadata checks. Unless actual continuation is supported, use a fresh execution with the complete relevant debate packet. A reused session identifier alone does not establish continuation.
 
-Preserve user-configured tools, permissions, approvals, and timeouts. Tool availability does not expand authority. Do not change accounts, global settings, or runtime capacity automatically.
+Preserve user-configured tools, permissions, approvals, and timeouts. Pass fences, limits, and allocated capacity to descendants. Tool availability does not expand authority. Do not change accounts, global settings, or runtime capacity automatically.
 
-Honor `max_parallel_workers` and `max_external_sessions_per_assignment` across descendants and all external providers, including Muse. Defaults are three workers and one active external session. Native workers consume worker capacity, not external slots. Sequential dispatch is valid. An idle persistent thread is not an active session.
+Honor runtime, provider, project, and positive configured `max_parallel_workers` and `max_external_sessions_per_assignment` limits across descendants and all external providers, including Muse. Null or omitted values add no router ceiling. Native workers consume worker capacity, not external slots. Sequential dispatch is valid. Idle persistent threads are not active sessions. Claude helpers may delegate within selected permissions, tools, pool, scope, and role fences. Native Codex workers remain leaves unless assigned a team role. External workers must not recursively launch the opposite controller. Helpers add no votes or model diversity.
 
 Retain any configured Claude 60-minute assignment lifecycle unless overridden. Share remaining budgets across resumes and later rounds rather than resetting them. Council adds no cap. Prefer completion events, verify exact session ownership and result delivery, and report failures instead of endorsements.

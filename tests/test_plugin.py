@@ -123,7 +123,7 @@ class PluginPackageTests(unittest.TestCase):
                 bundle.launch_plan(resolved, directory, str(prompt), str(Path(directory) / "runs"))
         bulk = bundle.resolve(self.config, mode="bulk", design="claude-plugin")
         self.assertEqual([c["code"] for c in bulk["choices"]], ["SL", "TM", "TH", "SM", "SH", "SX", "SMAX", "AL", "OX", "FH"])
-        self.assertEqual(bulk["limits"]["max_parallel_workers"], 3)
+        self.assertIsNone(bulk["limits"]["max_parallel_workers"])
 
     def test_plugin_settings_only_supply_the_codex_status_line(self):
         # Claude Code 2.1.322 accepts only these keys from a plugin's settings.json.
