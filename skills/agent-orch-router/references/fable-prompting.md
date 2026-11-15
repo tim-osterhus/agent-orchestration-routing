@@ -36,6 +36,8 @@ Record the provider's usage-exhaustion evidence, requested and actual profiles, 
 
 This fallback narrowly overrides required-profile, outside-pool, no-alternate, and mapped Opus role/lifecycle fences for this trigger only. It continues the original authorized Fable assignment, not a new role or lifecycle. Preserve the original scope, role, permissions, tools, and remaining limits without granting capabilities. For example, Amusing FH implementation may continue on OX despite OX's normal review-role fence. Preserve independent conclusions, same-version ratification, and required Council/UI-Pro membership and model diversity. Helpers add no votes. Two Opus runs are not distinct model opinions. If substitution collapses required diversity, report incomplete membership and request a distinct alternate.
 
+Frontier Research retains independent challenge after fallback without Council-style membership or votes. Disclose author/reviewer model overlap. Prefer cross-family challenge where useful and critically review the evaluator or probe when shared errors threaten acceptance. Overlap alone does not require a new committee or a different-family reviewer.
+
 The offline inspector and launch planner do not detect exhaustion or execute retries. The coordinator records mapped role/lifecycle exceptions with `--role-override`, even for an in-pool fallback. Add `--allow-out-of-pool` only when needed. Preserve the original role and selected Claude workflow in the plan. These flags record this narrow preauthorization, not broader task authority.
 
 Sources: [video discussion](https://youtu.be/ha1Iu9YWMtw?t=384), [official prompting guide](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5-2).

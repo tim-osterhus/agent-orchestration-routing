@@ -262,7 +262,7 @@ class VariantTests(unittest.TestCase):
                 "performance": ["OM", "OH", "OX", "OMAX", "SMAX", "AMAX", "FH"]}}
         for variant, modes in expected.items():
             actual = bundle.mode_pools(self.config, variant)
-            self.assertEqual(set(actual) - set(modes), {"amusing", "ui-pro", "council", "browser-3d", "codex-burn", "claude-burn"})
+            self.assertEqual(set(actual) - set(modes), {"amusing", "ui-pro", "council", "frontier-research", "browser-3d", "codex-burn", "claude-burn"})
             self.assertEqual(set(modes) - set(actual), set())
             for mode, codes in modes.items():
                 self.assertEqual([entry["profile"] for entry in actual[mode]], codes)
@@ -299,7 +299,9 @@ class VariantTests(unittest.TestCase):
                 for role in self.config["roles"]:
                     for design in self.config["designs"]:
                         kwargs = {"burn_account": "work", "burn_endpoint": "queue end"} if mode in bundle.BURN_PROVIDERS else {}
-                        if mode == "council" and role in {"implementation", "frontend", "integration", "browser"}:
+                        excluded_roles = {"council": {"implementation", "frontend", "integration", "browser"},
+                                          "frontier-research": {"frontend", "browser"}}
+                        if role in excluded_roles.get(mode, set()):
                             with self.assertRaisesRegex(ValueError, "No eligible profile"):
                                 bundle.resolve(self.config, variant=variant, mode=mode, role=role, design=design)
                             continue
@@ -404,7 +406,7 @@ class VariantTests(unittest.TestCase):
         for variant in config["variants"]:
             for mode, pool in bundle.mode_pools(config, variant).items():
                 self.assertEqual({"FM", "FH", "FX", "FMAX"} & {entry["profile"] for entry in pool},
-                                 {"FH"} if mode in {"amusing", "council", "performance", "bulk"} else set())
+                                 {"FH"} if mode in {"amusing", "council", "frontier-research", "performance", "bulk"} else set())
             for code in ("FM", "FH", "FX", "FMAX"):
                 with self.assertRaisesRegex(ValueError, "outside"):
                     bundle.resolve(config, variant=variant, code=code)
@@ -582,6 +584,27 @@ class PlanTests(unittest.TestCase):
                 self.assertEqual(self.value(plan["argv"], "--model"), "claude-opus-5-5")
                 self.assertEqual(self.value(plan["argv"], "--effort"), "xhigh")
                 self.assertNotIn("--dangerously-skip-permissions", plan["argv"])
+        self.assertEqual(self.config, before)
+
+    def test_frontier_fh_fallback_preserves_proposal_role_without_changing_reviewer(self):
+        before = deepcopy(self.config)
+        for role in ("research", "planning"):
+            source = bundle.resolve(self.config, mode="frontier-research", code="FH", role=role)
+            with self.assertRaisesRegex(ValueError, "role/lifecycle"):
+                bundle.resolve(self.config, mode="frontier-research", code="OX", role=role)
+            mapped = bundle.resolve(self.config, mode="frontier-research", code="OX", role=role,
+                                    role_override=True)
+            self.assertEqual(mapped["role"], source["role"])
+            self.assertEqual(mapped["limits"], source["limits"])
+            self.assertEqual(mapped["choices"][0]["execution"], source["choices"][0]["execution"])
+            plan = bundle.launch_plan(mapped, self.cwd, self.prompt, self.artifacts)
+            self.assertFalse(plan["executes"])
+            self.assertEqual(self.value(plan["argv"], "--model"), "claude-opus-5-5")
+            self.assertEqual(self.value(plan["argv"], "--effort"), "xhigh")
+            reviewer = bundle.resolve(self.config, mode="frontier-research", slot="frontier-reviewer",
+                                      role="qa")["choices"][0]
+            self.assertEqual(reviewer["code"], "AMAX")
+            self.assertTrue(reviewer["independent_review"])
         self.assertEqual(self.config, before)
 
     def test_orchestration_plan_requires_assignment_wide_capacity_handoff(self):

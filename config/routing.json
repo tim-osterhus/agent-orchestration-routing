@@ -154,6 +154,14 @@
     }
   },
   "modes": {
+    "frontier-research": [
+      {"slot": "frontier-proposer", "roles": ["research", "planning"], "fit": "Propose a mechanism, identify its hardest assumption, and design the cheapest decisive test."},
+      {"slot": "frontier-reviewer", "roles": ["qa", "spec-review"], "independent_review": true, "fit": "Independently challenge the proposal with counterexamples, violated invariants, and decisive tests."},
+      {"slot": "opus-deep", "roles": ["qa", "spec-review"], "independent_review": true, "fit": "Provide an alternate review of runtime constraints and failure cases when useful."},
+      {"slot": "investigate-deep", "roles": ["research", "planning", "qa"], "fit": "Seek a materially different representation or implementation when the first approach stalls."},
+      {"slot": "hard", "roles": ["implementation", "integration", "qa"], "fit": "Build, integrate, or reproduce a bounded probe with explicit write ownership and acceptance checks."},
+      {"slot": "opus-max", "roles": ["research", "planning", "qa", "spec-review"], "escalation": true, "fit": "Investigate a named unresolved question after focused evidence or cheaper checks have narrowed it."}
+    ],
     "ui-pro": [
       {"slot":"browser","roles":["browser"],"specialist":true,"fit":"Capture screenshots and run interaction, keyboard, and focus checks with verified browser/computer-control tools. Record build, route, viewport, theme, and state."},
       {"slot":"visual-deep","roles":["research","planning","qa","spec-review"],"fit":"Diagnose concrete defects in baseline and intermediate screenshots. Return unresolved framing to the coordinator; this critique does not replace the final council."},
@@ -281,6 +289,8 @@
     "glm:public_api_or_self_hosted_weights": {"verified": false}
   },
   "slots": {
+    "frontier-proposer": {"description": "Propose a competing mechanism and a minimal discriminating experiment."},
+    "frontier-reviewer": {"description": "Independently challenge assumptions and seek decisive counterexamples."},
     "cheap": {"description": "Trivial bounded extraction or mechanical edits with an inexpensive acceptance check."},
     "small": {"description": "Small specified changes, source transformations, or visual interpretation following an established pattern with inexpensive checks."},
     "ember": {"description": "Bounded reasoning only after exact Muse adapter and account access are verified."},
@@ -385,6 +395,14 @@
       }
     },
     "shared": {
+      "frontier-research": {
+        "frontier-proposer": "FH",
+        "frontier-reviewer": "AMAX",
+        "opus-deep": "OX",
+        "investigate-deep": "MFX",
+        "hard": "SX",
+        "opus-max": "OMAX"
+      },
       "ui-pro": {"browser": "TM", "visual-deep": "TH", "standard": "SM", "opus-medium": "OM", "max-code": "SMAX", "opus-deep": "OX", "investigate-deep": "MFX"},
       "browser-3d": {
         "standard": "SM",

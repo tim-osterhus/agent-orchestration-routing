@@ -68,6 +68,62 @@ class SlotTests(unittest.TestCase):
             efficient = bundle.resolve(self.config, variant=variant, mode="efficient")
             self.assertEqual(efficient.get("unavailable_profiles", []), ["EX"] if variant == "codex-primary" else [])
 
+    def test_frontier_research_exact_bindings_and_role_fences_across_hosts(self):
+        expected = ["FH", "AMAX", "OX", "MFX", "SX", "OMAX"]
+        roles = {"research": ["FH", "MFX", "OMAX"],
+                 "planning": ["FH", "MFX", "OMAX"],
+                 "qa": ["AMAX", "OX", "MFX", "SX", "OMAX"],
+                 "spec-review": ["AMAX", "OX", "OMAX"],
+                 "implementation": ["SX"], "integration": ["SX"]}
+        for variant in self.config["variants"]:
+            pool = bundle.mode_pools(self.config, variant)["frontier-research"]
+            self.assertEqual([e["profile"] for e in pool], expected)
+            self.assertNotIn("frontier-research", self.config["variants"][variant]["modes"])
+            self.assertEqual([e["profile"] for e in pool if e.get("independent_review")], ["AMAX", "OX"])
+            self.assertEqual([e["profile"] for e in pool if e.get("escalation")], ["OMAX"])
+            for design in self.config["designs"]:
+                kwargs = dict(mode="frontier-research", variant=variant, design=design)
+                for role in self.config["roles"]:
+                    if role not in roles:
+                        with self.assertRaises(ValueError):
+                            bundle.resolve(self.config, role=role, **kwargs)
+                        continue
+                    result = bundle.resolve(self.config, role=role, **kwargs)
+                    self.assertEqual([c["code"] for c in result["choices"]], roles[role])
+                    self.assertEqual(result["limits"], {"max_parallel_workers": None,
+                                                        "max_external_sessions_per_assignment": None})
+                    for code in expected:
+                        if code not in roles[role]:
+                            with self.assertRaisesRegex(ValueError, "role/lifecycle"):
+                                bundle.resolve(self.config, code=code, role=role, **kwargs)
+        fh = bundle.resolve(self.config, mode="frontier-research", slot="frontier-proposer", role="research")["choices"][0]
+        self.assertEqual((fh["code"], fh["model"], fh["effort"]), ("FH", "claude-fable-5-2", "high"))
+        self.assertEqual(fh["claude_mode"], "consultation")
+
+    def test_frontier_research_rebinding_preserves_review_and_configurable_permissions(self):
+        changed = bundle.merge(self.config, {
+            "bindings": {"shared": {"frontier-research": {"frontier-reviewer": "SMAX"}}},
+            "adapters": {"muse:muse_code_subscription": {"verified": False}},
+            "codex": {"approval_policy": "on-request"},
+            "claude": {"modes": {"implementation": {"permission_mode": "acceptEdits"}}},
+            "max_parallel_workers": 2, "max_external_sessions_per_assignment": 1})
+        reviewer = bundle.resolve(changed, mode="frontier-research", slot="frontier-reviewer", role="qa")["choices"][0]
+        self.assertEqual(reviewer["code"], "SMAX")
+        self.assertTrue(reviewer["independent_review"])
+        self.assertEqual(reviewer["execution"]["approval_policy"], "on-request")
+        with self.assertRaisesRegex(ValueError, "role/lifecycle"):
+            bundle.resolve(changed, mode="frontier-research", slot="frontier-reviewer", role="implementation")
+        result = bundle.resolve(changed, mode="frontier-research", role="qa")
+        self.assertIn("MFX", result["unavailable_profiles"])
+        self.assertNotIn("MFX", [c["code"] for c in result["choices"]])
+        self.assertEqual(result["limits"], {"max_parallel_workers": 2, "max_external_sessions_per_assignment": 1})
+        claude = bundle.resolve(changed, mode="frontier-research", code="OX", role="qa", claude_mode="implementation")["choices"][0]
+        self.assertEqual(claude["execution"]["permission_mode"], "acceptEdits")
+        self.assertTrue(claude["independent_review"])
+        explicit = bundle.resolve(changed, mode="frontier-research", code="MFX", role="research")["choices"][0]
+        self.assertFalse(explicit["execution"]["adapter_route_available"])
+        self.assertFalse(explicit["execution"]["launch_plan_supported"])
+
     def test_provider_flag_cannot_enable_or_substitute_a_different_access_route(self):
         broad = bundle.merge(self.config, {"adapters": {"muse": {"verified": True}}})
         self.assertFalse(bundle.adapter_available(broad, bundle.profile(broad, "EX")))

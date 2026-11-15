@@ -10,6 +10,8 @@ In Claude Code, the [agent-orch plugin](docs/configuration.md#claude-code-plugin
 
 Opt-in [Amusing](skills/agent-orch-router/modes/amusing.md) adds maintainability review and selective Muse investigation through a separately verified provider adapter.
 
+Opt-in [Frontier Research](skills/agent-orch-router/modes/frontier-research.md) pairs competing technical mechanisms with independent challenge and decisive experiments. It retains the current controller and resolves disagreements through evidence, not model votes.
+
 ```sh
 python3 scripts/bundle.py validate
 python3 scripts/bundle.py resolve --mode balanced --role implementation

@@ -45,7 +45,7 @@ Regenerate it with the same `plugin` action without `--check`. Generation copies
 | `adapters` | Availability by exact `provider:access_mode` route. A known adapter does not establish current account access, tools, or permissions. |
 | `profiles` | One master catalog of exact model, provider, effort, target tier, soft context target, and descriptions. Aliases use `alias_of`. |
 | `default_variant`, `variants` | Select `codex-primary` or `claude-primary` pools for Efficient, Balanced, and Performance. |
-| `modes` | Shared UI-Pro, Amusing, Council, Browser-3D, and burn pools, plus custom/preset pools. Entries carry role/lifecycle, specialist, independent-review, and escalation markers. |
+| `modes` | Shared UI-Pro, Amusing, Council, Frontier Research, Browser-3D, and burn pools, plus custom/preset pools. Entries carry role/lifecycle, specialist, independent-review, and escalation markers. |
 | `selection.bias` | Low/default/high selection preference. It never changes model effort or sorts unknown benchmark values. |
 | `execution_style` | Pure orchestration or supporting delegation. |
 | `max_parallel_workers` | Optional positive assignment-wide worker ceiling across descendants. Null or omitted adds no router ceiling. |
@@ -66,6 +66,8 @@ Both variants use one shared catalog. The [router entrypoint](../skills/agent-or
 Fable `FM`, `FX`, and `FMAX` remain on-call. `FH` can reason, implement, integrate, or review in Performance, Bulk, and Amusing. Council keeps its advisory assignment. No Fable profile appears in the Opus/Haiku preset. `FH`/`FX` select Fable 5.2, not 5.1. Ultracode is not supported. All model IDs require account/runtime verification.
 
 The [Fable usage-cap policy](../skills/agent-orch-router/references/fable-prompting.md#automatic-usage-cap-fallback) preauthorizes FM→OH, FH→OX, FX→OMAX, and FMAX→OMAX only after explicit provider usage exhaustion. Pool catalogs remain unchanged. Coordinators apply the trigger, terminal-run, neutral-review, diversity, and disclosure rules. The mapped Opus profile continues the original authorized Fable role/lifecycle, overriding its normal eligibility fences without expanding authority or capabilities. Offline tools neither detect exhaustion nor execute retries. Record mapped role/lifecycle exceptions with `--role-override` even in-pool. Add `--allow-out-of-pool` when needed, retaining the original role and selected Claude workflow.
+
+[Frontier Research](../skills/agent-orch-router/modes/frontier-research.md) is shared and opt-in for hard technical questions. FH proposes and AMAX independently challenges by default. OX, MFX, SX, and OMAX support alternate review, competing hypotheses, bounded probes, and named unresolved escalation. The current controller retains acceptance. Evidence, not model consensus, resolves disagreements. The inspector checks eligibility and bindings, not research completion or evidence quality.
 
 [Council](../skills/agent-orch-router/modes/council.md) is shared and opt-in for decision deliberation. Required members default to SMAX, OX, and MFX. AMAX is optional. FH advises without a vote unless explicitly appointed.
 
