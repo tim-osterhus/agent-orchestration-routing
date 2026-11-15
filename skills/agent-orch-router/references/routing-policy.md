@@ -1,6 +1,6 @@
 # Routing policy compatibility note
 
-The [router entrypoint](../SKILL.md) and its selected mode document contain the complete bundled routing instructions. Existing Claude companion links may land here; no additional policy read is needed after that pair.
+Read the [router entrypoint](../SKILL.md), [shared dispatch](dispatch.md), and selected mode, plus conditional provider references when selected. Existing Claude companion links may land here. This compatibility note adds no required policy read.
 
 For a burn assignment, retain the selected mode's account, endpoint, backlog, provider pool, and external-session ownership. Burn does not enable Orchestration or bypass.
 

@@ -1,5 +1,6 @@
 # Amusing
 
+Apply [shared dispatch](../references/dispatch.md).
 Opt in for maintainable changes with functional evidence and independent review. This shared mode has eight eligible profiles, not an eight-stage pipeline.
 
 ## Ordered pool
@@ -17,8 +18,6 @@ Opt in for maintainable changes with functional evidence and independent review.
 | investigate-deep | MFX: muse-wonder-full-1.0 / xhigh | general | Examine cross-system failures with competing hypotheses and challenge a proposed plan against evidence. Default to discriminating checks, not a second dispatcher. Implement when the work order authorizes edits. |
 <!-- END GENERATED:pool:amusing -->
 
-Choose the earliest suitable eligible slot. Use specialists only when their task fit warrants them. Role-restricted entries do not preempt general candidates. Preserve exact model/effort and role fences. Exceptions require explicit user authorization and an exact profile. The optional inspector records pool and role exceptions as `--allow-out-of-pool` and `--role-override`.
-
 ## Accept the candidate
 
 Define functional checks and maintainability expectations before implementation. Check the repository's conventions, scope, duplication, and unnecessary abstractions alongside behavior. Do not impose mandatory worktrees, documentation, linter frameworks, or arbitrary complexity thresholds.
@@ -30,15 +29,3 @@ Before requesting fixes, the coordinator separates evidenced defects and materia
 The coordinator retains resolved and rejected findings. Reopen them only for relevant changes or new material evidence. Keep prior verdicts out of fresh review packets. Use targeted verification for known corrections, without replacing required independent acceptance.
 
 If an unexplained failure follows product and evaluator changes, check the corrected evaluator against unchanged product behavior before further product edits.
-
-## Execute
-
-Use native workers for the current host's provider with the exact catalog model/effort and required tools. For selected Claude work, load the installed Claude Delegation skill and only its relevant launch reference. Review defaults to Consultation. Authored work defaults to Implementation. For external Codex work under Claude, use the optional [controller adapter](../../../docs/controller-designs.md).
-
-Selected Muse work requires the conditional provider checks linked from the entrypoint and an available, verified adapter, including a durable adapter when configured. No adapter or model availability is implied.
-
-Give workers the objective, inputs, disjoint write ownership, acceptance checks, profile, and any deadline. Reviewers do not author fixes without reassignment. The controller retains integration and acceptance.
-
-The router adds no default worker or external-session ceiling. Honor runtime, provider, project, and explicit configured limits across descendants. A positive `max_external_sessions_per_assignment` counts all active external-provider runs, including Muse and durable T3 runs, together across descendants. Idle persistent threads are not active sessions. Claude helpers may delegate within selected tools, permissions, pool, scope, and role fences. Native Codex workers remain leaves unless assigned a team role. Pass variant, mode, bias, fences, limits, and allocated capacity to descendants. External workers must not recursively launch the opposite controller.
-
-Preserve actual host permissions and user-selected tools, approvals, concurrency, and timeouts. Amusing changes routing and acceptance guidance, not those controls.

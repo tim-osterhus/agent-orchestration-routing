@@ -6,9 +6,7 @@ disable-model-invocation: true
 
 # Agent Orchestration Router
 
-Activate only by explicit invocation. Default to **codex-primary / balanced / default bias**, **pure orchestration**: delegate substantive work, integrate, and accept. Use supporting delegation when requested. Retain choices through compaction.
-
-Read this file and **only the selected mode document**:
+Activate only by explicit invocation. Default: **codex-primary / balanced / default bias, pure orchestration**. Read [shared dispatch](references/dispatch.md) once and **only the selected mode**:
 
 | Variant | Efficient | Balanced | Performance |
 | --- | --- | --- | --- |
@@ -17,79 +15,35 @@ Read this file and **only the selected mode document**:
 
 Shared across variants: [Amusing](modes/amusing.md) · [UI-Pro](modes/ui-pro.md) · [Council](modes/council.md) · [Frontier Research](modes/frontier-research.md) · [Browser-3D](modes/browser-3d.md) · [Codex-burn](modes/codex-burn.md) · [Claude-burn](modes/claude-burn.md).
 
-Variant selects pool preference, not host. Never change the parent model. Honor explicit profiles or active-mode bindings. Rebinding preserves roles, lifecycle, and review authority. Shared models do not merge jobs.
+## Exact profile index
 
-## Standard frontier
+Efforts are positional: l=low, m=medium, h=high, x=xhigh, max=max. These 21 frontier and nine specialist configurations add no automatic mode eligibility.
 
-All **21 raw-score nondominated configurations** from the dated four-provider Standard comparison. Membership establishes neither suitability, subscription economics, access, nor dispatch availability.
+| Exact model | Frontier aliases → efforts |
+| --- | --- |
+| gpt-6-luna | LL/LM → l/m |
+| claude-haiku-5-5 | HL → l |
+| gpt-6.1-terra | TL/TM/TH → l/m/h |
+| muse-ember-1.0 | EX/EMAX → x/max |
+| gpt-6.1-sol | SM/SH/SX/SMAX → m/h/x/max |
+| gpt-6-astra | AH/AX → h/x |
+| claude-fable-5-2 | FM/FH/FX/FMAX → m/h/x/max |
+| claude-opus-5-5 | OX → x |
+| gemini-4-carbon | GCM/GCH → m/h |
 
-<!-- BEGIN GENERATED:catalog-frontier -->
-| Code | Exact model | Effort |
-| --- | --- | --- |
-| LL | gpt-6-luna | low |
-| LM | gpt-6-luna | medium |
-| HL | claude-haiku-5-5 | low |
-| TL | gpt-6.1-terra | low |
-| EX | muse-ember-1.0 | xhigh |
-| EMAX | muse-ember-1.0 | max |
-| TM | gpt-6.1-terra | medium |
-| TH | gpt-6.1-terra | high |
-| SM | gpt-6.1-sol | medium |
-| SH | gpt-6.1-sol | high |
-| SX | gpt-6.1-sol | xhigh |
-| SMAX | gpt-6.1-sol | max |
-| AH | gpt-6-astra | high |
-| AX | gpt-6-astra | xhigh |
-| FM | claude-fable-5-2 | medium |
-| OX | claude-opus-5-5 | xhigh |
-| GCM | gemini-4-carbon | medium |
-| GCH | gemini-4-carbon | high |
-| FH | claude-fable-5-2 | high |
-| FX | claude-fable-5-2 | xhigh |
-| FMAX | claude-fable-5-2 | max |
-<!-- END GENERATED:catalog-frontier -->
+| Exact model | Specialist alias → effort |
+| --- | --- |
+| claude-opus-5-5 | OH → h |
+| muse-wonder-1.0 | MWM → max |
+| muse-spark-1.3 | MSX → x |
+| claude-sonnet-5-5 | SNMAX → max |
+| muse-wonder-full-1.0 | MFMAX → max |
+| kimi-k3.1-pro | KK31 → unspecified |
+| gemini-4-argon | GA4H → h |
+| deepseek-flash | DSFH → h |
+| gemini-3.8-flash | G38FH → h |
 
-## Specialist exceptions
-
-These disjoint exceptions neither expand pools nor authorize spending. See [model fit and specialist evidence](references/model-fit.md) for evidence, limitations, and conditional candidates.
-
-<!-- BEGIN GENERATED:catalog-specialists -->
-| Code | Exact model | Effort | Task exception | Access |
-| --- | --- | --- | --- | --- |
-| OH | claude-opus-5-5 | high | Agentic frontend and full-stack implementation | public_api |
-| MWM | muse-wonder-1.0 | max | Website design and visual aesthetics | public_api_standard |
-| MSX | muse-spark-1.3 | xhigh | Lower-cost website and UI generation | public_api_standard |
-| SNMAX | claude-sonnet-5-5 | max | Professional deliverables and knowledge work | public_api |
-| MFMAX | muse-wonder-full-1.0 | max | Orchestration and steerable prose trials | muse_code_subscription |
-| KK31 | kimi-k3.1-pro | unspecified | Terminal-intensive engineering | public_api_or_self_hosted_weights |
-| GA4H | gemini-4-argon | high | Visual reasoning and MCP tool use | public_api |
-| DSFH | deepseek-flash | high | Budget workflow automation experiments | public_api_rolling_alias_or_self_hosted_weights |
-| G38FH | gemini-3.8-flash | high | Audio understanding with text output | public_api |
-<!-- END GENERATED:catalog-specialists -->
-
-Kimi needs a supported runtime effort. Wonder Full uses Muse Code subscription, not Wonder's API. Verify adapter, account, tools, effort, and data handling. Unavailable routes fail without substitution except the Fable usage-cap fallback. Permissions remain independently configurable.
-
-Other exact [compatibility profiles](references/compatibility.md) require explicit selection. Retired Fast codes, `fast`, `tokenburn`, and `CMAX` fail with migration guidance. Retired `hiq` requires explicit `amusing` reselection.
-
-Task fits are preferences, not measured effort-specific specialties. Assignments determine authorship, independence, and delegation.
-
-Eligible Fable profiles may reason, implement, or review. Prefer FH for selective trials. FX/FMAX are optional higher-effort comparisons.
-
-For selected FM/FH/FX/FMAX only, read [Fable prompting](references/fable-prompting.md) before briefing or dispatch. Pass relevant guidance. Eligibility alone does not trigger loading.
-
-Usage-cap fallback is preauthorized: **FM→OH, FH→OX, FX/FMAX→OMAX** (supported Max). Follow that reference's trigger, stop, receipt, independence, and diversity rules. Its narrow exception overrides pool, required-profile, mapped-role/lifecycle, and no-alternate fences without expanding original authority.
-
-For selected Muse work only, read [Muse provider checks](references/muse.md).
-
-## Execution discipline
-
-No default concurrency ceiling applies. Honor runtime/provider/project and positive assignment-wide caps across descendants. Idle threads consume no active capacity.
-
-Claude helpers may delegate within permissions, tools, pool, role, scope, ownership, and context isolation. Pass fences, limits, and allocations to descendants. With positive caps, return capacity requests without allocations; null/omitted caps require none. Helpers add no votes or coordinators. Native Codex workers remain leaves unless assigned team roles. External workers cannot recursively launch opposite controllers.
-
-- Diagnose product, evaluator, infrastructure, provider, or authority failures before escalating. Retry only with changed inputs, supported transient conditions, or new diagnostic hypotheses.
-- Transfer evidence only while its assumptions hold. Run required checks. Preserve candidate identity, fresh independent reviews, and same-version ratification.
-- Keep controls proportional to actual risks and requirements. Finish after acceptance and verification. Continue independent ready work around blockers.
+For specialty/access gates, compatibility profiles, or retired aliases, read [full catalog](references/catalog.md). For selection rationale read [model fit](references/model-fit.md).
 
 In Claude Code with the agent-orch plugin, use design `claude-plugin` and read [Claude plugin dispatch](references/claude-plugin.md) before the first dispatch.
 

@@ -1,5 +1,6 @@
 # UI-Pro
 
+Apply [shared dispatch](../references/dispatch.md).
 Opt in for UI improvement through independent critique, focused implementation, and fresh visual/functional evidence. Seven eligible profiles do not imply seven simultaneous workers.
 
 ## Ordered pool
@@ -21,8 +22,6 @@ The browser binding defaults to TM. Verify actual browser/computer-control tools
 SM or OM implements. TH critiques baseline/intermediate evidence. SMAX, OX, and MFX form the final council and may give fresh intermediate reviews. Reviewers do not edit unless reassigned. These jobs are workflow choices, not measured model specialties.
 
 ## Independent review packets
-
-Every independent review uses a fresh native worker or provider session. Do not fork or resume an author/reviewer conversation. Check auto-loaded memory and project context for prior verdicts. Use session-scoped isolation. Disclose unresolved contamination instead of claiming independence.
 
 Give each reviewer the same neutral inputs:
 
@@ -72,10 +71,4 @@ A screenshot alone does not prove usability or accessibility. Material design/be
 
 Stop when material findings are resolved and final evidence is accepted, at a user/project budget or deadline, or when rounds stop yielding useful improvements. Report remaining issues and missing evidence. UI-Pro imposes no new time, turn, or round cap and does not authorize publication, deployment, or merging.
 
-## Execution
-
-Use native workers for the host provider with exact model/effort and verified tools. The installed Claude Delegation skill supplies external Claude launch mechanics. Keep review authority separate from permissions: full tool access does not authorize edits. Use configured tools/approvals. If required checks need a broader profile, obtain that selection rather than silently widening access. The optional planner accepts `--claude-mode implementation` for a full-tool, review-scoped Claude launch. Its name does not authorize product edits. Verify session-scoped memory/context isolation separately before calling any review independent.
-
-For MFX use the Muse checks linked from the entrypoint and a verified Muse Code subscription adapter, never Wonder's API. Preserve exact effort, data handling, selected local/remote route, result metadata, and owned-session lifecycle. If the route fails, do not switch silently. The bundled planner does not launch Muse.
-
-The host coordinator owns the brief, ledger, integration, and acceptance. Claude helpers stay within permissions/tools/pool/scope/roles. Pass fences, limits, and allocated capacity to descendants. Native Codex workers remain leaves unless assigned team roles. External workers cannot recursively launch opposite controllers. Helpers add no votes or diversity. Preserve permissions, positive worker/external-session caps, shared deadlines, cancellation, and completion handling. No default router ceiling applies. Honor runtime/provider/project and explicit assignment limits. Idle threads consume no active capacity. UI-Pro adds no capacity, accounts, global changes, or mandatory worktrees.
+UI-Pro adds no capacity, accounts, global changes, or mandatory worktrees.

@@ -1,5 +1,6 @@
 # Frontier Research
 
+Apply [shared dispatch](../references/dispatch.md).
 Opt in for hard technical questions needing competing mechanisms, falsifiable experiments, and independent evidence checks. Keep the current controller responsible for scope, integration, and acceptance. Eligible profiles are not mandatory stages.
 
 <!-- BEGIN GENERATED:pool:frontier-research -->
@@ -32,13 +33,3 @@ Validate the evaluator proportionately, using a negative control or known-bad in
 Reproducible evidence, not votes or consensus, resolves disagreements. Retain commands, results, and limits. Blocked tests are not passes. Stop at verified acceptance, budget/deadline, or a blocker without useful authorized checks. Report unresolved hypotheses, blockers, and the next decisive check.
 
 If asked to compare pairings, start with four to six frozen tasks on identical inputs/checks. Compare verified results, useful counterexamples, time, and usage before revising defaults.
-
-## Dispatch within existing authority
-
-Use native workers for the host's provider with exact model/effort and verified tools. For external Claude, load the installed Claude Delegation skill and launcher guidance. Research/review default to Consultation. Preserve configured permissions, tools, approvals, deadlines, and lifecycle checks. For external Codex, use the optional [controller adapter](../../../docs/controller-designs.md).
-
-For Muse, use the entrypoint's provider checks and verified host adapter. Verify account route, model, effective effort, tools, data handling, and required Contributor mode settings. Report unavailable routes/verification. No silent substitution except the narrow Fable usage-cap fallback. Never broaden permissions.
-
-No default concurrency ceiling applies. Honor runtime/provider/project limits and positive assignment-wide worker/external-session caps across descendants, including Muse. Null/omitted caps add no ceiling. Idle threads consume no active capacity. Pass scope, disjoint ownership, role/lifecycle fences, context isolation, permissions, remaining budgets, and allocations. Under positive caps, request unallocated capacity.
-
-Claude helpers may delegate within those fences. Native Codex workers remain leaves unless assigned team roles. External workers cannot recursively launch opposite controllers. Helpers add no votes or diversity. Analysis/tool access does not authorize implementation or external mutations.
