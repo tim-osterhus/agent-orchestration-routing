@@ -20,6 +20,8 @@ Opt in for maintainable changes with functional evidence and independent review.
 
 ## Accept the candidate
 
+Apply [coding acceptance](../references/coding-acceptance.md) to implementation reviews and delivery. Keep this mode's independent acceptance and role fences.
+
 Define functional checks and maintainability expectations before implementation. Check the repository's conventions, scope, duplication, and unnecessary abstractions alongside behavior. Do not impose mandatory worktrees, documentation, linter frameworks, or arbitrary complexity thresholds.
 
 Give a fresh independent reviewer the requirements, relevant source, candidate diff or revision, and authorized checks. Let the reviewer form findings without the author's conclusions. Record the reviewed revision or diff identity. The controller resolves findings, verifies corrections, and repeats affected checks when the candidate changes. An author cannot be the sole acceptance check.
@@ -27,5 +29,7 @@ Give a fresh independent reviewer the requirements, relevant source, candidate d
 Before requesting fixes, the coordinator separates evidenced defects and material risks from optional or out-of-scope improvements. Accept, reject, or defer findings against the agreed requirements; suggestions do not automatically expand implementation scope.
 
 The coordinator retains resolved and rejected findings. Reopen them only for relevant changes or new material evidence. Keep prior verdicts out of fresh review packets. Use targeted verification for known corrections, without replacing required independent acceptance.
+
+Compare the scoped diff before and after corrections. Explain added behavior, abstractions, guards, and tests against the agreed goal. Necessary regression tests may grow the diff. Reject unrelated growth rather than optimizing line counts. Keep the reviewed candidate stable while a reviewer inspects that checkout.
 
 If an unexplained failure follows product and evaluator changes, check the corrected evaluator against unchanged product behavior before further product edits.

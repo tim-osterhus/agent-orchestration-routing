@@ -37,20 +37,24 @@ A targeted check may name a known defect. Label it verification, not an independ
 
 ## Rubric and iteration
 
+Apply [coding acceptance](../references/coding-acceptance.md) to implementation proof, review output, and delivery. Extend its finding format with the UI fields below.
+
 Review task clarity, hierarchy, typography/readability, spacing/density, contrast/color, interaction states, and design-system consistency. Report each finding with artifact/location, viewport/theme/state, severity, evidence, and a concrete correction. Name uninspected states.
 
 Blockers prevent or mislead the intended task or fail an applicable accessibility requirement. Material findings substantially impair use or consistency. Separate these from minor, optional, or out-of-scope suggestions. Scores, if used, are advisory. Do not chase a numeric target.
 
 1. Capture representative baseline evidence and agree on criteria.
 2. Obtain fresh independent critique of the baseline or current candidate.
-3. Let the coordinator verify, deduplicate, and prioritize material findings.
+3. Verify, deduplicate, and prioritize material findings against the agreed criteria before assigning fixes.
 4. Assign focused implementation with disjoint surface ownership and one owner for shared tokens, styles, or components.
 5. Capture fresh screenshots and functional evidence for the exact updated revision.
 6. Repeat while new actionable findings justify changes, then run the final council.
 
 Review an existing candidate when supplied. Do not reimplement it to create review work. Distinguish capture, viewport, build, and evaluator failures from UI defects before redesigning. Keep criteria stable unless requirements or evidence change. If product and evaluator changes obscure a failure, check the corrected evaluator against unchanged product behavior.
 
-Keep a concise coordinator-owned findings ledger, including accepted/rejected findings and reasons. Reopen settled findings only for relevant changes or new material evidence. Keep prior verdicts out of fresh review packets. Intermediate rounds may use TH or any council profile in a fresh context. Staging does not remove the final council.
+Retain stable finding IDs, outcomes, and reasons in the coordinator's ledger. Reopen settled findings only for relevant changes or new material evidence. Keep prior verdicts out of fresh review packets. Intermediate rounds may use TH or any council profile in a fresh context. Staging does not remove the final council.
+
+Compare the scoped diff after corrections. Keep necessary coverage, but reject unrelated features, abstractions, and redesigns. Keep the reviewed candidate stable while reviewers inspect that checkout.
 
 ## Final council and acceptance
 

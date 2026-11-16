@@ -34,6 +34,7 @@ Required independent reviews use fresh native workers or provider sessions, neve
 
 ## Conditional provider guidance
 
+- Code/documentation changes, implementation reviews, or commit/push/release delivery: read [coding acceptance](coding-acceptance.md) for proof, reviewer output, and finish-state checks.
 - Claude selected: read [Claude execution](claude-execution.md).
 - FM/FH/FX/FMAX selected: read [Fable prompting and usage-cap fallback](fable-prompting.md) before briefing/dispatch. Pass relevant guidance. Its narrow fallback overrides pool, required-profile, mapped-role/lifecycle, and no-alternate fences only as specified there.
 - Muse selected: read [Muse checks](muse.md). Verify exact adapter/account/tools/effort/data handling/result metadata/session lifecycle. Availability is not implied. Never substitute Wonder API for Code subscription. The planner does not launch Muse.

@@ -131,6 +131,23 @@ class RouterDocumentTests(unittest.TestCase):
                 self.assertTrue((source.parent / target.split("#", 1)[0]).is_file(),
                                 f"{source.relative_to(SKILL)}: {target}")
 
+    def test_coding_acceptance_is_conditional_and_complete_paths_remain_bounded(self):
+        entrypoint = (SKILL / "SKILL.md").read_text()
+        shared = (SKILL / "references/dispatch.md").read_text()
+        acceptance = (SKILL / "references/coding-acceptance.md").read_text()
+        self.assertNotIn("coding-acceptance.md", entrypoint)
+        links = re.findall(r"\[[^\]]*\]\(([^)]+)\)", shared)
+        self.assertEqual(links.count("coding-acceptance.md"), 1)
+        for mode in (SKILL / "modes").glob("*.md"):
+            if mode.name == "hiq.md":
+                continue
+            with self.subTest(mode=mode.name):
+                # Count the conditional document once, including when the mode
+                # also links it. Ordinary research paths retain the old budgets.
+                path = entrypoint + shared + mode.read_text() + acceptance
+                budget = 2650 if mode.name in {"council.md", "ui-pro.md"} else 2300
+                self.assertLessEqual(len(path.split()), budget)
+
     def test_provider_defaults_and_mode_specific_controller_contracts_remain_distinct(self):
         shared = (SKILL / "references/dispatch.md").read_text()
         self.assertIn("](claude-execution.md)", shared)
