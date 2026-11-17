@@ -8,14 +8,14 @@ Opt in for decision, architecture, or research tradeoffs through independent ope
 <!-- BEGIN GENERATED:pool:council -->
 | Slot | Exact profile | Eligibility | Task fit |
 | --- | --- | --- | --- |
-| max-code | S62MAX: gpt-6.2-sol / max | research, planning, qa, spec-review | Develop a decision proposal, test its assumptions, and compare concrete implementation tradeoffs. |
+| max-code | SMAX: gpt-6.2-sol / max | research, planning, qa, spec-review | Develop a decision proposal, test its assumptions, and compare concrete implementation tradeoffs. |
 | opus-deep | OX: claude-opus-5-5 / xhigh | research, planning, qa, spec-review | Challenge architectural choices against requirements, source evidence, and simpler alternatives. |
 | investigate-deep | MFX: muse-wonder-full-1.0 / xhigh | research, planning, qa, spec-review | Investigate competing hypotheses and identify evidence that distinguishes proposed approaches. |
-| broad | A62MAX: gpt-6.2-astra / max | research, planning, qa, spec-review | Add an optional fourth perspective on assumptions, alternatives, and decision criteria. |
+| broad | AMAX: gpt-6.2-astra / max | research, planning, qa, spec-review | Add an optional fourth perspective on assumptions, alternatives, and decision criteria. |
 | fable-review | FH: claude-fable-5-2 / high | research, planning, spec-review | Advise on requirements and overlooked constraints, challenging the premise when useful and proposing materially distinct alternatives. This advisory slot adds no vote. |
 <!-- END GENERATED:pool:council -->
 
-Default required member slots: **max-code, opus-deep, investigate-deep**, with their exact active bindings. The bundled bindings are S62MAX, OX, and MFX. The broad slot is optional. If added as a member, it must endorse. The fable-review slot advises without a vote unless explicitly appointed. Rebinding changes the model, not membership or voting authority.
+Default required member slots: **max-code, opus-deep, investigate-deep**, with their exact active bindings. The bundled bindings are SMAX, OX, and MFX. The broad slot is optional. If added as a member, it must endorse. The fable-review slot advises without a vote unless explicitly appointed. Rebinding changes the model, not membership or voting authority.
 
 Record required membership before openings. Five eligible profiles do not mean five members or concurrent workers. These task fits do not claim measured superiority.
 

@@ -6,8 +6,8 @@ These retained configurations preserve explicit requests and custom pools. Reten
 | Code | Exact model | Effort |
 | --- | --- | --- |
 | L | gpt-6-luna | max |
-| A62L | gpt-6.2-astra | low |
-| A62M | gpt-6.2-astra | medium |
+| AL | gpt-6.2-astra | low |
+| AM | gpt-6.2-astra | medium |
 | HMED | claude-haiku-5-5 | medium |
 | HH | claude-haiku-5-5 | high |
 | HM | claude-haiku-5-5 | xhigh |

@@ -24,8 +24,8 @@ Efforts are positional: l=low, m=medium, h=high, x=xhigh, max=max. These 19 fron
 | claude-haiku-5-5 | HL → l |
 | gpt-6.1-terra | TL/TM/TH/TX → l/m/h/x |
 | muse-ember-1.0 | EX/EMAX → x/max |
-| gpt-6.2-sol | S62L/S62M/S62H/S62X/S62MAX → l/m/h/x/max |
-| gpt-6.2-astra | A62H/A62X/A62MAX → h/x/max |
+| gpt-6.2-sol | SL/SM/SH/SX/SMAX → l/m/h/x/max |
+| gpt-6.2-astra | AH/AX/AMAX → h/x/max |
 | claude-fable-5-2 | FX/FMAX → x/max |
 
 | Exact model | Specialist alias → effort |

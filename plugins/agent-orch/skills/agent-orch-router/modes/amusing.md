@@ -8,11 +8,11 @@ Opt in for maintainable changes with functional evidence and independent review.
 <!-- BEGIN GENERATED:pool:amusing -->
 | Slot | Exact profile | Eligibility | Task fit |
 | --- | --- | --- | --- |
-| standard | S62M: gpt-6.2-sol / medium | general | Implement bounded changes in the repository's existing idioms. Prefer the smallest complete change and inexpensive acceptance checks. |
-| hard | S62X: gpt-6.2-sol / xhigh | general | Debug difficult invariants or integrate changes with interacting constraints. Require evidence that the fix addresses the cause without expanding scope. |
+| standard | SM: gpt-6.2-sol / medium | general | Implement bounded changes in the repository's existing idioms. Prefer the smallest complete change and inexpensive acceptance checks. |
+| hard | SX: gpt-6.2-sol / xhigh | general | Debug difficult invariants or integrate changes with interacting constraints. Require evidence that the fix addresses the cause without expanding scope. |
 | opus-medium | OM: claude-opus-5-5 / medium | general | Prefer for substantial scoped implementation or refactoring when the task fits Opus Medium. Medium is not a universal optimum, so compare the actual candidate and checks. |
 | opus-deep | OX: claude-opus-5-5 / xhigh | planning, qa, spec-review; independent review | Independently review maintainability and architecture against the repository's existing design. Propose concrete simpler alternatives where they preserve the required behavior. |
-| broad | A62MAX: gpt-6.2-astra / max | qa, browser; independent review | Independently test functional behavior, failure cases, and implementation assumptions against the requirements. Report evidence and maintainability concerns without claiming model-specific code-quality authority. |
+| broad | AMAX: gpt-6.2-astra / max | qa, browser; independent review | Independently test functional behavior, failure cases, and implementation assumptions against the requirements. Report evidence and maintainability concerns without claiming model-specific code-quality authority. |
 | fable | FH: claude-fable-5-2 / high | general | Consider for demanding implementation or a fresh framing when the current approach overcomplicates the task or offers too-similar alternatives. Preserve acceptance criteria and distinguish authorship from independent review. |
 | investigate | MFH: muse-wonder-full-1.0 / high | general | Investigate repository structure, existing fixes, and root causes using source evidence. Default to diagnosis and focused checks. Implement when the work order authorizes edits. |
 | investigate-deep | MFX: muse-wonder-full-1.0 / xhigh | general | Examine cross-system failures with competing hypotheses and challenge a proposed plan against evidence. Default to discriminating checks, not a second dispatcher. Implement when the work order authorizes edits. |

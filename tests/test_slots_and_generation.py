@@ -22,7 +22,7 @@ class SlotTests(unittest.TestCase):
 
     def test_exact_frontier_and_disjoint_specialist_catalogs(self):
         self.assertEqual(self.config["catalogs"]["frontier"],
-                         "LL LM HL TL EX EMAX TM S62L TH TX S62M S62H S62X S62MAX A62H A62X A62MAX FX FMAX".split())
+                         "LL LM HL TL EX EMAX TM SL TH TX SM SH SX SMAX AH AX AMAX FX FMAX".split())
         self.assertEqual(len(self.config["catalogs"]["specialists"]), 9)
         self.assertEqual(len(self.config["catalogs"]["conditional"]), 3)
         all_codes = [c for group in self.config["catalogs"].values() for c in group]
@@ -30,13 +30,13 @@ class SlotTests(unittest.TestCase):
         self.assertEqual(set(all_codes), set(self.config["profiles"]))
 
     def test_only_new_sol_and_astra_releases_are_selectable(self):
-        retired_codes = "SL SM SH SX SMAX AL AM AH AX AMAX".split()
+        rejected_codes = [prefix + "62" + effort for prefix in "SA" for effort in ("L", "M", "H", "X", "MAX")]
         retired_models = {"gpt-6.1-sol", "gpt-6-astra"}
         self.assertTrue(retired_models.isdisjoint({p.get("model") for p in self.config["profiles"].values()}))
-        for code in retired_codes:
+        for code in rejected_codes:
             with self.subTest(code=code), self.assertRaisesRegex(ValueError, "Unknown profile"):
                 bundle.resolve(self.config, code=code, allow_out_of_pool=True, role_override=True)
-        for code in ("TX", "A62L", "A62M"):
+        for code in ("TX", "AL", "AM"):
             self.assertTrue(all(code != entry["profile"]
                                 for variant in self.config["variants"]
                                 for pool in bundle.mode_pools(self.config, variant).values()
@@ -44,12 +44,12 @@ class SlotTests(unittest.TestCase):
 
     def test_performance_marks_max_as_escalation(self):
         pool = bundle.mode_pools(self.config, "codex-primary")["performance"]
-        self.assertEqual({p["profile"] for p in pool if p.get("escalation")} & {"S62MAX", "A62MAX", "A62X"},
-                         {"S62MAX", "A62MAX"})
+        self.assertEqual({p["profile"] for p in pool if p.get("escalation")} & {"SMAX", "AMAX", "AX"},
+                         {"SMAX", "AMAX"})
 
     def test_efficient_provider_preferences_and_muse_gate_are_variant_specific(self):
-        for variant, codes in (("codex-primary", ["LM", "TL", "EX", "TM", "TH", "S62M"]),
-                               ("claude-primary", ["HL", "TL", "HM", "TM", "SNH", "S62M"])):
+        for variant, codes in (("codex-primary", ["LM", "TL", "EX", "TM", "TH", "SM"]),
+                               ("claude-primary", ["HL", "TL", "HM", "TM", "SNH", "SM"])):
             pool = bundle.mode_pools(self.config, variant)["efficient"]
             self.assertEqual([e["profile"] for e in pool], codes)
             unavailable = bundle.resolve(self.config, variant=variant, mode="efficient")
@@ -73,9 +73,9 @@ class SlotTests(unittest.TestCase):
     def test_default_council_and_amusing_keep_known_code_routes_not_api_routes(self):
         for variant in self.config["variants"]:
             council = bundle.resolve(self.config, variant=variant, mode="council", role="research")
-            self.assertEqual([c["code"] for c in council["choices"]], ["S62MAX", "OX", "MFX", "A62MAX", "FH"])
+            self.assertEqual([c["code"] for c in council["choices"]], ["SMAX", "OX", "MFX", "AMAX", "FH"])
             amusing = bundle.resolve(self.config, variant=variant, mode="amusing", role="implementation")
-            self.assertEqual([c["code"] for c in amusing["choices"]], ["S62M", "S62X", "OM", "FH", "MFH", "MFX"])
+            self.assertEqual([c["code"] for c in amusing["choices"]], ["SM", "SX", "OM", "FH", "MFH", "MFX"])
             for result in (council, amusing):
                 self.assertNotIn("unavailable_profiles", result)
                 for choice in result["choices"]:
@@ -87,17 +87,17 @@ class SlotTests(unittest.TestCase):
             self.assertEqual(efficient.get("unavailable_profiles", []), ["EX"] if variant == "codex-primary" else [])
 
     def test_frontier_research_exact_bindings_and_role_fences_across_hosts(self):
-        expected = ["FH", "A62MAX", "OX", "MFX", "S62X", "OMAX"]
+        expected = ["FH", "AMAX", "OX", "MFX", "SX", "OMAX"]
         roles = {"research": ["FH", "MFX", "OMAX"],
                  "planning": ["FH", "MFX", "OMAX"],
-                 "qa": ["A62MAX", "OX", "MFX", "S62X", "OMAX"],
-                 "spec-review": ["A62MAX", "OX", "OMAX"],
-                 "implementation": ["S62X"], "integration": ["S62X"]}
+                 "qa": ["AMAX", "OX", "MFX", "SX", "OMAX"],
+                 "spec-review": ["AMAX", "OX", "OMAX"],
+                 "implementation": ["SX"], "integration": ["SX"]}
         for variant in self.config["variants"]:
             pool = bundle.mode_pools(self.config, variant)["frontier-research"]
             self.assertEqual([e["profile"] for e in pool], expected)
             self.assertNotIn("frontier-research", self.config["variants"][variant]["modes"])
-            self.assertEqual([e["profile"] for e in pool if e.get("independent_review")], ["A62MAX", "OX"])
+            self.assertEqual([e["profile"] for e in pool if e.get("independent_review")], ["AMAX", "OX"])
             self.assertEqual([e["profile"] for e in pool if e.get("escalation")], ["OMAX"])
             for design in self.config["designs"]:
                 kwargs = dict(mode="frontier-research", variant=variant, design=design)
@@ -120,13 +120,13 @@ class SlotTests(unittest.TestCase):
 
     def test_frontier_research_rebinding_preserves_review_and_configurable_permissions(self):
         changed = bundle.merge(self.config, {
-            "bindings": {"shared": {"frontier-research": {"frontier-reviewer": "S62MAX"}}},
+            "bindings": {"shared": {"frontier-research": {"frontier-reviewer": "SMAX"}}},
             "adapters": {"muse:muse_code_subscription": {"verified": False}},
             "codex": {"approval_policy": "on-request"},
             "claude": {"modes": {"implementation": {"permission_mode": "acceptEdits"}}},
             "max_parallel_workers": 2, "max_external_sessions_per_assignment": 1})
         reviewer = bundle.resolve(changed, mode="frontier-research", slot="frontier-reviewer", role="qa")["choices"][0]
-        self.assertEqual(reviewer["code"], "S62MAX")
+        self.assertEqual(reviewer["code"], "SMAX")
         self.assertTrue(reviewer["independent_review"])
         self.assertEqual(reviewer["execution"]["approval_policy"], "on-request")
         with self.assertRaisesRegex(ValueError, "role/lifecycle"):
@@ -160,7 +160,7 @@ class SlotTests(unittest.TestCase):
     def test_browser_3d_workers_are_codex_only_under_both_variants(self):
         for variant in self.config["variants"]:
             result = bundle.resolve(self.config, variant=variant, mode="browser-3d", design="claude-plugin")
-            self.assertEqual([c["code"] for c in result["choices"]], ["S62M", "S62H", "S62X", "S62MAX", "A62MAX"])
+            self.assertEqual([c["code"] for c in result["choices"]], ["SM", "SH", "SX", "SMAX", "AMAX"])
             for choice in result["choices"]:
                 self.assertEqual(choice["provider"], "codex")
                 self.assertNotEqual(choice["model"], "gpt-6.1-terra")
@@ -168,19 +168,19 @@ class SlotTests(unittest.TestCase):
             self.assertEqual(result["limits"]["max_parallel_workers"], self.config["max_parallel_workers"])
 
     def test_browser_3d_routine_checks_and_visual_authoring_are_eligible(self):
-        for code, role in (("S62M", "browser"), ("S62M", "qa"), ("A62MAX", "implementation"),
-                           ("A62MAX", "browser"), ("S62MAX", "qa"), ("S62H", "integration")):
+        for code, role in (("SM", "browser"), ("SM", "qa"), ("AMAX", "implementation"),
+                           ("AMAX", "browser"), ("SMAX", "qa"), ("SH", "integration")):
             result = bundle.resolve(self.config, mode="browser-3d", code=code, role=role)
             self.assertEqual(result["choices"][0]["code"], code)
             self.assertEqual(result["choices"][0]["execution"], self.config["codex"])
-        for code in ("S62L", "TL", "TM", "TH", "FH"):
+        for code in ("SL", "TL", "TM", "TH", "FH"):
             with self.assertRaisesRegex(ValueError, "outside the active pool"):
                 bundle.resolve(self.config, mode="browser-3d", code=code)
 
     def test_browser_3d_claude_first_counts_codex_as_external(self):
         result = bundle.resolve(self.config, mode="browser-3d", design="claude-first")
         self.assertEqual(result["controller"], "claude")
-        self.assertEqual([c["code"] for c in result["choices"]], ["S62M", "S62H", "S62X", "S62MAX", "A62MAX"])
+        self.assertEqual([c["code"] for c in result["choices"]], ["SM", "SH", "SX", "SMAX", "AMAX"])
         self.assertTrue(all(c["dispatch"] == "external-codex" for c in result["choices"]))
         self.assertEqual(result["limits"], {"max_parallel_workers": None, "max_external_sessions_per_assignment": None})
         changed = bundle.merge(self.config, {"max_parallel_workers": 2, "max_external_sessions_per_assignment": 2})
@@ -188,7 +188,7 @@ class SlotTests(unittest.TestCase):
                          {"max_parallel_workers": 2, "max_external_sessions_per_assignment": 2})
 
     def test_ui_pro_bindings_roles_and_review_independence(self):
-        expected = ["TM", "TH", "S62M", "OM", "S62MAX", "OX", "MFX"]
+        expected = ["TM", "TH", "SM", "OM", "SMAX", "OX", "MFX"]
         for variant in self.config["variants"]:
             pool = bundle.mode_pools(self.config, variant)["ui-pro"]
             self.assertEqual([e["profile"] for e in pool], expected)
@@ -198,17 +198,17 @@ class SlotTests(unittest.TestCase):
                 browser = bundle.resolve(self.config, role="browser", **kwargs)
                 self.assertEqual([c["code"] for c in browser["choices"]], ["TM"])
                 authors = bundle.resolve(self.config, role="implementation", **kwargs)
-                self.assertEqual([c["code"] for c in authors["choices"]], ["S62M", "OM"])
+                self.assertEqual([c["code"] for c in authors["choices"]], ["SM", "OM"])
                 reviews = bundle.resolve(self.config, role="qa", final=True, **kwargs)
-                self.assertEqual([c["code"] for c in reviews["choices"]], ["TH", "S62MAX", "OX", "MFX"])
+                self.assertEqual([c["code"] for c in reviews["choices"]], ["TH", "SMAX", "OX", "MFX"])
                 # Eligibility is not a council vote; the three named final members remain independent.
-                for code in ("S62MAX", "OX", "MFX"):
+                for code in ("SMAX", "OX", "MFX"):
                     choice = bundle.resolve(self.config, code=code, role="qa", final=True, **kwargs)["choices"][0]
                     self.assertTrue(choice["independent_review"])
                     with self.assertRaisesRegex(ValueError, "role/lifecycle"):
                         bundle.resolve(self.config, code=code, role="implementation", **kwargs)
                 with self.assertRaisesRegex(ValueError, "role/lifecycle"):
-                    bundle.resolve(self.config, code="S62M", role="browser", **kwargs)
+                    bundle.resolve(self.config, code="SM", role="browser", **kwargs)
         changed = bundle.merge(self.config, {"bindings": {"shared": {"ui-pro": {"opus-deep": "OH"}}}})
         choice = bundle.resolve(changed, mode="ui-pro", slot="opus-deep", role="qa")["choices"][0]
         self.assertEqual(choice["code"], "OH")
@@ -239,9 +239,9 @@ class SlotTests(unittest.TestCase):
     def test_mode_specific_fit_preserves_review_scope_and_authority(self):
         cases = [
             ("codex-primary", "council", "OX", "planning", "simpler alternatives"),
-            ("codex-primary", "council", "A62MAX", "planning", "optional fourth perspective"),
+            ("codex-primary", "council", "AMAX", "planning", "optional fourth perspective"),
             ("codex-primary", "amusing", "OX", "qa", "review maintainability and architecture"),
-            ("codex-primary", "amusing", "A62MAX", "qa", "Independently test functional behavior"),
+            ("codex-primary", "amusing", "AMAX", "qa", "Independently test functional behavior"),
         ]
         for variant, mode, code, role, scope in cases:
             entry = next(e for e in bundle.mode_pools(self.config, variant)[mode] if e["profile"] == code)
@@ -280,23 +280,23 @@ class SlotTests(unittest.TestCase):
                         self.assertEqual(result["choices"][0]["code"], entry["profile"])
                         self.assertFalse(result["overrides"]["role_or_lifecycle"])
         # Review authority belongs to the workflow assignment, not the shared model ID.
-        for mode, code in (("amusing", "OX"), ("amusing", "A62MAX"), ("bulk", "OH")):
+        for mode, code in (("amusing", "OX"), ("amusing", "AMAX"), ("bulk", "OH")):
             with self.assertRaisesRegex(ValueError, "role/lifecycle"):
                 bundle.resolve(self.config, mode=mode, code=code, role="implementation")
 
     def test_rebinding_preserves_mode_fences_permissions_and_exact_requests(self):
         before = deepcopy(self.config)
-        changed = bundle.merge(self.config, {"bindings": {"codex-primary": {"balanced": {"standard": "S62X"}}}})
+        changed = bundle.merge(self.config, {"bindings": {"codex-primary": {"balanced": {"standard": "SX"}}}})
         bundle.validate(changed)
         selected = bundle.resolve(changed, slot="standard")["choices"][0]
-        self.assertEqual((selected["code"], selected["effort"]), ("S62X", "xhigh"))
+        self.assertEqual((selected["code"], selected["effort"]), ("SX", "xhigh"))
         self.assertEqual(changed["variants"], before["variants"])
         self.assertEqual(changed["modes"], before["modes"])
         self.assertEqual(changed["codex"], before["codex"])
         self.assertEqual(changed["claude"], before["claude"])
         with self.assertRaisesRegex(ValueError, "outside"):
-            bundle.resolve(changed, code="S62M")
-        exact = bundle.resolve(changed, code="S62M", allow_out_of_pool=True, role_override=True)["choices"][0]
+            bundle.resolve(changed, code="SM")
+        exact = bundle.resolve(changed, code="SM", allow_out_of_pool=True, role_override=True)["choices"][0]
         self.assertEqual((exact["model"], exact["effort"]), ("gpt-6.2-sol", "medium"))
 
     def collision_config(self):
@@ -304,7 +304,7 @@ class SlotTests(unittest.TestCase):
         c["slots"].update(author={"description": "Author a scoped change."}, reviewer={"description": "Review a completed candidate."})
         c["modes"]["collision"] = [{"slot": "author", "roles": ["implementation"]},
                                     {"slot": "reviewer", "roles": ["qa"], "one_off_only": True, "independent_review": True}]
-        c["bindings"]["shared"]["collision"] = {"author": "S62M", "reviewer": "S62M"}
+        c["bindings"]["shared"]["collision"] = {"author": "SM", "reviewer": "SM"}
         return bundle.validate(c)
 
     def test_model_collision_does_not_merge_role_lifecycle_or_authority(self):
@@ -319,7 +319,7 @@ class SlotTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "role/lifecycle"):
                 bundle.resolve(c, mode="collision", **kwargs)
         for role, slot in (("implementation", "author"), ("qa", "reviewer")):
-            choices = bundle.resolve(c, mode="collision", code="S62M", role=role)["choices"]
+            choices = bundle.resolve(c, mode="collision", code="SM", role=role)["choices"]
             self.assertEqual(len(choices), 1)
             self.assertEqual(choices[0]["slot"], slot)
 
@@ -328,16 +328,16 @@ class SlotTests(unittest.TestCase):
         c["modes"]["collision"][1]["roles"] = ["implementation", "qa"]
         choices = bundle.resolve(c, mode="collision")["choices"]
         self.assertEqual([x["slot"] for x in choices], ["author", "reviewer"])
-        exact = bundle.resolve(c, mode="collision", code="S62M")["choices"]
+        exact = bundle.resolve(c, mode="collision", code="SM")["choices"]
         self.assertEqual(len(exact), 1)
         self.assertEqual(exact[0]["slot"], "author")
         self.assertNotIn("independent_review", exact[0])
-        plan = bundle.launch_plan(bundle.resolve(c, mode="collision", code="S62M", design="claude-first"), ROOT, __file__, ROOT / ".runs/test")
+        plan = bundle.launch_plan(bundle.resolve(c, mode="collision", code="SM", design="claude-first"), ROOT, __file__, ROOT / ".runs/test")
         self.assertEqual(plan["profile"]["effort"], "medium")
 
     def test_unknown_binding_duplicate_slot_and_unknown_slot_fail(self):
         for patch in ({"bindings": {"codex-primary": {"balanced": {"standard": "UNKNOWN"}}}},
-                      {"bindings": {"codex-primary": {"balanced": {"UNKNOWN": "S62M"}}}},
+                      {"bindings": {"codex-primary": {"balanced": {"UNKNOWN": "SM"}}}},
                       {"variants": {"codex-primary": {"modes": {"balanced": [{"slot": "standard"}, {"slot": "standard"}]}}}}):
             with self.assertRaises(ValueError):
                 bundle.validate(bundle.merge(self.config, patch))
@@ -362,7 +362,7 @@ class GenerationTests(unittest.TestCase):
         self.assertEqual(renderer.render(bundle.load_config(), ROOT / "skills/agent-orch-router", check=True), [])
 
     def test_overlay_drives_generation_and_drift_check(self):
-        config = bundle.merge(bundle.load_config(), {"bindings": {"codex-primary": {"balanced": {"standard": "S62X"}}}})
+        config = bundle.merge(bundle.load_config(), {"bindings": {"codex-primary": {"balanced": {"standard": "SX"}}}})
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             target = root / "mode.md"
@@ -370,10 +370,10 @@ class GenerationTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "differ"):
                 renderer.render(config, root, check=True)
             renderer.render(config, root)
-            self.assertIn("standard | S62X: gpt-6.2-sol / xhigh", target.read_text())
+            self.assertIn("standard | SX: gpt-6.2-sol / xhigh", target.read_text())
             self.assertTrue(target.read_text().startswith("Workflow stays."))
             self.assertEqual(renderer.render(config, root, check=True), [])
-            target.write_text(target.read_text().replace("S62X: gpt-6.2-sol", "S62M: gpt-6.2-sol", 1))
+            target.write_text(target.read_text().replace("SX: gpt-6.2-sol", "SM: gpt-6.2-sol", 1))
             with self.assertRaisesRegex(ValueError, "differ"):
                 renderer.render(config, root, check=True)
 

@@ -16,14 +16,14 @@ The controller is outside the worker pool. Do not launch another FH worker or na
 <!-- BEGIN GENERATED:pool:browser-3d -->
 | Slot | Exact profile | Eligibility | Task fit |
 | --- | --- | --- | --- |
-| standard | S62M: gpt-6.2-sol / medium | general | Implement conventional UI, interactions, asset manifests, automation, and tests. Also handle routine browser journeys and screenshot collection with verified tool access. |
-| deep | S62H: gpt-6.2-sol / high | general | Build scene-generation and export pipelines, browser rendering, and asset integration. Diagnose performance problems while preserving the approved visual direction. |
-| hard | S62X: gpt-6.2-sol / xhigh | general | Resolve difficult rendering, shader, transform, collision, or integration failures with interacting constraints. Return demonstrated causes and verified corrections. |
-| max-code | S62MAX: gpt-6.2-sol / max | general | Handle exceptional engineering problems or independently review a complex candidate against functional and performance requirements. Use a fresh reviewer when this profile authored the work. |
-| broad | A62MAX: gpt-6.2-astra / max | general | Create and refine geometry, materials, lighting, and spatial composition through the available 3D toolchain. Inspect actual browser output for visual fidelity and interaction defects, separately from authored work when reviewing. |
+| standard | SM: gpt-6.2-sol / medium | general | Implement conventional UI, interactions, asset manifests, automation, and tests. Also handle routine browser journeys and screenshot collection with verified tool access. |
+| deep | SH: gpt-6.2-sol / high | general | Build scene-generation and export pipelines, browser rendering, and asset integration. Diagnose performance problems while preserving the approved visual direction. |
+| hard | SX: gpt-6.2-sol / xhigh | general | Resolve difficult rendering, shader, transform, collision, or integration failures with interacting constraints. Return demonstrated causes and verified corrections. |
+| max-code | SMAX: gpt-6.2-sol / max | general | Handle exceptional engineering problems or independently review a complex candidate against functional and performance requirements. Use a fresh reviewer when this profile authored the work. |
+| broad | AMAX: gpt-6.2-astra / max | general | Create and refine geometry, materials, lighting, and spatial composition through the available 3D toolchain. Inspect actual browser output for visual fidelity and interaction defects, separately from authored work when reviewing. |
 <!-- END GENERATED:pool:browser-3d -->
 
-Choose by task fit, not an escalation ladder. S62M handles routine browser work. A62MAX handles demanding visuals. Verify tools and session access. Terra is outside this pool.
+Choose by task fit, not an escalation ladder. SM handles routine browser work. AMAX handles demanding visuals. Verify tools and session access. Terra is outside this pool.
 
 ## Produce and inspect
 
@@ -47,7 +47,7 @@ Use verified native host routes. With the plugin, select `claude-plugin` and pin
 
 Under `claude-first`, Codex consumes worker/external capacity. Plugin relays are native.
 
-S62H may integrate assigned components, not become another controller.
+SH may integrate assigned components, not become another controller.
 
 An explicitly authorized Claude worker is an out-of-pool exception, dispatched through the native Agent route on this Claude host. Under the plugin, use its pinned Claude agent. The installed Claude Delegation skill applies only from a Codex controller, not this FH host.
 

@@ -1,12 +1,12 @@
 ---
-name: codex-s62max
-description: Router-only relay for profile S62MAX (Codex gpt-6.2-sol, max). Dispatch only when agent-orch-router selects S62MAX.
+name: codex-smax
+description: Router-only relay for profile SMAX (Codex gpt-6.2-sol, max). Dispatch only when agent-orch-router selects SMAX.
 model: haiku
 effort: low
 tools: Bash
 ---
 
-You relay one agent-orch-router work order to profile S62MAX (Codex gpt-6.2-sol, max). You are a forwarder, not a worker.
+You relay one agent-orch-router work order to profile SMAX (Codex gpt-6.2-sol, max). You are a forwarder, not a worker.
 
 Your prompt has a `Role:` line, a `Work order file:` line with an absolute path, and optionally a `Resume thread:` line.
 

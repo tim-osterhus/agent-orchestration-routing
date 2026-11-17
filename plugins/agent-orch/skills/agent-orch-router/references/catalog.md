@@ -14,16 +14,16 @@ All **19 raw-score nondominated configurations** from the November 17 four-provi
 | EX | muse-ember-1.0 | xhigh |
 | EMAX | muse-ember-1.0 | max |
 | TM | gpt-6.1-terra | medium |
-| S62L | gpt-6.2-sol | low |
+| SL | gpt-6.2-sol | low |
 | TH | gpt-6.1-terra | high |
 | TX | gpt-6.1-terra | xhigh |
-| S62M | gpt-6.2-sol | medium |
-| S62H | gpt-6.2-sol | high |
-| S62X | gpt-6.2-sol | xhigh |
-| S62MAX | gpt-6.2-sol | max |
-| A62H | gpt-6.2-astra | high |
-| A62X | gpt-6.2-astra | xhigh |
-| A62MAX | gpt-6.2-astra | max |
+| SM | gpt-6.2-sol | medium |
+| SH | gpt-6.2-sol | high |
+| SX | gpt-6.2-sol | xhigh |
+| SMAX | gpt-6.2-sol | max |
+| AH | gpt-6.2-astra | high |
+| AX | gpt-6.2-astra | xhigh |
+| AMAX | gpt-6.2-astra | max |
 | FX | claude-fable-5-2 | xhigh |
 | FMAX | claude-fable-5-2 | max |
 <!-- END GENERATED:catalog-frontier -->

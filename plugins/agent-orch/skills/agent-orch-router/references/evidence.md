@@ -12,7 +12,7 @@ All five Sol 6.2 efforts qualify. Astra 6.2 High, XHigh, and Max qualify. Astra 
 
 [Model fit and specialist evidence](model-fit.md) records the nine disjoint specialist exceptions, three conditional records, evidence types, and limitations. Family traits appear there once. A narrow benchmark or human preference result supports a targeted comparison, not universal superiority. A retained compatibility profile is not automatically a specialist.
 
-Efficient, Balanced, Performance, Amusing, Council, Frontier Research, and burn pools are workflow choices, not alternate measured frontiers. General-mode entries allow authorship and review. Designated independent-review jobs retain their assignment boundaries. Frontier Research's FH proposer is research/planning only. Its pairing is a testable workflow preference, not a measured superiority claim. Efficient uses LM/TL/EX/TM/TH/S62M under Codex-primary and HL/TL/HM/TM/SNH/S62M under Claude-primary. An unavailable external adapter does not authorize substitution.
+Efficient, Balanced, Performance, Amusing, Council, Frontier Research, and burn pools are workflow choices, not alternate measured frontiers. General-mode entries allow authorship and review. Designated independent-review jobs retain their assignment boundaries. Frontier Research's FH proposer is research/planning only. Its pairing is a testable workflow preference, not a measured superiority claim. Efficient uses LM/TL/EX/TM/TH/SM under Codex-primary and HL/TL/HM/TM/SNH/SM under Claude-primary. An unavailable external adapter does not authorize substitution.
 
 Claude-primary Efficient prefers Haiku XHigh in Ember XHigh's capability band and Sonnet High near Terra High. The [Haiku XHigh](https://artificialanalysis.ai/models/claude-haiku-5-5-xhigh) and [Sonnet High](https://artificialanalysis.ai/models/claude-sonnet-5-5-high) v5.0.1 pages, checked 2026-11-12, report rounded scores 35 and 42. These are provider-preference exceptions, not claims of equivalent task fit, cost, or Pareto membership.
 
@@ -36,7 +36,7 @@ The 2026-11-09 AAI v5.0.1 snapshot reports rounded score/API task cost: FM 56/$3
 
 ## Configuration versus execution
 
-Catalog IDs and efforts are documented separately from adapter availability. [OpenAI lists Sol 6.2 and Astra 6.2 in Codex and the API](https://learn.chatgpt.com/docs/whats-new/gpt-62-astra-sol). Use the new `S62*` and `A62*` codes. Old Sol and Astra codes are not aliases. The bundled profiles cover Low through Max; Ultra is not bundled.
+Catalog IDs and efforts are documented separately from adapter availability. `S` is the shorthand prefix for Sol 6.2; `A` is the prefix for Astra 6.2. Both bind directly to their [GPT-6.2 model IDs](https://learn.chatgpt.com/docs/whats-new/gpt-62-astra-sol). The bundled profiles cover Low through Max; Ultra is not bundled.
 
 Native behavior and external planning follow [OpenAI subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents), [Codex exec](https://learn.chatgpt.com/docs/developer-commands#codex-exec), and the [Claude CLI reference](https://code.claude.com/docs/en/cli-reference). Offline plans never prove account access, effective effort, tools, service tier, timeout cleanup, or completed-task outcomes. Requested Standard tier must be verified on the actual route without changing global speed settings.
 

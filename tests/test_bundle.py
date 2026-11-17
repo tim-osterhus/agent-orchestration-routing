@@ -33,12 +33,12 @@ class RoutingTests(unittest.TestCase):
                             if item["provider"] == "codex"))
         self.assertEqual(self.resolve()["routing_variant"], "codex-primary")
         self.assertEqual([entry["profile"] for entry in bundle.mode_pools(self.config)["balanced"]],
-                         ["S62L", "TM", "TH", "S62M", "S62H", "S62X", "S62MAX", "OH"])
+                         ["SL", "TM", "TH", "SM", "SH", "SX", "SMAX", "OH"])
 
     def test_designs_invert_native_and_external_routes(self):
         for design, codex, claude in [("codex-first", "native-codex", "external-claude"),
                                        ("claude-first", "external-codex", "native-claude")]:
-            self.assertEqual(self.resolve(code="S62M", design=design)["choices"][0]["dispatch"], codex)
+            self.assertEqual(self.resolve(code="SM", design=design)["choices"][0]["dispatch"], codex)
             self.assertEqual(self.resolve(code="OH", role="qa", design=design)["choices"][0]["dispatch"], claude)
 
     def test_optional_concurrency_limits_preserve_explicit_overlays(self):
@@ -89,8 +89,8 @@ class RoutingTests(unittest.TestCase):
         self.assertEqual(result["choices"][0]["claude_mode"], "consultation")
 
     def test_astra_has_general_eligibility_without_browser_preemption(self):
-        for variant, mode, code in (("codex-primary", "performance", "A62X"),
-                                    ("claude-primary", "performance", "A62MAX")):
+        for variant, mode, code in (("codex-primary", "performance", "AX"),
+                                    ("claude-primary", "performance", "AMAX")):
             pool = bundle.mode_pools(self.config, variant)[mode]
             browser = self.resolve(mode=mode, variant=variant, role="browser")
             self.assertEqual([c["code"] for c in browser["choices"]], [e["profile"] for e in pool])
@@ -98,12 +98,12 @@ class RoutingTests(unittest.TestCase):
                 choice = self.resolve(mode=mode, variant=variant, code=code, role=role)["choices"][0]
                 self.assertEqual(choice["code"], code)
                 self.assertNotIn("specialist", choice)
-        astra = self.resolve(mode="codex-burn", code="A62H", role="browser", burn_account="codex-work",
+        astra = self.resolve(mode="codex-burn", code="AH", role="browser", burn_account="codex-work",
                              burn_endpoint="next reset")["choices"][0]
         self.assertNotIn("specialist", astra)
 
     def test_burn_modes_are_provider_exclusive_under_both_designs(self):
-        for mode, provider, expected in [("codex-burn", "codex", ["S62M", "S62H", "S62X", "A62H", "A62X", "A62MAX"]),
+        for mode, provider, expected in [("codex-burn", "codex", ["SM", "SH", "SX", "AH", "AX", "AMAX"]),
                                           ("claude-burn", "claude", ["HMAX", "SNH", "OM", "OH", "OX", "OMAX"])]:
             self.assertEqual([entry["profile"] for entry in bundle.mode_pools(self.config)[mode]], expected)
             for design in ("codex-first", "claude-first"):
@@ -113,7 +113,7 @@ class RoutingTests(unittest.TestCase):
                     dispatch = ("native-" if design == provider + "-first" else "external-") + provider
                     self.assertTrue(all(choice["dispatch"] == dispatch for choice in result["choices"]))
                     self.assertEqual(result["burn"], {"provider": provider, "account": "work-account", "endpoint": "reset"})
-            other = "OH" if provider == "codex" else "S62M"
+            other = "OH" if provider == "codex" else "SM"
             with self.assertRaisesRegex(ValueError, "outside"):
                 self.resolve(mode=mode, code=other, role="qa", burn_account="work-account", burn_endpoint="reset")
             exception = self.resolve(mode=mode, code=other, role="qa", allow_out_of_pool=True, role_override=True,
@@ -156,21 +156,21 @@ class RoutingTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "retired.*explicitly"):
                 self.resolve(mode=mode)
             with self.assertRaisesRegex(ValueError, "retired"):
-                bundle.validate(bundle.merge(self.config, {"modes": {mode: [{"profile": "S62M"}]}}))
+                bundle.validate(bundle.merge(self.config, {"modes": {mode: [{"profile": "SM"}]}}))
         for code in bundle.RETIRED_PROFILES:
             self.assertNotIn(code, self.config["profiles"])
             with self.assertRaisesRegex(ValueError, "retired.*explicitly"):
                 self.resolve(code=code, allow_out_of_pool=True, role_override=True)
             with self.assertRaisesRegex(ValueError, "retired"):
-                bundle.validate(bundle.merge(self.config, {"profiles": {code: {"alias_of": "S62M"}}}))
+                bundle.validate(bundle.merge(self.config, {"profiles": {code: {"alias_of": "SM"}}}))
         with self.assertRaisesRegex(ValueError, "Standard"):
-            bundle.validate(bundle.merge(self.config, {"profiles": {"S62M": {"service_tier": "fast"}}}))
+            bundle.validate(bundle.merge(self.config, {"profiles": {"SM": {"service_tier": "fast"}}}))
         with self.assertRaisesRegex(ValueError, "SNX retains Sonnet XHigh"):
             bundle.validate(bundle.merge(self.config, {"profiles": {"SNX": {"effort": "max"}}}))
 
     def test_out_of_pool_requires_separate_pool_and_eligibility_overrides(self):
         for mode, code, role in [("balanced", "L", "implementation"), ("codex-burn", "OH", "qa"),
-                                 ("codex-burn", "OX", "implementation"), ("claude-burn", "A62M", "implementation")]:
+                                 ("codex-burn", "OX", "implementation"), ("claude-burn", "AM", "implementation")]:
             with self.subTest(mode=mode, code=code, role=role):
                 kwargs = {"mode": mode, "code": code, "role": role}
                 if mode in bundle.BURN_PROVIDERS:
@@ -198,13 +198,13 @@ class RoutingTests(unittest.TestCase):
         for kwargs in ({"mode": "missing"}, {"code": "missing"}, {"role": "missing"}):
             with self.assertRaises(ValueError):
                 self.resolve(**kwargs)
-        self.config["profiles"]["S62M"] = {"alias_of": "S62H"}
-        self.config["profiles"]["S62H"] = {"alias_of": "S62M"}
+        self.config["profiles"]["SM"] = {"alias_of": "SH"}
+        self.config["profiles"]["SH"] = {"alias_of": "SM"}
         with self.assertRaisesRegex(ValueError, "cycle"):
             bundle.validate(self.config)
 
     def test_merge_replaces_arrays_and_preserves_other_settings(self):
-        result = bundle.merge(self.config, {"modes": {"balanced": [{"profile": "S62M"}]},
+        result = bundle.merge(self.config, {"modes": {"balanced": [{"profile": "SM"}]},
                                            "claude": {"modes": {"implementation": {"timeout_seconds": 42}}}})
         bundle.validate(result)
         self.assertEqual(len(result["modes"]["balanced"]), 1)
@@ -252,14 +252,14 @@ class VariantTests(unittest.TestCase):
     def test_exact_bundled_pools_and_counts(self):
         expected = {
             "codex-primary": {
-                "efficient": ["LM", "TL", "EX", "TM", "TH", "S62M"],
-                "balanced": ["S62L", "TM", "TH", "S62M", "S62H", "S62X", "S62MAX", "OH"],
-                "performance": ["S62H", "S62X", "S62MAX", "A62X", "A62MAX", "OX", "OMAX", "FH"],
-                "bulk": ["S62L", "TM", "TH", "S62M", "S62H", "S62X", "S62MAX", "OX", "OH", "FH"]},
+                "efficient": ["LM", "TL", "EX", "TM", "TH", "SM"],
+                "balanced": ["SL", "TM", "TH", "SM", "SH", "SX", "SMAX", "OH"],
+                "performance": ["SH", "SX", "SMAX", "AX", "AMAX", "OX", "OMAX", "FH"],
+                "bulk": ["SL", "TM", "TH", "SM", "SH", "SX", "SMAX", "OX", "OH", "FH"]},
             "claude-primary": {
-                "efficient": ["HL", "TL", "HM", "TM", "SNH", "S62M"],
-                "balanced": ["HH", "HM", "HMAX", "SNH", "OM", "OH", "OX", "S62M", "S62MAX"],
-                "performance": ["OM", "OH", "OX", "OMAX", "S62MAX", "A62MAX", "FH"]}}
+                "efficient": ["HL", "TL", "HM", "TM", "SNH", "SM"],
+                "balanced": ["HH", "HM", "HMAX", "SNH", "OM", "OH", "OX", "SM", "SMAX"],
+                "performance": ["OM", "OH", "OX", "OMAX", "SMAX", "AMAX", "FH"]}}
         for variant, modes in expected.items():
             actual = bundle.mode_pools(self.config, variant)
             self.assertEqual(set(actual) - set(modes), {"amusing", "ui-pro", "council", "frontier-research", "browser-3d", "codex-burn", "claude-burn"})
@@ -275,8 +275,8 @@ class VariantTests(unittest.TestCase):
         families = {
             "gpt-6-luna": {"LM": "medium", "L": "max"},
             "gpt-6.1-terra": {"TL": "low", "TM": "medium", "TH": "high", "TX": "xhigh"},
-            "gpt-6.2-sol": {"S62L": "low", "S62M": "medium", "S62H": "high", "S62X": "xhigh", "S62MAX": "max"},
-            "gpt-6.2-astra": {"A62L": "low", "A62M": "medium", "A62H": "high", "A62X": "xhigh", "A62MAX": "max"},
+            "gpt-6.2-sol": {"SL": "low", "SM": "medium", "SH": "high", "SX": "xhigh", "SMAX": "max"},
+            "gpt-6.2-astra": {"AL": "low", "AM": "medium", "AH": "high", "AX": "xhigh", "AMAX": "max"},
             "claude-haiku-5-5": {"HMED": "medium", "HH": "high", "HM": "xhigh", "HK": "xhigh", "HMAX": "max"},
             "claude-sonnet-5-5": {"SNH": "high", "SNX": "xhigh"},
             "claude-opus-5-5": {"OM": "medium", "OH": "high", "OX": "xhigh", "OMAX": "max"},
@@ -339,10 +339,10 @@ class VariantTests(unittest.TestCase):
                 result = bundle.resolve(self.config, variant="claude-primary", mode=mode, code=code)
                 self.assertEqual(result["choices"][0]["claude_mode"], "implementation")
                 self.assertFalse(result["overrides"]["role_or_lifecycle"])
-        review = bundle.resolve(self.config, variant="claude-primary", code="S62M", role="qa")
+        review = bundle.resolve(self.config, variant="claude-primary", code="SM", role="qa")
         self.assertNotIn("independent_review", review["choices"][0])
-        implementation = bundle.resolve(self.config, variant="claude-primary", code="S62M", role="implementation")
-        self.assertEqual(implementation["choices"][0]["code"], "S62M")
+        implementation = bundle.resolve(self.config, variant="claude-primary", code="SM", role="implementation")
+        self.assertEqual(implementation["choices"][0]["code"], "SM")
         authored = bundle.resolve(self.config, variant="claude-primary", code="OH")
         self.assertNotIn("independent_review", authored["choices"][0])
         escalation = bundle.resolve(self.config, mode="performance", code="OMAX")
@@ -352,10 +352,10 @@ class VariantTests(unittest.TestCase):
         config = bundle.merge(self.config, {"variants": {"claude-primary": {"modes": {"balanced": [{"profile": "OM"}]}}}})
         bundle.validate(config)
         self.assertEqual([item["code"] for item in bundle.resolve(config, variant="claude-primary")["choices"]], ["OM"])
-        config = bundle.merge(config, {"modes": {"balanced": [{"profile": "S62H"}]}})
+        config = bundle.merge(config, {"modes": {"balanced": [{"profile": "SH"}]}})
         bundle.validate(config)
         for variant in config["variants"]:
-            self.assertEqual([item["code"] for item in bundle.resolve(config, variant=variant)["choices"]], ["S62H"])
+            self.assertEqual([item["code"] for item in bundle.resolve(config, variant=variant)["choices"]], ["SH"])
         legacy = deepcopy(config)
         del legacy["variants"], legacy["default_variant"]
         bundle.validate(legacy)
@@ -368,7 +368,7 @@ class VariantTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Unknown routing variant"):
             bundle.resolve(self.config, variant="missing")
         with self.assertRaisesRegex(ValueError, "shared top-level"):
-            bundle.validate(bundle.merge(self.config, {"variants": {"codex-primary": {"modes": {"codex-burn": [{"profile": "S62H"}]}}}}))
+            bundle.validate(bundle.merge(self.config, {"variants": {"codex-primary": {"modes": {"codex-burn": [{"profile": "SH"}]}}}}))
 
     def test_fable_performance_supports_authorship_and_review_without_role_override(self):
         for variant in self.config["variants"]:
@@ -416,29 +416,29 @@ class VariantTests(unittest.TestCase):
                 self.assertEqual(result["choices"][0]["model"], "claude-fable-5-2")
 
     def test_amusing_is_shared_non_burn_with_nonpreemptive_role_fences(self):
-        expected = ["S62M", "S62X", "OM", "OX", "A62MAX", "FH", "MFH", "MFX"]
+        expected = ["SM", "SX", "OM", "OX", "AMAX", "FH", "MFH", "MFX"]
         for variant in self.config["variants"]:
             pool = bundle.mode_pools(self.config, variant)["amusing"]
             self.assertEqual([entry["profile"] for entry in pool], expected)
             self.assertNotIn("amusing", self.config["variants"][variant]["modes"])
             self.assertFalse(any(entry.get("specialist") for entry in pool))
             for role, codes in {
-                "implementation": ["S62M", "S62X", "OM", "FH", "MFH", "MFX"],
-                "research": ["S62M", "S62X", "OM", "FH", "MFH", "MFX"],
-                "planning": ["S62M", "S62X", "OM", "OX", "FH", "MFH", "MFX"],
-                "qa": ["S62M", "S62X", "OM", "OX", "A62MAX", "FH", "MFH", "MFX"],
-                "spec-review": ["S62M", "S62X", "OM", "OX", "FH", "MFH", "MFX"],
-                "browser": ["S62M", "S62X", "OM", "A62MAX", "FH", "MFH", "MFX"]}.items():
+                "implementation": ["SM", "SX", "OM", "FH", "MFH", "MFX"],
+                "research": ["SM", "SX", "OM", "FH", "MFH", "MFX"],
+                "planning": ["SM", "SX", "OM", "OX", "FH", "MFH", "MFX"],
+                "qa": ["SM", "SX", "OM", "OX", "AMAX", "FH", "MFH", "MFX"],
+                "spec-review": ["SM", "SX", "OM", "OX", "FH", "MFH", "MFX"],
+                "browser": ["SM", "SX", "OM", "AMAX", "FH", "MFH", "MFX"]}.items():
                 result = bundle.resolve(self.config, mode="amusing", variant=variant, role=role)
                 self.assertEqual([choice["code"] for choice in result["choices"]], codes)
                 self.assertNotIn("burn", result)
             for role in ("qa", "browser"):
-                choice = bundle.resolve(self.config, mode="amusing", variant=variant, code="A62MAX", role=role)["choices"][0]
+                choice = bundle.resolve(self.config, mode="amusing", variant=variant, code="AMAX", role=role)["choices"][0]
                 self.assertEqual((choice["model"], choice["effort"]), ("gpt-6.2-astra", "max"))
                 self.assertTrue(choice["independent_review"])
                 with self.assertRaisesRegex(ValueError, "outside"):
-                    bundle.resolve(self.config, mode="amusing", variant=variant, code="A62X", role=role)
-        for code in ("OX", "A62MAX"):
+                    bundle.resolve(self.config, mode="amusing", variant=variant, code="AX", role=role)
+        for code in ("OX", "AMAX"):
             with self.assertRaisesRegex(ValueError, "role/lifecycle"):
                 bundle.resolve(self.config, mode="amusing", code=code, role="implementation")
         with self.assertRaisesRegex(ValueError, "only to burn"):
@@ -451,7 +451,7 @@ class VariantTests(unittest.TestCase):
                     bundle.resolve(self.config, variant=variant, mode=mode, role="planning")
 
     def test_council_eligibility_order_exact_routes_and_authority(self):
-        expected = ["S62MAX", "OX", "MFX", "A62MAX", "FH"]
+        expected = ["SMAX", "OX", "MFX", "AMAX", "FH"]
         baseline = deepcopy(self.config)
         for variant in self.config["variants"]:
             self.assertNotIn("council", self.config["variants"][variant]["modes"])
@@ -480,10 +480,10 @@ class VariantTests(unittest.TestCase):
                     self.assertEqual(result["overrides"], {"out_of_pool": False, "role_or_lifecycle": True})
         for overrides, error in [({}, "outside"), ({"allow_out_of_pool": True}, "--role-override")]:
             with self.assertRaisesRegex(ValueError, error):
-                bundle.resolve(self.config, mode="council", code="S62M", role="planning", **overrides)
-        result = bundle.resolve(self.config, mode="council", code="S62M", role="planning",
+                bundle.resolve(self.config, mode="council", code="SM", role="planning", **overrides)
+        result = bundle.resolve(self.config, mode="council", code="SM", role="planning",
                                 allow_out_of_pool=True, role_override=True)
-        self.assertEqual(result["choices"][0]["code"], "S62M")
+        self.assertEqual(result["choices"][0]["code"], "SM")
         self.assertEqual(self.config, baseline)
 
     def test_muse_is_external_without_codex_or_claude_execution_settings(self):
@@ -603,7 +603,7 @@ class PlanTests(unittest.TestCase):
             self.assertEqual(self.value(plan["argv"], "--effort"), "xhigh")
             reviewer = bundle.resolve(self.config, mode="frontier-research", slot="frontier-reviewer",
                                       role="qa")["choices"][0]
-            self.assertEqual(reviewer["code"], "A62MAX")
+            self.assertEqual(reviewer["code"], "AMAX")
             self.assertTrue(reviewer["independent_review"])
         self.assertEqual(self.config, before)
 
@@ -700,12 +700,12 @@ class PlanTests(unittest.TestCase):
 
     def test_codex_permissions_and_deadline_are_independent_configuration(self):
         config = bundle.merge(self.config, {"codex": {"sandbox_by_role": {"qa": "workspace-write"}, "approval_policy": "on-request", "timeout_seconds": 88}})
-        plan = self.plan(config=config, code="S62M", role="qa", design="claude-first")
+        plan = self.plan(config=config, code="SM", role="qa", design="claude-first")
         self.assertEqual(self.value(plan["argv"], "--sandbox"), "workspace-write")
         self.assertIn('approval_policy="on-request"', plan["argv"])
         self.assertEqual(plan["timeout_seconds"], 88)
         config["codex"]["bypass_approvals_and_sandbox"] = True
-        bypass = self.plan(config=config, code="S62M", role="qa", design="claude-first")
+        bypass = self.plan(config=config, code="SM", role="qa", design="claude-first")
         self.assertIn("--dangerously-bypass-approvals-and-sandbox", bypass["argv"])
         self.assertNotIn("--sandbox", bypass["argv"])
 
@@ -744,19 +744,19 @@ class PlanTests(unittest.TestCase):
             self.plan(code="OH", role="qa", resume="latest")
 
     def test_external_codex_is_workspace_scoped_without_bypass(self):
-        plan = self.plan(code="S62M", design="claude-first")
+        plan = self.plan(code="SM", design="claude-first")
         self.assertEqual(plan["argv"][:2], ["codex", "exec"])
         self.assertEqual(self.value(plan["argv"], "--sandbox"), "workspace-write")
         self.assertNotIn("--dangerously-bypass-approvals-and-sandbox", plan["argv"])
         self.assertTrue(plan["stdout_file"].endswith("events.jsonl"))
-        readonly = self.plan(code="S62M", role="qa", design="claude-first")
+        readonly = self.plan(code="SM", role="qa", design="claude-first")
         self.assertEqual(self.value(readonly["argv"], "--sandbox"), "read-only")
 
     def test_retired_codex_and_codex_resume_fail_without_fake_support(self):
         with self.assertRaisesRegex(ValueError, "retired"):
             self.plan(code="SMF", design="claude-first")
         with self.assertRaisesRegex(ValueError, "resume"):
-            self.plan(code="S62M", design="claude-first", resume="12345678-1234-4234-8234-123456789abc")
+            self.plan(code="SM", design="claude-first", resume="12345678-1234-4234-8234-123456789abc")
 
     def test_standard_launch_plans_preserve_exact_codex_model_effort(self):
         for code, item in self.config["profiles"].items():
@@ -770,9 +770,9 @@ class PlanTests(unittest.TestCase):
             self.assertNotIn("--fast", plan["argv"])
 
     def test_burn_plan_retains_scope_and_preset_compatibility(self):
-        for mode, code, design in [("codex-burn", "S62H", "claude-first"), ("claude-burn", "SNH", "codex-first")]:
+        for mode, code, design in [("codex-burn", "SH", "claude-first"), ("claude-burn", "SNH", "codex-first")]:
             plan = self.plan(mode=mode, code=code, design=design, burn_account="work-account", burn_endpoint="reset")
-            self.assertEqual(plan["burn"]["provider"], "codex" if code == "S62H" else "claude")
+            self.assertEqual(plan["burn"]["provider"], "codex" if code == "SH" else "claude")
             self.assertEqual(plan["burn"]["endpoint"], "reset")
         exception = self.plan(mode="codex-burn", code="OH", role="qa", allow_out_of_pool=True, role_override=True,
                               burn_account="codex-work", burn_endpoint="reset")
@@ -835,7 +835,7 @@ class PlanTests(unittest.TestCase):
         self.assertTrue(json.loads(result.stdout)["valid"])
 
     def test_native_routes_never_generate_external_cli_plans(self):
-        for variant, design, code in [("codex-primary", "codex-first", "S62M"),
+        for variant, design, code in [("codex-primary", "codex-first", "SM"),
                                        ("claude-primary", "claude-first", "OH")]:
             with self.assertRaisesRegex(ValueError, "Native routes require"):
                 self.plan(variant=variant, design=design, code=code)
