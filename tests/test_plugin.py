@@ -99,14 +99,14 @@ class PluginPackageTests(unittest.TestCase):
             config = deepcopy(self.config)
             config["codex"].update(change)
             with self.assertRaisesRegex(ValueError, message):
-                bundle.resolve(config, code="SM", design="claude-plugin")
+                bundle.resolve(config, code="S62M", design="claude-plugin")
             with self.assertRaisesRegex(ValueError, message):
                 bundle.plugin_files(config)
-            bundle.resolve(config, code="SM", design="claude-first")
+            bundle.resolve(config, code="S62M", design="claude-first")
 
     def test_plugin_design_resolves_pinned_agents_and_refuses_cli_plans(self):
-        codex = bundle.resolve(self.config, code="SM", design="claude-plugin")["choices"][0]
-        self.assertEqual((codex["dispatch"], codex["agent"]), ("native-codex", "agent-orch:codex-sm"))
+        codex = bundle.resolve(self.config, code="S62M", design="claude-plugin")["choices"][0]
+        self.assertEqual((codex["dispatch"], codex["agent"]), ("native-codex", "agent-orch:codex-s62m"))
         claude = bundle.resolve(self.config, code="OH", role="qa", design="claude-plugin")["choices"][0]
         self.assertEqual((claude["dispatch"], claude["agent"]), ("native-claude", "agent-orch:claude-oh"))
         muse = bundle.resolve(self.config, mode="amusing", code="MFH", role="research", design="claude-plugin")["choices"][0]
@@ -118,11 +118,11 @@ class PluginPackageTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             prompt = Path(directory) / "task.txt"
             prompt.write_text("Bounded task.")
-            resolved = bundle.resolve(self.config, code="SM", design="claude-plugin")
+            resolved = bundle.resolve(self.config, code="S62M", design="claude-plugin")
             with self.assertRaisesRegex(ValueError, "Native routes require"):
                 bundle.launch_plan(resolved, directory, str(prompt), str(Path(directory) / "runs"))
         bulk = bundle.resolve(self.config, mode="bulk", design="claude-plugin")
-        self.assertEqual([c["code"] for c in bulk["choices"]], ["SL", "TM", "TH", "SM", "SH", "SX", "SMAX", "AL", "OX", "FH"])
+        self.assertEqual([c["code"] for c in bulk["choices"]], ["S62L", "TM", "TH", "S62M", "S62H", "S62X", "S62MAX", "OX", "FH"])
         self.assertIsNone(bulk["limits"]["max_parallel_workers"])
 
     def test_plugin_settings_only_supply_the_codex_status_line(self):

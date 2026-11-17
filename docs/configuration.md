@@ -61,15 +61,15 @@ Bundled concurrency caps are null. Actual runtime, provider, project, and explic
 
 Both variants use one shared catalog. The [router entrypoint](../skills/agent-orch-router/SKILL.md) links the common dispatch contract and each mode's pool, task-fit guidance, workflow, and acceptance rules. Native routing does not require reading JSON. Pool sizes are bundled choices, not hard limits on custom configuration.
 
-[UI-Pro](../skills/agent-orch-router/modes/ui-pro.md) adds independent visual critique, focused implementation, and a required same-candidate SMAX/OX/MFX final council. TM supplies the default browser binding; TH handles baseline/intermediate critique, and SM/OM implement. TH's eligibility in a final-review resolution does not make it a council member. The inspector resolves roles and bindings, not browser access, context isolation, council completion, or acceptance. Permission/tool profiles remain configurable; broader review access does not authorize edits.
+[UI-Pro](../skills/agent-orch-router/modes/ui-pro.md) adds independent visual critique, focused implementation, and a required same-candidate S62MAX/OX/MFX final council. TM supplies the default browser binding; TH handles baseline/intermediate critique, and S62M/OM implement. TH's eligibility in a final-review resolution does not make it a council member. The inspector resolves roles and bindings, not browser access, context isolation, council completion, or acceptance. Permission/tool profiles remain configurable; broader review access does not authorize edits.
 
 Fable `FM`, `FX`, and `FMAX` remain on-call. `FH` can reason, implement, integrate, or review in Performance, Bulk, and Amusing. Council keeps its advisory assignment. No Fable profile appears in the Opus/Haiku preset. `FH`/`FX` select Fable 5.2, not 5.1. Ultracode is not supported. All model IDs require account/runtime verification.
 
 The [Fable usage-cap policy](../skills/agent-orch-router/references/fable-prompting.md#automatic-usage-cap-fallback) preauthorizes FM→OH, FH→OX, FX→OMAX, and FMAX→OMAX only after explicit provider usage exhaustion. Pool catalogs remain unchanged. Coordinators apply the trigger, terminal-run, neutral-review, diversity, and disclosure rules. The mapped Opus profile continues the original authorized Fable role/lifecycle, overriding its normal eligibility fences without expanding authority or capabilities. Offline tools neither detect exhaustion nor execute retries. Record mapped role/lifecycle exceptions with `--role-override` even in-pool. Add `--allow-out-of-pool` when needed, retaining the original role and selected Claude workflow.
 
-[Frontier Research](../skills/agent-orch-router/modes/frontier-research.md) is shared and opt-in for hard technical questions. FH proposes and AMAX independently challenges by default. OX, MFX, SX, and OMAX support alternate review, competing hypotheses, bounded probes, and named unresolved escalation. The current controller retains acceptance. Evidence, not model consensus, resolves disagreements. The inspector checks eligibility and bindings, not research completion or evidence quality.
+[Frontier Research](../skills/agent-orch-router/modes/frontier-research.md) is shared and opt-in for hard technical questions. FH proposes and A62MAX independently challenges by default. OX, MFX, S62X, and OMAX support alternate review, competing hypotheses, bounded probes, and named unresolved escalation. The current controller retains acceptance. Evidence, not model consensus, resolves disagreements. The inspector checks eligibility and bindings, not research completion or evidence quality.
 
-[Council](../skills/agent-orch-router/modes/council.md) is shared and opt-in for decision deliberation. Required members default to SMAX, OX, and MFX. AMAX is optional. FH advises without a vote unless explicitly appointed.
+[Council](../skills/agent-orch-router/modes/council.md) is shared and opt-in for decision deliberation. Required members default to S62MAX, OX, and MFX. A62MAX is optional. FH advises without a vote unless explicitly appointed.
 
 Its five-profile pool describes eligibility, not required membership or simultaneous workers. The inspector does not run a council or establish consensus. Implementation, frontend, integration, and browser roles have no automatic eligibility. Existing concurrency, provider checks, permissions, and assignment budgets still apply.
 
@@ -92,10 +92,10 @@ Pool entries name a stable `slot` and retain their own role/lifecycle fences. `b
 For example, this local overlay rebinds only Balanced's general implementation slot:
 
 ```json
-{"bindings": {"codex-primary": {"balanced": {"standard": "SX"}}}}
+{"bindings": {"codex-primary": {"balanced": {"standard": "S62X"}}}}
 ```
 
-An exact `--profile SM` request still means Sol Medium, not the rebound slot. Use `--slot standard` to follow the active binding. Pool and role exceptions remain explicit. Slot bindings never modify permission profiles.
+An exact `--profile S62M` request still means Sol Medium, not the rebound slot. Use `--slot standard` to follow the active binding. Pool and role exceptions remain explicit. Slot bindings never modify permission profiles.
 
 If several slots bind to the requested exact profile, an explicit profile request uses the first role/lifecycle-eligible slot. It produces one launch target and does not merge authority flags from other slots. Select a named slot when its specific job matters. Automatic inspection keeps separate slot identities.
 
@@ -146,7 +146,7 @@ python3 scripts/bundle.py resolve --mode performance --role browser
 python3 scripts/bundle.py resolve --mode amusing --profile MFH --role research
 python3 scripts/bundle.py resolve --mode council --profile MFX --role planning
 python3 scripts/bundle.py resolve --mode balanced --profile OH --role qa
-python3 scripts/bundle.py resolve --mode balanced --profile SM --role implementation --design claude-first
+python3 scripts/bundle.py resolve --mode balanced --profile S62M --role implementation --design claude-first
 python3 scripts/bundle.py resolve --variant claude-primary --design claude-first --mode balanced --profile OH --role implementation --bias high
 python3 scripts/bundle.py resolve --mode codex-burn --role browser --burn-account codex-work --burn-endpoint "next account reset"
 python3 scripts/bundle.py resolve --mode claude-burn --profile HMAX --design claude-first --burn-account claude-work --burn-endpoint "authorized queue exhausted"
@@ -155,7 +155,7 @@ python3 scripts/bundle.py validate --preset opus-haiku
 python3 scripts/bundle.py resolve --preset opus-haiku --mode opus-haiku --profile OH --role implementation --claude-mode orchestration
 ```
 
-`resolve` returns eligible candidates, not the final suitability or dispatch decision. Codex-primary Efficient's EX slot requires a verified adapter. Claude-primary Efficient instead uses HL/TL/HM/TM/SNH/SM, with no Muse slot. An explicit EX request stays exact and reports unsupported launch planning without substitution. The agent evaluates task complexity and tool fit before choosing one. Entries marked `specialist` take precedence for their stated roles. Amusing uses nonpreemptive role restrictions instead. Unknown profiles, alias cycles, ineligible roles, and disabled orchestration fail rather than silently selecting something else. An empty eligible set is a blocker.
+`resolve` returns eligible candidates, not the final suitability or dispatch decision. Codex-primary Efficient's EX slot requires a verified adapter. Claude-primary Efficient instead uses HL/TL/HM/TM/SNH/S62M, with no Muse slot. An explicit EX request stays exact and reports unsupported launch planning without substitution. The agent evaluates task complexity and tool fit before choosing one. Entries marked `specialist` take precedence for their stated roles. Amusing uses nonpreemptive role restrictions instead. Unknown profiles, alias cycles, ineligible roles, and disabled orchestration fail rather than silently selecting something else. An empty eligible set is a blocker.
 
 An explicit out-of-pool profile requires both `--allow-out-of-pool` and `--role-override`. The active pool has no entry defining that profile's role/lifecycle eligibility. The second flag acknowledges this unspecified eligibility, not a global model restriction inferred from another mode.
 

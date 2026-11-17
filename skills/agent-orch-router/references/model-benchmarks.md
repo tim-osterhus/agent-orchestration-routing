@@ -1,6 +1,6 @@
 # Model benchmark snapshot
 
-Source: **Artificial Analysis**. Accessed **2026-11-13**; **Artificial Analysis Intelligence Index v5.0.1**.
+Source: **Artificial Analysis Intelligence Index v5.0.1**. Snapshot **2026-11-13**; OpenAI section refreshed **2026-11-17**.
 
 Customization reference only. Deliberately not linked from the router entrypoint or modes; reading it is not part of normal dispatch. This snapshot does not add supported profiles or change routing.
 
@@ -14,14 +14,16 @@ Scope: selected current general-purpose, reasoning, and budget families from Ope
 
 ## OpenAI
 
-Artificial Analysis Intelligence Index **v5.0.1** / Cost per Intelligence Index Task **USD** · **2026-11-13** · Source: **Artificial Analysis**
+Artificial Analysis Intelligence Index **v5.0.1** / Cost per Intelligence Index Task **USD** · **2026-11-17** · Source: **Artificial Analysis**
 
 | Model release | Fixed / non-reasoning | Low | Medium | High | XHigh | Max |
 | --- | --- | --- | --- | --- | --- | --- |
 | GPT-6 Luna | [9 / $0.0714](https://artificialanalysis.ai/models/gpt-6-luna-non-reasoning) | [10 / $0.0051](https://artificialanalysis.ai/models/gpt-6-luna-low) | [18 / $0.0422](https://artificialanalysis.ai/models/gpt-6-luna-medium) | [21 / $0.0729](https://artificialanalysis.ai/models/gpt-6-luna-high) | [23 / $0.10](https://artificialanalysis.ai/models/gpt-6-luna-xhigh) | [28 / $0.15](https://artificialanalysis.ai/models/gpt-6-luna) |
 | GPT-6.1 Terra | [31 / $0.23](https://artificialanalysis.ai/models/gpt-6-1-terra-non-reasoning) | [29 / $0.0713](https://artificialanalysis.ai/models/gpt-6-1-terra-low) | [38 / $0.17](https://artificialanalysis.ai/models/gpt-6-1-terra-medium) | [42 / $0.26](https://artificialanalysis.ai/models/gpt-6-1-terra-high) | [45 / $0.40](https://artificialanalysis.ai/models/gpt-6-1-terra-xhigh) | [51 / $0.96](https://artificialanalysis.ai/models/gpt-6-1-terra) |
-| GPT-6.1 Sol | — | [35 / $0.16](https://artificialanalysis.ai/models/gpt-6-1-sol-low) | [46 / $0.36](https://artificialanalysis.ai/models/gpt-6-1-sol-medium) | [50 / $0.59](https://artificialanalysis.ai/models/gpt-6-1-sol-high) | [52 / $0.76](https://artificialanalysis.ai/models/gpt-6-1-sol-xhigh) | [55 / $1.27](https://artificialanalysis.ai/models/gpt-6-1-sol) |
-| GPT-6 Astra | — | [43 / $1.42](https://artificialanalysis.ai/models/gpt-6-astra-low) | [52 / $2.73](https://artificialanalysis.ai/models/gpt-6-astra-medium) | [55 / $3.24](https://artificialanalysis.ai/models/gpt-6-astra-high) | [55 / $3.66](https://artificialanalysis.ai/models/gpt-6-astra-xhigh) | [57 / $6.24](https://artificialanalysis.ai/models/gpt-6-astra) |
+| GPT-6.2 Sol | — | [41 / $0.18](https://artificialanalysis.ai/models/gpt-6-2-sol-low) | [53 / $0.41](https://artificialanalysis.ai/models/gpt-6-2-sol-medium) | [55 / $0.56](https://artificialanalysis.ai/models/gpt-6-2-sol-high) | [56 / $0.65](https://artificialanalysis.ai/models/gpt-6-2-sol-xhigh) | [57 / $1.01](https://artificialanalysis.ai/models/gpt-6-2-sol) |
+| GPT-6.2 Astra | — | [46 / $0.66](https://artificialanalysis.ai/models/gpt-6-2-astra-low) | [57 / $1.62](https://artificialanalysis.ai/models/gpt-6-2-astra-medium) | [60 / $2.07](https://artificialanalysis.ai/models/gpt-6-2-astra-high) | [62 / $2.52](https://artificialanalysis.ai/models/gpt-6-2-astra-xhigh) | [62 / $4.00](https://artificialanalysis.ai/models/gpt-6-2-astra) |
+
+All ten GPT-6.2 costs also appear in the [public Cost per Intelligence Index Task chart](https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index?models=gpt-6-2-astra-xhigh%2Cgpt-6-2-astra%2Cgpt-6-2-sol%2Cgpt-6-2-astra-high%2Cgpt-6-2-astra-medium%2Cgpt-6-2-astra-low%2Cgpt-6-2-sol-xhigh%2Cgpt-6-2-sol-high%2Cgpt-6-2-sol-medium%2Cgpt-6-2-sol-low#cost-per-intelligence-index-task-chart).
 
 ## Anthropic
 

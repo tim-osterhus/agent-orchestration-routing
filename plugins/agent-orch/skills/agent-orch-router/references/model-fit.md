@@ -6,9 +6,9 @@ Read only when comparing model families or selecting a specialist. Benchmark evi
 
 - Luna and Haiku: small bounded packets with inexpensive checks. Cheap attempts are not efficient when retries or controller repair dominate.
 - Terra: established-pattern implementation, source-rich writing, synthesis, and visual analysis. Start at Medium, choosing effort by checked results rather than assuming High resolves a framing problem.
-- Sol: general implementation, analysis, debugging, integration, and verification. Effort-specific task assignments are routing heuristics, not measured specialties.
-- Astra: general reasoning, implementation, analysis, and verification. Browser work requires the actual worker's tools. AH has no established browser-specific advantage here.
-- Ember and Gemini Carbon: general reasoning candidates on the supplied frontier. Use only through a verified exact provider route.
+- Sol 6.2: Low for clear edits, Medium for general coding and debugging, and High/XHigh for interacting constraints. Use Max for justified escalation or a designated council seat. These are routing preferences.
+- Astra 6.2: High or XHigh for difficult cross-component diagnosis, implementation, or independent analysis. Use Max when the stakes justify it. Browser work requires verified tools, not a specific Astra effort.
+- Ember and Gemini Carbon: general reasoning candidates with verified adapters. Ember is on the current frontier; Carbon remains selectable outside it.
 - Opus and Sonnet: general implementation and knowledge work. For Opus, consider OH when reproductions and edge-case coverage warrant extra diligence; OX is a candidate for deliberately exhaustive investigation. These are practitioner-informed preferences, not measured effort-specific specialties.
 - Fable: demanding reasoning, implementation, and review, including a fresh-framing trial when an approach stalls or alternatives are too similar. Check candidates against the same acceptance criteria and risk-appropriate tests. FH remains the preferred selective trial; raw AAI scores do not establish strict FH dominance over FX.
 

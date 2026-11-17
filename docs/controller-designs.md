@@ -32,7 +32,7 @@ For secondary Codex work, preflight the native `codex` executable, relevant help
 From the bundle root, with an existing `task.txt`:
 
 ```sh
-python3 scripts/bundle.py codex-plan --design claude-first --profile SM --role implementation --cwd . --prompt-file task.txt --artifacts .runs/codex
+python3 scripts/bundle.py codex-plan --design claude-first --profile S62M --role implementation --cwd . --prompt-file task.txt --artifacts .runs/codex
 ```
 
 The plan uses `codex exec` with an exact model/effort and JSONL output. Sandbox and approval choices come from the separate Codex configuration. The supplied defaults use read-only or workspace-write sandboxing and no interactive prompts. An operator can override them or explicitly configure bypass. The caller verifies that the unattended route supports the configured approval policy, records the session ID, and checks results independently. Sandbox restrictions do not authorize connector side effects or prove that every tool is read-only.
@@ -41,7 +41,7 @@ Cross-provider Codex workers are leaves by default. They must not reopen this ro
 
 ## Claude plugin
 
-Install the agent-orch plugin as described in [configuration](configuration.md#claude-code-plugin) and invoke the router in Claude Code. `--design claude-plugin` resolves every Codex and Claude profile to a pinned agent such as `agent-orch:codex-sm` or `agent-orch:claude-oh`. Codex agents are Haiku relays for persistent Codex app-server threads, so Codex counts as native here and `codex-plan` refuses these routes. Muse remains external.
+Install the agent-orch plugin as described in [configuration](configuration.md#claude-code-plugin) and invoke the router in Claude Code. `--design claude-plugin` resolves every Codex and Claude profile to a pinned agent such as `agent-orch:codex-s62m` or `agent-orch:claude-oh`. Codex agents are Haiku relays for persistent Codex app-server threads, so Codex counts as native here and `codex-plan` refuses these routes. Muse remains external.
 
 Workers share the checkout. The controller assigns disjoint Write lists, checks them with `bundle.py snapshot` and `check-ownership`, sequences overlapping or dependent work, and routes every handoff itself by resuming the owning worker's exact thread. See [Claude plugin dispatch](../skills/agent-orch-router/references/claude-plugin.md).
 

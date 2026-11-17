@@ -10,16 +10,16 @@ Opt in for UI improvement through independent critique, focused implementation, 
 | --- | --- | --- | --- |
 | browser | TM: gpt-6.1-terra / medium | browser; specialist | Capture screenshots and run interaction, keyboard, and focus checks with verified browser/computer-control tools. Record build, route, viewport, theme, and state. |
 | visual-deep | TH: gpt-6.1-terra / high | research, planning, qa, spec-review | Diagnose concrete defects in baseline and intermediate screenshots. Return unresolved framing to the coordinator; this critique does not replace the final council. |
-| standard | SM: gpt-6.1-sol / medium | implementation, frontend, integration | Own focused UI implementation in the project's existing design system and idioms. |
+| standard | S62M: gpt-6.2-sol / medium | implementation, frontend, integration | Own focused UI implementation in the project's existing design system and idioms. |
 | opus-medium | OM: claude-opus-5-5 / medium | implementation, frontend, integration | Own substantial scoped UI implementation or refactoring across related components. |
-| max-code | SMAX: gpt-6.1-sol / max | qa, spec-review; independent review | Review the final candidate independently against the requirements, rubric, and functional evidence. Fresh intermediate reviews are also eligible. |
+| max-code | S62MAX: gpt-6.2-sol / max | qa, spec-review; independent review | Review the final candidate independently against the requirements, rubric, and functional evidence. Fresh intermediate reviews are also eligible. |
 | opus-deep | OX: claude-opus-5-5 / xhigh | qa, spec-review; independent review | Critique visual design, interaction, and rendering code from a separate model's perspective. Fresh intermediate reviews are also eligible. |
 | investigate-deep | MFX: muse-wonder-full-1.0 / xhigh | qa, spec-review; independent review | Critique the candidate against existing components, tokens, and repository patterns. Fresh intermediate reviews are also eligible. |
 <!-- END GENERATED:pool:ui-pro -->
 
 The browser binding defaults to TM. Verify actual browser/computer-control tools and session access, not merely shell access. If unavailable, report visual/interaction acceptance as blocked. Do not silently substitute another model or shell-only capture route. Explicit user choices and configured bindings override defaults.
 
-SM or OM implements. TH critiques baseline/intermediate evidence. SMAX, OX, and MFX form the final council and may give fresh intermediate reviews. Reviewers do not edit unless reassigned. These jobs are workflow choices, not measured model specialties.
+S62M or OM implements. TH critiques baseline/intermediate evidence. S62MAX, OX, and MFX form the final council and may give fresh intermediate reviews. Reviewers do not edit unless reassigned. These jobs are workflow choices, not measured model specialties.
 
 ## Independent review packets
 
@@ -58,7 +58,7 @@ Compare the scoped diff after corrections. Keep necessary coverage, but reject u
 
 ## Final council and acceptance
 
-Required default members are the max-code, opus-deep, and investigate-deep bindings: **SMAX, OX, MFX**. Each reviews the identical final revision/build independently in a fresh context. Record that identity in every packet and confirm each reply names it. Withhold council findings and verdicts until all assigned members return.
+Required default members are the max-code, opus-deep, and investigate-deep bindings: **S62MAX, OX, MFX**. Each reviews the identical final revision/build independently in a fresh context. Record that identity in every packet and confirm each reply names it. Withhold council findings and verdicts until all assigned members return.
 
 Run sequentially when concurrency or external-session limits require it. If a required member/route is unavailable, report an incomplete council and request an explicit alternate. Do not substitute silently, count several sessions of one model as model diversity, or claim consensus from a partial council.
 

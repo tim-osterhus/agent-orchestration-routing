@@ -16,19 +16,17 @@ Shared across variants: [Amusing](modes/amusing.md) · [UI-Pro](modes/ui-pro.md)
 
 ## Exact profile index
 
-Efforts are positional: l=low, m=medium, h=high, x=xhigh, max=max. These 21 frontier and nine specialist configurations add no automatic mode eligibility.
+Efforts are positional: l=low, m=medium, h=high, x=xhigh, max=max. These 19 frontier and nine specialist configurations add no automatic mode eligibility.
 
 | Exact model | Frontier aliases → efforts |
 | --- | --- |
 | gpt-6-luna | LL/LM → l/m |
 | claude-haiku-5-5 | HL → l |
-| gpt-6.1-terra | TL/TM/TH → l/m/h |
+| gpt-6.1-terra | TL/TM/TH/TX → l/m/h/x |
 | muse-ember-1.0 | EX/EMAX → x/max |
-| gpt-6.1-sol | SM/SH/SX/SMAX → m/h/x/max |
-| gpt-6-astra | AH/AX → h/x |
-| claude-fable-5-2 | FM/FH/FX/FMAX → m/h/x/max |
-| claude-opus-5-5 | OX → x |
-| gemini-4-carbon | GCM/GCH → m/h |
+| gpt-6.2-sol | S62L/S62M/S62H/S62X/S62MAX → l/m/h/x/max |
+| gpt-6.2-astra | A62H/A62X/A62MAX → h/x/max |
+| claude-fable-5-2 | FX/FMAX → x/max |
 
 | Exact model | Specialist alias → effort |
 | --- | --- |

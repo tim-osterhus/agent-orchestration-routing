@@ -16,8 +16,8 @@
     "method": "dated-raw-pareto-frontier-with-specialist-exceptions",
     "source": "https://artificialanalysis.ai/evaluations/artificial-analysis-intelligence-index",
     "methodology": "https://artificialanalysis.ai/methodology",
-    "reviewed_on": "2026-11-10",
-    "status": "All 21 raw AAI v5.0.1 frontier configurations in the supplied four-provider Standard comparison; task-fit exceptions are separate. Not a live API or account-access test.",
+    "reviewed_on": "2026-11-17",
+    "status": "19 configurations on the raw AAI v5.0.1 frontier of the selected four-provider Standard comparison after replacing the retired Sol and Astra releases. This is not an account-access test.",
     "automatic_refresh": false,
     "bias": "default",
     "bias_options": ["low", "default", "high"]
@@ -28,16 +28,17 @@
     "TL": {"provider": "codex", "model": "gpt-6.1-terra", "effort": "low", "service_tier": "standard", "description": "Use for small, specified changes, source transformations, or straightforward visual interpretation following an established pattern, with inexpensive checks. Prefer another eligible profile when substantial interpretation or reframing is needed."},
     "TM": {"provider": "codex", "model": "gpt-6.1-terra", "effort": "medium", "service_tier": "standard", "description": "Execute established implementation or screen-based workflows and structure source-rich writing, including substantial multi-step work. Supply relevant patterns, decision boundaries, and acceptance checks, and surface unresolved choices instead of narrowing the task."},
     "TH": {"provider": "codex", "model": "gpt-6.1-terra", "effort": "high", "service_tier": "standard", "description": "Handle harder bounded diagnosis, implementation, synthesis, or visual analysis with explicit ownership and checks. Ask the coordinator to reframe unresolved problems rather than assuming more Terra effort will resolve them."},
-    "SL": {"provider": "codex", "model": "gpt-6.1-sol", "effort": "low", "service_tier": "standard", "description": "Candidate for routine bounded work with clear acceptance checks."},
-    "SM": {"provider": "codex", "model": "gpt-6.1-sol", "effort": "medium", "service_tier": "standard", "description": "General implementation, analysis, debugging, and verification candidate at Medium effort."},
-    "SH": {"provider": "codex", "model": "gpt-6.1-sol", "effort": "high", "service_tier": "standard", "description": "General implementation, analysis, debugging, and verification candidate at High effort. Additional effort is a routing choice, not a proven task-specific advantage."},
-    "SX": {"provider": "codex", "model": "gpt-6.1-sol", "effort": "xhigh", "service_tier": "standard", "description": "General implementation, analysis, debugging, and verification candidate at XHigh effort. Choose it when the assignment justifies testing additional reasoning."},
-    "SMAX": {"provider": "codex", "model": "gpt-6.1-sol", "effort": "max", "service_tier": "standard", "description": "General implementation, analysis, debugging, and verification candidate at Max effort. Max does not imply review-only work or guaranteed improvement."},
-    "AL": {"provider": "codex", "model": "gpt-6-astra", "effort": "low", "service_tier": "standard", "description": "General reasoning, implementation, and analysis candidate at Low effort. Browser work requires verified tools, not an Astra-specific assignment."},
-    "AM": {"provider": "codex", "model": "gpt-6-astra", "effort": "medium", "service_tier": "standard", "description": "Retained Astra Medium profile for explicit selection or custom pools."},
-    "AH": {"provider": "codex", "model": "gpt-6-astra", "effort": "high", "service_tier": "standard", "description": "General reasoning, implementation, debugging, and analysis candidate at High effort. No browser-only specialization is implied."},
-    "AX": {"provider": "codex", "model": "gpt-6-astra", "effort": "xhigh", "service_tier": "standard", "description": "General reasoning, implementation, and analysis candidate at XHigh effort. Compare checked results rather than assuming a distinct task specialty."},
-    "AMAX": {"provider": "codex", "model": "gpt-6-astra", "effort": "max", "service_tier": "standard", "description": "General reasoning, implementation, and verification candidate at Max effort. Particular modes may assign independent review, without limiting the model to that role."},
+    "TX": {"provider": "codex", "model": "gpt-6.1-terra", "effort": "xhigh", "service_tier": "standard", "description": "Explicit higher-effort comparison for a well-framed Terra task. Verify any gains against the same acceptance checks."},
+    "S62L": {"provider": "codex", "model": "gpt-6.2-sol", "effort": "low", "service_tier": "standard", "description": "Candidate for routine bounded work with clear acceptance checks."},
+    "S62M": {"provider": "codex", "model": "gpt-6.2-sol", "effort": "medium", "service_tier": "standard", "description": "General implementation, analysis, debugging, and verification candidate at Medium effort."},
+    "S62H": {"provider": "codex", "model": "gpt-6.2-sol", "effort": "high", "service_tier": "standard", "description": "General implementation, analysis, debugging, and verification candidate at High effort. Additional effort is a routing choice, not a proven task-specific advantage."},
+    "S62X": {"provider": "codex", "model": "gpt-6.2-sol", "effort": "xhigh", "service_tier": "standard", "description": "General implementation, analysis, debugging, and verification candidate at XHigh effort. Choose it when the assignment justifies testing additional reasoning."},
+    "S62MAX": {"provider": "codex", "model": "gpt-6.2-sol", "effort": "max", "service_tier": "standard", "description": "General implementation, analysis, debugging, and verification candidate at Max effort. Max does not imply review-only work or guaranteed improvement."},
+    "A62L": {"provider": "codex", "model": "gpt-6.2-astra", "effort": "low", "service_tier": "standard", "description": "General reasoning, implementation, and analysis candidate at Low effort. Browser work requires verified tools, not an Astra-specific assignment."},
+    "A62M": {"provider": "codex", "model": "gpt-6.2-astra", "effort": "medium", "service_tier": "standard", "description": "Astra Medium for explicit selection or custom pools."},
+    "A62H": {"provider": "codex", "model": "gpt-6.2-astra", "effort": "high", "service_tier": "standard", "description": "General reasoning, implementation, debugging, and analysis candidate at High effort. No browser-only specialization is implied."},
+    "A62X": {"provider": "codex", "model": "gpt-6.2-astra", "effort": "xhigh", "service_tier": "standard", "description": "General reasoning, implementation, and analysis candidate at XHigh effort. Compare checked results rather than assuming a distinct task specialty."},
+    "A62MAX": {"provider": "codex", "model": "gpt-6.2-astra", "effort": "max", "service_tier": "standard", "description": "General reasoning, implementation, and verification candidate at Max effort. Particular modes may assign independent review, without limiting the model to that role."},
     "HMED": {"provider": "claude", "model": "claude-haiku-5-5", "effort": "medium", "context_target_tokens": null, "description": "Candidate for small, well-scoped worker assignments with concrete checks."},
     "HH": {"provider": "claude", "model": "claude-haiku-5-5", "effort": "high", "context_target_tokens": null, "description": "Candidate for bounded delegation when additional Haiku reasoning may reduce controller repair work."},
     "HM": {"provider": "claude", "model": "claude-haiku-5-5", "effort": "xhigh", "context_target_tokens": null, "description": "Bounded Haiku XHigh worker candidate, also used by the optional Opus/Haiku preset."},
@@ -92,15 +93,14 @@
           {"slot": "deep", "fit": "Use for debugging, unclear behavior, or integration where controller repair would otherwise be substantial."},
           {"slot": "hard", "fit": "Use for difficult implementation or debugging with interacting constraints and explicit acceptance checks."},
           {"slot": "max-code", "fit": "Consider for demanding implementation, integration, or independent verification. Use Max only when the assignment warrants the additional effort."},
-          {"slot": "reasoning", "fit": "Consider for general analysis or implementation at Low effort. Browser assignments require verified tools and session access."},
           {"slot": "opus", "fit": "Consider for thorough implementation, investigation, or independent review when reproductions and edge-case coverage warrant additional diligence. Use a fresh reviewer for work it authored."}
         ],
         "performance": [
           {"slot": "deep", "fit": "Use for substantive implementation or diagnosis when a routine route would leave material uncertainty."},
           {"slot": "hard", "fit": "Use for difficult debugging, integration, or implementation with several interacting constraints."},
-          {"slot": "max-code", "fit": "Consider for demanding implementation, integration, or independent verification. Use Max only when the assignment warrants the additional effort."},
-          {"slot": "broad", "fit": "Consider for demanding analysis, implementation, or verification when task fit warrants Max effort. Verify tools for interactive work."},
-          {"slot": "reasoning", "fit": "Consider for demanding reasoning, implementation, debugging, or analysis. High effort does not imply a browser specialty."},
+          {"slot": "max-code", "escalation": true, "fit": "Escalate demanding implementation or verification when a concrete risk justifies more reasoning."},
+          {"slot": "reasoning", "fit": "First Astra choice for difficult cross-component diagnosis or independent analysis. Verify tools for interactive work."},
+          {"slot": "broad", "escalation": true, "fit": "Use Astra Max when the stakes or unresolved evidence justify going beyond XHigh."},
           {"slot": "opus-deep", "fit": "Consider for difficult analysis, implementation, architecture, or independent review, especially when exhaustive investigation or extensive testing is warranted. Keep authorship separate from final acceptance."},
           {"slot": "opus-max", "escalation": true, "fit": "Use as a justified escalation for demanding analysis or implementation when earlier eligible choices do not fit."},
           {"slot": "fable", "escalation": true, "one_off_only": true, "fit": "Consider for demanding reasoning, implementation, or fresh architectural framing when an approach stalls or offers too-similar alternatives. Return a candidate checked against the same acceptance criteria, or an independent review, within the bounded assignment."}
@@ -113,7 +113,6 @@
           {"slot": "deep", "fit": "Use for debugging, unclear behavior, or integration where controller repair would otherwise be substantial."},
           {"slot": "hard", "fit": "Use for difficult implementation or debugging with interacting constraints and explicit acceptance checks."},
           {"slot": "max-code", "fit": "Consider for demanding implementation, integration, or independent verification. Use Max only when the assignment warrants the additional effort."},
-          {"slot": "reasoning", "fit": "Consider for general analysis or implementation at Low effort. Browser assignments require verified tools and session access."},
           {"slot": "opus-max", "escalation": true, "fit": "Escalate hard or quality-sensitive implementation or analysis after an unconvincing Codex attempt or when errors would be costly."},
           {"slot": "opus", "roles": ["qa", "spec-review"], "independent_review": true, "fit": "Use for independent QA or specification review of a Codex-authored candidate, not implementation."},
           {"slot": "fable", "escalation": true, "one_off_only": true, "fit": "Consider for demanding reasoning, implementation, or fresh architectural framing when an approach stalls or offers too-similar alternatives. Return a candidate checked against the same acceptance criteria, or an independent review, within the bounded assignment."}
@@ -186,11 +185,11 @@
       {"slot": "fable-review", "roles": ["research", "planning", "spec-review"], "fit": "Advise on requirements and overlooked constraints, challenging the premise when useful and proposing materially distinct alternatives. This advisory slot adds no vote."}
     ],
     "codex-burn": [
-      {"slot": "reasoning", "fit": "Consider for general analysis or implementation at Low effort. Browser assignments require verified tools and session access. Select only authorized backlog work."},
       {"slot": "standard", "fit": "Use for ordinary authorized implementation or verification with a clear change surface and acceptance checks."},
       {"slot": "deep", "fit": "Use for backlog diagnosis or integration where uncertainty warrants additional reasoning."},
       {"slot": "hard", "fit": "Use for difficult authorized implementation or debugging with multiple interacting constraints."},
-      {"slot": "reasoning-high", "fit": "Consider for demanding reasoning, implementation, debugging, or analysis. High effort does not imply a browser specialty. Select only authorized backlog work."},
+      {"slot": "reasoning-high", "fit": "Use for demanding cross-component diagnosis or analysis when Astra High is sufficient."},
+      {"slot": "reasoning", "fit": "Use for complex diagnosis or independent analysis when Astra XHigh fits the authorized backlog."},
       {"slot": "broad", "fit": "Consider for demanding analysis, implementation, or verification when task fit warrants Max effort. Verify tools for interactive work. Select only authorized backlog work."}
     ],
     "claude-burn": [
@@ -275,10 +274,10 @@
     }
   },
   "catalogs": {
-    "frontier": ["LL", "LM", "HL", "TL", "EX", "EMAX", "TM", "TH", "SM", "SH", "SX", "SMAX", "AH", "AX", "FM", "OX", "GCM", "GCH", "FH", "FX", "FMAX"],
+    "frontier": ["LL", "LM", "HL", "TL", "EX", "EMAX", "TM", "S62L", "TH", "TX", "S62M", "S62H", "S62X", "S62MAX", "A62H", "A62X", "A62MAX", "FX", "FMAX"],
     "specialists": ["OH", "MWM", "MSX", "SNMAX", "MFMAX", "KK31", "GA4H", "DSFH", "G38FH"],
     "conditional": ["GLMMAX", "MSMAX", "CYBER"],
-    "compatibility": ["L", "SL", "AL", "AM", "AMAX", "HMED", "HH", "HM", "HK", "HMAX", "SNH", "SNX", "OM", "OMAX", "MFH", "MFX"]
+    "compatibility": ["L", "A62L", "A62M", "HMED", "HH", "HM", "HK", "HMAX", "SNH", "SNX", "OM", "OX", "OMAX", "FM", "FH", "MFH", "MFX", "GCM", "GCH"]
   },
   "adapters": {
     "muse:muse_code_subscription": {"verified": true, "verification_scope": "Existing Muse Code adapter route only. Current account access, model entitlement, tools, and effective effort require dispatch preflight."},
@@ -313,7 +312,7 @@
     "sonnet": {"description": "Scoped implementation or analysis needing stronger judgment than a small worker packet."},
     "opus-medium": {"description": "Substantive scoped implementation and integration."},
     "investigate-deep": {"description": "Examine cross-system failures with competing hypotheses and discriminating checks."},
-    "browser-ah": {"description": "Legacy slot for general reasoning, implementation, or analysis. Browser work requires verified tools, not an AH-specific specialty."},
+    "browser-ah": {"description": "Legacy slot for general reasoning, implementation, or analysis. Browser work requires verified tools, not an A62H-specific specialty."},
     "investigate": {"description": "Investigate repository structure, existing fixes, and root causes using source evidence."},
     "reasoning": {"description": "General reasoning, analysis, or implementation with task-appropriate tools."},
     "fable": {"description": "Demanding reasoning, architecture, implementation, or independent review."},
@@ -327,40 +326,38 @@
         "ember": "EX",
         "visual": "TM",
         "visual-deep": "TH",
-        "standard": "SM"
+        "standard": "S62M"
       },
       "balanced": {
-        "routine": "SL",
+        "routine": "S62L",
         "visual": "TM",
         "visual-deep": "TH",
-        "standard": "SM",
-        "deep": "SH",
-        "hard": "SX",
-        "max-code": "SMAX",
-        "opus": "OH",
-        "reasoning": "AL"
+        "standard": "S62M",
+        "deep": "S62H",
+        "hard": "S62X",
+        "max-code": "S62MAX",
+        "opus": "OH"
       },
       "performance": {
-        "deep": "SH",
-        "hard": "SX",
-        "max-code": "SMAX",
-        "broad": "AMAX",
+        "deep": "S62H",
+        "hard": "S62X",
+        "max-code": "S62MAX",
+        "broad": "A62MAX",
         "opus-deep": "OX",
         "opus-max": "OMAX",
-        "reasoning": "AH",
+        "reasoning": "A62X",
         "fable": "FH"
       },
       "bulk": {
-        "routine": "SL",
+        "routine": "S62L",
         "visual": "TM",
         "visual-deep": "TH",
-        "standard": "SM",
-        "deep": "SH",
-        "hard": "SX",
-        "max-code": "SMAX",
+        "standard": "S62M",
+        "deep": "S62H",
+        "hard": "S62X",
+        "max-code": "S62MAX",
         "opus-max": "OX",
         "opus": "OH",
-        "reasoning": "AL",
         "fable": "FH"
       }
     },
@@ -371,7 +368,7 @@
         "haiku-xhigh": "HM",
         "visual": "TM",
         "sonnet": "SNH",
-        "standard": "SM"
+        "standard": "S62M"
       },
       "balanced": {
         "haiku-high": "HH",
@@ -381,50 +378,50 @@
         "opus-medium": "OM",
         "opus": "OH",
         "opus-deep": "OX",
-        "standard": "SM",
-        "max-code": "SMAX"
+        "standard": "S62M",
+        "max-code": "S62MAX"
       },
       "performance": {
         "opus-medium": "OM",
         "opus": "OH",
         "opus-deep": "OX",
         "opus-max": "OMAX",
-        "max-code": "SMAX",
-        "broad": "AMAX",
+        "max-code": "S62MAX",
+        "broad": "A62MAX",
         "fable": "FH"
       }
     },
     "shared": {
       "frontier-research": {
         "frontier-proposer": "FH",
-        "frontier-reviewer": "AMAX",
+        "frontier-reviewer": "A62MAX",
         "opus-deep": "OX",
         "investigate-deep": "MFX",
-        "hard": "SX",
+        "hard": "S62X",
         "opus-max": "OMAX"
       },
-      "ui-pro": {"browser": "TM", "visual-deep": "TH", "standard": "SM", "opus-medium": "OM", "max-code": "SMAX", "opus-deep": "OX", "investigate-deep": "MFX"},
+      "ui-pro": {"browser": "TM", "visual-deep": "TH", "standard": "S62M", "opus-medium": "OM", "max-code": "S62MAX", "opus-deep": "OX", "investigate-deep": "MFX"},
       "browser-3d": {
-        "standard": "SM",
-        "deep": "SH",
-        "hard": "SX",
-        "max-code": "SMAX",
-        "broad": "AMAX"
+        "standard": "S62M",
+        "deep": "S62H",
+        "hard": "S62X",
+        "max-code": "S62MAX",
+        "broad": "A62MAX"
       },
       "council": {
-        "max-code": "SMAX",
+        "max-code": "S62MAX",
         "opus-deep": "OX",
         "investigate-deep": "MFX",
-        "broad": "AMAX",
+        "broad": "A62MAX",
         "fable-review": "FH"
       },
       "codex-burn": {
-        "standard": "SM",
-        "deep": "SH",
-        "hard": "SX",
-        "broad": "AMAX",
-        "reasoning": "AL",
-        "reasoning-high": "AH"
+        "standard": "S62M",
+        "deep": "S62H",
+        "hard": "S62X",
+        "broad": "A62MAX",
+        "reasoning-high": "A62H",
+        "reasoning": "A62X"
       },
       "claude-burn": {
         "haiku-max": "HMAX",
@@ -435,11 +432,11 @@
         "opus-max": "OMAX"
       },
       "amusing": {
-        "standard": "SM",
-        "hard": "SX",
+        "standard": "S62M",
+        "hard": "S62X",
         "opus-medium": "OM",
         "opus-deep": "OX",
-        "broad": "AMAX",
+        "broad": "A62MAX",
         "investigate": "MFH",
         "investigate-deep": "MFX",
         "fable": "FH"

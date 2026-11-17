@@ -2,7 +2,7 @@
 
 ## Standard frontier
 
-All **21 raw-score nondominated configurations** from the dated four-provider Standard comparison. Membership establishes neither suitability, subscription economics, access, nor dispatch availability.
+All **19 raw-score nondominated configurations** from the November 17 four-provider Standard comparison of selected releases. Membership does not establish task fit, subscription cost, or dispatch availability.
 
 <!-- BEGIN GENERATED:catalog-frontier -->
 | Code | Exact model | Effort |
@@ -14,18 +14,16 @@ All **21 raw-score nondominated configurations** from the dated four-provider St
 | EX | muse-ember-1.0 | xhigh |
 | EMAX | muse-ember-1.0 | max |
 | TM | gpt-6.1-terra | medium |
+| S62L | gpt-6.2-sol | low |
 | TH | gpt-6.1-terra | high |
-| SM | gpt-6.1-sol | medium |
-| SH | gpt-6.1-sol | high |
-| SX | gpt-6.1-sol | xhigh |
-| SMAX | gpt-6.1-sol | max |
-| AH | gpt-6-astra | high |
-| AX | gpt-6-astra | xhigh |
-| FM | claude-fable-5-2 | medium |
-| OX | claude-opus-5-5 | xhigh |
-| GCM | gemini-4-carbon | medium |
-| GCH | gemini-4-carbon | high |
-| FH | claude-fable-5-2 | high |
+| TX | gpt-6.1-terra | xhigh |
+| S62M | gpt-6.2-sol | medium |
+| S62H | gpt-6.2-sol | high |
+| S62X | gpt-6.2-sol | xhigh |
+| S62MAX | gpt-6.2-sol | max |
+| A62H | gpt-6.2-astra | high |
+| A62X | gpt-6.2-astra | xhigh |
+| A62MAX | gpt-6.2-astra | max |
 | FX | claude-fable-5-2 | xhigh |
 | FMAX | claude-fable-5-2 | max |
 <!-- END GENERATED:catalog-frontier -->
@@ -50,7 +48,7 @@ These disjoint exceptions neither expand pools nor authorize spending. See [mode
 
 Kimi needs a supported runtime effort. Wonder Full uses Muse Code subscription, not Wonder's API. Verify adapter, account, tools, effort, and data handling. Unavailable routes fail without substitution except the Fable usage-cap fallback. Permissions remain independently configurable.
 
-Other exact [compatibility profiles](compatibility.md) require explicit selection. Retired Fast codes, `fast`, `tokenburn`, and `CMAX` fail with migration guidance. Retired `hiq` requires explicit `amusing` reselection.
+See [other exact profiles](compatibility.md) for models that modes and custom pools can use outside the benchmark frontier. Outside-pool selections require an explicit request. Retired Fast codes, `fast`, `tokenburn`, and `CMAX` fail with migration guidance. Retired `hiq` requires explicit `amusing` reselection.
 
 Eligible Fable profiles may reason, implement, or review. Prefer FH for selective trials. FX/FMAX are optional higher-effort comparisons.
 
