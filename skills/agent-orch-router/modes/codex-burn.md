@@ -5,6 +5,8 @@ Complete useful authorized Codex backlog work before its account endpoint. This 
 
 Establish explicit burn invocation, intended account, reset/deadline or queue endpoint, and authorized backlog before launch. Ask only for missing inputs.
 
+If a packet stalls without a useful next check, save its evidence and what would unblock it. Take another ready, authorized item. If none remain, stop launching and report stalled items. Endpoint and restore rules are unchanged. Never retry just to use the allowance.
+
 Restore the prior mode at the endpoint or backlog completion. Stop on quota, billing, authentication, rate-limit, or model-access failures. Do not invent work, change authentication, or enable paid extra usage. An explicit cross-provider exception uses its own account route, not this burn allowance. Burn does not enable Orchestration or change permissions.
 
 ## Ordered pool

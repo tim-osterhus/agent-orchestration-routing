@@ -3,6 +3,8 @@
 Apply [shared dispatch](../references/dispatch.md).
 Prioritize task success and turnaround. Escalation is available when justified, not required.
 
+Name the unresolved question or check that warrants deeper effort. After a stall, say what the next pass will do differently. For optimization, compare the primary metric and guardrails against the same baseline under matching conditions. Example: reduce bundle size without worsening load time on the same fixture.
+
 ## Ordered pool
 
 <!-- BEGIN GENERATED:pool:codex-primary/performance -->

@@ -8,6 +8,16 @@ All five Sol 6.2 efforts qualify. Astra 6.2 High, XHigh, and Max qualify. Astra 
 
 [AA's methodology](https://artificialanalysis.ai/methodology) uses benchmark token consumption and API pricing. It does not measure subscription quota per completed assignment. Rounded scores can change dominance conclusions. Do not reconstruct exact raw values from chart pixels or treat API benchmark cost as accepted-task economics.
 
+## GPT-6.2 execution evidence — checked 2026-11-17
+
+[Theo's early-access Astra report](https://x.com/theo/status/2122760447103484410) describes a filename question that stopped work, hard-to-parse explanations, and a compiler performance run that pursued a secondary size metric. He also reports strengths in review and 3D. This is one practitioner's experience, not a controlled comparison or a Sol trial.
+
+[Artificial Analysis](https://artificialanalysis.ai/es/articles/openai-has-the-2-model-in-the-intelligence-index-with-the-release-of-gpt-6-2-astra-and-gpt-6-2-sol) found Sol 6.2 down 3 points on its Coding Agent Index versus Sol 6.1 at Max in Codex. Sol Max lost 14 points on SWE-Atlas-QnA-AA, with more key facts omitted. Astra 6.2 was flat versus Astra 6 on the coding index and led AA-3D at release. These results do not establish regressions at other efforts or measure unattended project delivery.
+
+[OpenAI's system card (§4.1.4.2)](https://deploymentsafety.openai.com/gpt-6-2-astra-sol/agentreplay) reports higher instruction-following flag rates versus each predecessor in a filtered historical internal replay: Sol 3.21% to 4.66%, Astra 1.96% to 2.87%. These are per-turn replay rates, not live task-failure rates. The findings support stronger work orders and checks without changing model pools.
+
+If building a direct GPT-6.2 API adapter, append corrections rather than rewriting the conversation prefix. [OpenAI Docs](https://developers.openai.com/api/docs/guides/latest-model?model=gpt-6.2-astra) notes that prefix edits or model downgrades can discard retained reasoning. Keep accepted task state outside the conversation so the next worker can recover it. Do not infer Codex or T3 session behavior from this API rule.
+
 ## Task fit and specialists
 
 [Model fit and specialist evidence](model-fit.md) records the nine disjoint specialist exceptions, three conditional records, evidence types, and limitations. Family traits appear there once. A narrow benchmark or human preference result supports a targeted comparison, not universal superiority. A retained compatibility profile is not automatically a specialist.
