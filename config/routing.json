@@ -153,6 +153,17 @@
     }
   },
   "modes": {
+    "balanced-split": [
+      {"slot": "routine", "fit": "Mechanical edits. Apply a prescribed change, such as a rename, fixture update, or repeated pattern. Run focused checks."},
+      {"slot": "standard", "fit": "Scoped feature build. Implement specified behavior in one component with clear ownership and acceptance checks. Use SM for visual desktop control and browser use after verifying the required tools on its route."},
+      {"slot": "opus-medium", "fit": "Planned integration. Wire components together or carry out a migration or API adoption after the design is settled."},
+      {"slot": "claude-review", "fit": "Independent acceptance review. Check the candidate against the brief, test evidence, and unverified requirements."},
+      {"slot": "deep", "fit": "Hard debugging. Reproduce the failure, distinguish competing causes, and verify a focused fix."},
+      {"slot": "opus-deep", "fit": "Complex refactoring. Restructure tangled code across boundaries while preserving behavior and reducing maintenance burden."},
+      {"slot": "adversarial-review", "fit": "Adversarial technical verification. Challenge a high-stakes candidate with failure cases, cross-system invariants, and neglected assumptions."},
+      {"slot": "fable", "fit": "Architectural reframing. Compare materially different approaches and test the most consequential tradeoff with a bounded probe."},
+      {"slot": "muse-artifact-review", "roles": ["qa"], "independent_review": true, "final_only": true, "requires_verified_adapter": true, "fit": "Specialist final QA for copywriting, documentation, and UI design only. Review the final candidate against the brief. Use rendered evidence for UI design and report what remains unverified."}
+    ],
     "frontier-research": [
       {"slot": "frontier-proposer", "roles": ["research", "planning"], "fit": "Propose a mechanism, identify its hardest assumption, and design the cheapest decisive test."},
       {"slot": "frontier-reviewer", "roles": ["qa", "spec-review"], "independent_review": true, "fit": "Independently challenge the proposal with counterexamples, violated invariants, and decisive tests."},
@@ -288,6 +299,9 @@
     "glm:public_api_or_self_hosted_weights": {"verified": false}
   },
   "slots": {
+    "claude-review": {"description": "Independent acceptance review against the brief and evidence."},
+    "adversarial-review": {"description": "Challenge high-stakes technical work with failure cases and cross-system invariants."},
+    "muse-artifact-review": {"description": "Independent final QA of copywriting, documentation, and UI design."},
     "frontier-proposer": {"description": "Propose a competing mechanism and a minimal discriminating experiment."},
     "frontier-reviewer": {"description": "Independently challenge assumptions and seek decisive counterexamples."},
     "cheap": {"description": "Trivial bounded extraction or mechanical edits with an inexpensive acceptance check."},
@@ -392,6 +406,17 @@
       }
     },
     "shared": {
+      "balanced-split": {
+        "routine": "SL",
+        "standard": "SM",
+        "opus-medium": "OM",
+        "claude-review": "OH",
+        "deep": "SX",
+        "opus-deep": "OX",
+        "adversarial-review": "AH",
+        "fable": "FH",
+        "muse-artifact-review": "MFH"
+      },
       "frontier-research": {
         "frontier-proposer": "FH",
         "frontier-reviewer": "AMAX",

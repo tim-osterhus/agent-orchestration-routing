@@ -262,7 +262,7 @@ class VariantTests(unittest.TestCase):
                 "performance": ["OM", "OH", "OX", "OMAX", "SMAX", "AMAX", "FH"]}}
         for variant, modes in expected.items():
             actual = bundle.mode_pools(self.config, variant)
-            self.assertEqual(set(actual) - set(modes), {"amusing", "ui-pro", "council", "frontier-research", "browser-3d", "codex-burn", "claude-burn"})
+            self.assertEqual(set(actual) - set(modes), {"balanced-split", "amusing", "ui-pro", "council", "frontier-research", "browser-3d", "codex-burn", "claude-burn"})
             self.assertEqual(set(modes) - set(actual), set())
             for mode, codes in modes.items():
                 self.assertEqual([entry["profile"] for entry in actual[mode]], codes)
@@ -406,7 +406,7 @@ class VariantTests(unittest.TestCase):
         for variant in config["variants"]:
             for mode, pool in bundle.mode_pools(config, variant).items():
                 self.assertEqual({"FM", "FH", "FX", "FMAX"} & {entry["profile"] for entry in pool},
-                                 {"FH"} if mode in {"amusing", "council", "frontier-research", "performance", "bulk"} else set())
+                                 {"FH"} if mode in {"balanced-split", "amusing", "council", "frontier-research", "performance", "bulk"} else set())
             for code in ("FM", "FH", "FX", "FMAX"):
                 with self.assertRaisesRegex(ValueError, "outside"):
                     bundle.resolve(config, variant=variant, code=code)

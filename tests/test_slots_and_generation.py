@@ -47,6 +47,29 @@ class SlotTests(unittest.TestCase):
         self.assertEqual({p["profile"] for p in pool if p.get("escalation")} & {"SMAX", "AMAX", "AX"},
                          {"SMAX", "AMAX"})
 
+    def test_balanced_split_pool_and_muse_final_review_eligibility(self):
+        mode = "balanced-split"
+        expected = "SL SM OM OH SX OX AH FH MFH".split()
+        no_muse = bundle.merge(self.config, {"adapters": {"muse:muse_code_subscription": {"verified": False}}})
+        self.assertEqual(self.config["default_mode"], "balanced")
+        for variant in self.config["variants"]:
+            kwargs = {"mode": mode, "variant": variant}
+            pool = bundle.mode_pools(self.config, variant)[mode]
+            self.assertEqual([e["profile"] for e in pool], expected)
+            for bias in self.config["selection"]["bias_options"]:
+                browser = bundle.resolve(self.config, role="browser", code="SM", bias=bias, **kwargs)["choices"][0]
+                self.assertEqual((browser["model"], browser["effort"]), ("gpt-6.2-sol", "medium"))
+            for role in ("implementation", "qa"):
+                with self.assertRaisesRegex(ValueError, "role/lifecycle"):
+                    bundle.resolve(self.config, role=role, code="MFH", **kwargs)
+            final_qa = bundle.resolve(self.config, role="qa", final=True, **kwargs)
+            self.assertEqual([c["code"] for c in final_qa["choices"]], expected)
+            self.assertTrue(final_qa["choices"][-1]["independent_review"])
+            self.assertFalse(final_qa["choices"][-1]["execution"]["account_access_verified"])
+            unavailable = bundle.resolve(no_muse, role="qa", final=True, **kwargs)
+            self.assertEqual(unavailable["unavailable_profiles"], ["MFH"])
+            self.assertEqual([c["code"] for c in unavailable["choices"]], expected[:-1])
+
     def test_efficient_provider_preferences_and_muse_gate_are_variant_specific(self):
         for variant, codes in (("codex-primary", ["LM", "TL", "EX", "TM", "TH", "SM"]),
                                ("claude-primary", ["HL", "TL", "HM", "TM", "SNH", "SM"])):
