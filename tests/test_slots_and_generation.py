@@ -36,39 +36,47 @@ class SlotTests(unittest.TestCase):
         for code in rejected_codes:
             with self.subTest(code=code), self.assertRaisesRegex(ValueError, "Unknown profile"):
                 bundle.resolve(self.config, code=code, allow_out_of_pool=True, role_override=True)
-        for code in ("TX", "AL", "AM"):
-            self.assertTrue(all(code != entry["profile"]
-                                for variant in self.config["variants"]
-                                for pool in bundle.mode_pools(self.config, variant).values()
-                                for entry in pool))
+        for code, modes in (("TX", set()), ("AL", {"balanced-split"}), ("AM", set())):
+            for variant in self.config["variants"]:
+                self.assertEqual({mode for mode, pool in bundle.mode_pools(self.config, variant).items()
+                                  if any(entry["profile"] == code for entry in pool)}, modes)
 
     def test_performance_marks_max_as_escalation(self):
         pool = bundle.mode_pools(self.config, "codex-primary")["performance"]
         self.assertEqual({p["profile"] for p in pool if p.get("escalation")} & {"SMAX", "AMAX", "AX"},
                          {"SMAX", "AMAX"})
 
-    def test_balanced_split_pool_and_muse_final_review_eligibility(self):
+    def test_balanced_split_pool_browser_specialist_and_muse_final_review(self):
         mode = "balanced-split"
-        expected = "SL SM OM OH SX OX AH FH MFH".split()
+        expected = "SL SM AL OM OH SX OX AH FH MFH".split()
+        general = [code for code in expected if code not in {"AL", "MFH"}]
         no_muse = bundle.merge(self.config, {"adapters": {"muse:muse_code_subscription": {"verified": False}}})
         self.assertEqual(self.config["default_mode"], "balanced")
         for variant in self.config["variants"]:
             kwargs = {"mode": mode, "variant": variant}
             pool = bundle.mode_pools(self.config, variant)[mode]
             self.assertEqual([e["profile"] for e in pool], expected)
-            for bias in self.config["selection"]["bias_options"]:
-                browser = bundle.resolve(self.config, role="browser", code="SM", bias=bias, **kwargs)["choices"][0]
-                self.assertEqual((browser["model"], browser["effort"]), ("gpt-6.2-sol", "medium"))
+            for design in self.config["designs"]:
+                for bias in self.config["selection"]["bias_options"]:
+                    browser = bundle.resolve(self.config, role="browser", design=design, bias=bias, **kwargs)
+                    self.assertEqual([(c["code"], c["model"], c["effort"]) for c in browser["choices"]],
+                                     [("AL", "gpt-6.2-astra", "low")])
+            for role in self.config["roles"]:
+                if role != "browser":
+                    with self.assertRaisesRegex(ValueError, "role/lifecycle"):
+                        bundle.resolve(self.config, role=role, code="AL", **kwargs)
+            implementation = bundle.resolve(self.config, role="implementation", **kwargs)
+            self.assertEqual([c["code"] for c in implementation["choices"]], general)
             for role in ("implementation", "qa"):
                 with self.assertRaisesRegex(ValueError, "role/lifecycle"):
                     bundle.resolve(self.config, role=role, code="MFH", **kwargs)
             final_qa = bundle.resolve(self.config, role="qa", final=True, **kwargs)
-            self.assertEqual([c["code"] for c in final_qa["choices"]], expected)
+            self.assertEqual([c["code"] for c in final_qa["choices"]], general + ["MFH"])
             self.assertTrue(final_qa["choices"][-1]["independent_review"])
             self.assertFalse(final_qa["choices"][-1]["execution"]["account_access_verified"])
             unavailable = bundle.resolve(no_muse, role="qa", final=True, **kwargs)
             self.assertEqual(unavailable["unavailable_profiles"], ["MFH"])
-            self.assertEqual([c["code"] for c in unavailable["choices"]], expected[:-1])
+            self.assertEqual([c["code"] for c in unavailable["choices"]], general)
 
     def test_efficient_provider_preferences_and_muse_gate_are_variant_specific(self):
         for variant, codes in (("codex-primary", ["LM", "TL", "EX", "TM", "TH", "SM"]),

@@ -8,7 +8,8 @@ Choose explicitly from either provider preference. Use this pool instead of prov
 | Slot | Exact profile | Eligibility | Task fit |
 | --- | --- | --- | --- |
 | routine | SL: gpt-6.2-sol / low | general | Mechanical edits. Apply a prescribed change, such as a rename, fixture update, or repeated pattern. Run focused checks. |
-| standard | SM: gpt-6.2-sol / medium | general | Scoped feature build. Implement specified behavior in one component with clear ownership and acceptance checks. Use SM for visual desktop control and browser use after verifying the required tools on its route. |
+| standard | SM: gpt-6.2-sol / medium | general | Scoped feature build. Implement specified behavior in one component with clear ownership and acceptance checks. |
+| browser | AL: gpt-6.2-astra / low | browser; specialist | Use for visual desktop control and browser interaction. Verify the required tools and session access before dispatch. Report missing capabilities rather than silently substituting another profile. |
 | opus-medium | OM: claude-opus-5-5 / medium | general | Planned integration. Wire components together or carry out a migration or API adoption after the design is settled. |
 | claude-review | OH: claude-opus-5-5 / high | general | Independent acceptance review. Check the candidate against the brief, test evidence, and unverified requirements. |
 | deep | SX: gpt-6.2-sol / xhigh | general | Hard debugging. Reproduce the failure, distinguish competing causes, and verify a focused fix. |
@@ -20,7 +21,7 @@ Choose explicitly from either provider preference. Use this pool instead of prov
 
 The general jobs are routing defaults, not role restrictions or required stages. AH challenges the candidate. FH challenges the approach. Acceptance still requires a fresh, author-independent reviewer.
 
-MFH is optional and only reviews its listed artifact types. It does not edit. For UI design, supply renders captured by SM or another verified route; without them, mark the visual result unverified. OH remains the general acceptance reviewer.
+MFH is optional and only reviews its listed artifact types. It does not edit. For UI design, supply renders captured by AL or another verified route. Without renders, mark the visual result unverified. OH remains the general acceptance reviewer.
 
 ## Split the work
 

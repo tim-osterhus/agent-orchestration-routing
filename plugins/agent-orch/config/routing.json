@@ -155,7 +155,8 @@
   "modes": {
     "balanced-split": [
       {"slot": "routine", "fit": "Mechanical edits. Apply a prescribed change, such as a rename, fixture update, or repeated pattern. Run focused checks."},
-      {"slot": "standard", "fit": "Scoped feature build. Implement specified behavior in one component with clear ownership and acceptance checks. Use SM for visual desktop control and browser use after verifying the required tools on its route."},
+      {"slot": "standard", "fit": "Scoped feature build. Implement specified behavior in one component with clear ownership and acceptance checks."},
+      {"slot": "browser", "roles": ["browser"], "specialist": true, "fit": "Use for visual desktop control and browser interaction. Verify the required tools and session access before dispatch. Report missing capabilities rather than silently substituting another profile."},
       {"slot": "opus-medium", "fit": "Planned integration. Wire components together or carry out a migration or API adoption after the design is settled."},
       {"slot": "claude-review", "fit": "Independent acceptance review. Check the candidate against the brief, test evidence, and unverified requirements."},
       {"slot": "deep", "fit": "Hard debugging. Reproduce the failure, distinguish competing causes, and verify a focused fix."},
@@ -409,6 +410,7 @@
       "balanced-split": {
         "routine": "SL",
         "standard": "SM",
+        "browser": "AL",
         "opus-medium": "OM",
         "claude-review": "OH",
         "deep": "SX",
