@@ -2,6 +2,8 @@
 
 Choose explicitly from either provider preference. Use this pool instead of provider-specific Balanced. Keep the current coordinator and route. Low favors economical fits. Default chooses the smallest suitable profile, accounting for likely rework. High favors deeper reasoning when justified. All biases use the same profiles and efforts.
 
+Split High prefers available specialists for their listed jobs: AL for browser work, MFH for final artifact QA, and GNH for scoped diagnosis or fix critique. Choosing High opts in to GNH; select its exact profile or slot when the task fits. Do not add workers just to use the pool. Low and Default still require an explicit GNH request.
+
 ## Default jobs
 
 <!-- BEGIN GENERATED:pool:balanced-split -->
@@ -26,6 +28,6 @@ MFH is optional and only reviews its listed artifact types. It does not edit. Fo
 
 ## Split the work
 
-Aim for roughly even Codex and Claude workload across the backlog, not equal launches or subscription spend. Track estimated work by provider, including repeat work. Count MFH and explicitly requested GNH separately from Codex and Claude. Compare like-sized packets. Do not equate a quick review with a long implementation.
+Aim for roughly even Codex and Claude workload across the backlog, not equal launches or subscription spend. Track estimated work by provider, including repeat work. Count MFH and GNH separately from Codex and Claude. Compare like-sized packets. Do not equate a quick review with a long implementation.
 
 Start with the default profile for the job. When multiple eligible profiles fit equally well, prefer the provider with less substantive work. Let both providers own implementation where they fit. Accept temporary imbalance rather than forcing a second worker, expanding scope, or weakening review. Use [shared dispatch](../references/dispatch.md) for exact-profile overrides, unavailable routes, and provider guidance.

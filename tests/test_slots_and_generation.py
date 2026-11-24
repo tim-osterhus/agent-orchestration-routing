@@ -36,7 +36,7 @@ class SlotTests(unittest.TestCase):
         for code in rejected_codes:
             with self.subTest(code=code), self.assertRaisesRegex(ValueError, "Unknown profile"):
                 bundle.resolve(self.config, code=code, allow_out_of_pool=True, role_override=True)
-        for code, modes in (("TX", set()), ("AL", {"balanced-split"}), ("AM", set())):
+        for code, modes in (("TX", set()), ("AL", {"balanced-split", "ui-pro"}), ("AM", set())):
             for variant in self.config["variants"]:
                 self.assertEqual({mode for mode, pool in bundle.mode_pools(self.config, variant).items()
                                   if any(entry["profile"] == code for entry in pool)}, modes)
@@ -83,6 +83,7 @@ class SlotTests(unittest.TestCase):
             ("balanced-split", "neon-diagnosis", "GNH", "high"),
             ("council", "neon-advisor", "GNH", "high"),
             ("frontier-research", "neon-counterhypothesis", "GNX", "xhigh"),
+            ("ui-pro", "neon-design-advisor", "GNH", "high"),
         ]
         api_only = bundle.merge(self.config, {"adapters": {
             "gemini:public_api": {"verified": True},
@@ -252,7 +253,7 @@ class SlotTests(unittest.TestCase):
                          {"max_parallel_workers": 2, "max_external_sessions_per_assignment": 2})
 
     def test_ui_pro_bindings_roles_and_review_independence(self):
-        expected = ["TM", "TH", "SM", "OM", "SMAX", "OX", "MFX"]
+        expected = ["AL", "AL", "SM", "OM", "SMAX", "OX", "MFX", "GNH"]
         for variant in self.config["variants"]:
             pool = bundle.mode_pools(self.config, variant)["ui-pro"]
             self.assertEqual([e["profile"] for e in pool], expected)
@@ -260,11 +261,20 @@ class SlotTests(unittest.TestCase):
             for design in self.config["designs"]:
                 kwargs = dict(mode="ui-pro", variant=variant, design=design)
                 browser = bundle.resolve(self.config, role="browser", **kwargs)
-                self.assertEqual([c["code"] for c in browser["choices"]], ["TM"])
+                self.assertEqual([(c["code"], c["slot"]) for c in browser["choices"]], [("AL", "browser")])
+                critique, = bundle.resolve(self.config, code="AL", role="qa", **kwargs)["choices"]
+                self.assertEqual(critique["slot"], "visual-deep")
                 authors = bundle.resolve(self.config, role="implementation", **kwargs)
                 self.assertEqual([c["code"] for c in authors["choices"]], ["SM", "OM"])
                 reviews = bundle.resolve(self.config, role="qa", final=True, **kwargs)
-                self.assertEqual([c["code"] for c in reviews["choices"]], ["TH", "SMAX", "OX", "MFX"])
+                self.assertEqual([c["code"] for c in reviews["choices"]], ["AL", "SMAX", "OX", "MFX"])
+                automatic_planning = bundle.resolve(self.config, role="planning", **kwargs)
+                self.assertNotIn("GNH", [c["code"] for c in automatic_planning["choices"]])
+                adviser, = bundle.resolve(self.config, code="GNH", role="planning", **kwargs)["choices"]
+                self.assertTrue(adviser["independent_review"])
+                for role in ("browser", "qa", "spec-review"):
+                    with self.assertRaisesRegex(ValueError, "role/lifecycle"):
+                        bundle.resolve(self.config, code="GNH", role=role, **kwargs)
                 # Eligibility is not a council vote; the three named final members remain independent.
                 for code in ("SMAX", "OX", "MFX"):
                     choice = bundle.resolve(self.config, code=code, role="qa", final=True, **kwargs)["choices"][0]
@@ -290,7 +300,7 @@ class SlotTests(unittest.TestCase):
         self.assertIn("MFX", result["unavailable_profiles"])
         self.assertNotIn("MFX", [c["code"] for c in result["choices"]])
         self.assertEqual(result["limits"], {"max_parallel_workers": 2, "max_external_sessions_per_assignment": 2})
-        codex = bundle.resolve(changed, mode="ui-pro", code="TM", role="browser")["choices"][0]
+        codex = bundle.resolve(changed, mode="ui-pro", code="AL", role="browser")["choices"][0]
         self.assertEqual(codex["execution"]["approval_policy"], "on-request")
         claude = bundle.resolve(changed, mode="ui-pro", code="OX", role="qa", claude_mode="implementation")["choices"][0]
         self.assertEqual(claude["execution"]["permission_mode"], "acceptEdits")

@@ -184,7 +184,8 @@
       {"slot":"opus-medium","roles":["implementation","frontend","integration"],"fit":"Own substantial scoped UI implementation or refactoring across related components."},
       {"slot":"max-code","roles":["qa","spec-review"],"independent_review":true,"fit":"Review the final candidate independently against the requirements, rubric, and functional evidence. Fresh intermediate reviews are also eligible."},
       {"slot":"opus-deep","roles":["qa","spec-review"],"independent_review":true,"fit":"Critique visual design, interaction, and rendering code from a separate model's perspective. Fresh intermediate reviews are also eligible."},
-      {"slot":"investigate-deep","roles":["qa","spec-review"],"independent_review":true,"fit":"Critique the candidate against existing components, tokens, and repository patterns. Fresh intermediate reviews are also eligible."}
+      {"slot":"investigate-deep","roles":["qa","spec-review"],"independent_review":true,"fit":"Critique the candidate against existing components, tokens, and repository patterns. Fresh intermediate reviews are also eligible."},
+      {"slot": "neon-design-advisor", "roles": ["research", "planning"], "independent_review": true, "explicit_only": true, "requires_verified_adapter": true, "fit": "Flag where visual hierarchy, wording, or interaction flow obscures the user's task. Cite the screenshot and suggest the smallest fix."}
     ],
     "browser-3d": [
       {"slot": "standard", "fit": "Implement conventional UI, interactions, asset manifests, automation, and tests. Also handle routine browser journeys and screenshot collection with verified tool access."},
@@ -308,6 +309,7 @@
   "slots": {
     "neon-diagnosis": {"description": "Trace a scoped repository issue or critique a fix. Return source anchors and a check that distinguishes competing causes."},
     "neon-advisor": {"description": "Challenge an architectural assumption with source evidence and a distinct alternative. No vote unless explicitly appointed."},
+    "neon-design-advisor": {"description": "Opt-in design second opinion on hierarchy, wording, and interaction flow."},
     "neon-counterhypothesis": {"description": "For a named unresolved question, propose an alternative mechanism and the smallest test that could disprove it."},
     "claude-review": {"description": "Independent acceptance review against the brief and evidence."},
     "adversarial-review": {"description": "Challenge high-stakes technical work with failure cases and cross-system invariants."},
@@ -438,7 +440,7 @@
         "opus-max": "OMAX",
         "neon-counterhypothesis": "GNX"
       },
-      "ui-pro": {"browser": "TM", "visual-deep": "TH", "standard": "SM", "opus-medium": "OM", "max-code": "SMAX", "opus-deep": "OX", "investigate-deep": "MFX"},
+      "ui-pro": {"browser": "AL", "visual-deep": "AL", "standard": "SM", "opus-medium": "OM", "max-code": "SMAX", "opus-deep": "OX", "investigate-deep": "MFX", "neon-design-advisor": "GNH"},
       "browser-3d": {
         "standard": "SM",
         "deep": "SH",

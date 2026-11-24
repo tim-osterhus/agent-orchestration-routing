@@ -1,25 +1,28 @@
 # UI-Pro
 
 Apply [shared dispatch](../references/dispatch.md).
-Opt in for UI improvement through independent critique, focused implementation, and fresh visual/functional evidence. Seven eligible profiles do not imply seven simultaneous workers.
+Opt in for UI improvement through independent critique, focused implementation, and fresh visual/functional evidence.
 
 ## Ordered pool
 
 <!-- BEGIN GENERATED:pool:ui-pro -->
 | Slot | Exact profile | Eligibility | Task fit |
 | --- | --- | --- | --- |
-| browser | TM: gpt-6.1-terra / medium | browser; specialist | Capture screenshots and run interaction, keyboard, and focus checks with verified browser/computer-control tools. Record build, route, viewport, theme, and state. |
-| visual-deep | TH: gpt-6.1-terra / high | research, planning, qa, spec-review | Diagnose concrete defects in baseline and intermediate screenshots. Return unresolved framing to the coordinator; this critique does not replace the final council. |
+| browser | AL: gpt-6.2-astra / low | browser; specialist | Capture screenshots and run interaction, keyboard, and focus checks with verified browser/computer-control tools. Record build, route, viewport, theme, and state. |
+| visual-deep | AL: gpt-6.2-astra / low | research, planning, qa, spec-review | Diagnose concrete defects in baseline and intermediate screenshots. Return unresolved framing to the coordinator; this critique does not replace the final council. |
 | standard | SM: gpt-6.2-sol / medium | implementation, frontend, integration | Own focused UI implementation in the project's existing design system and idioms. |
 | opus-medium | OM: claude-opus-5-5 / medium | implementation, frontend, integration | Own substantial scoped UI implementation or refactoring across related components. |
 | max-code | SMAX: gpt-6.2-sol / max | qa, spec-review; independent review | Review the final candidate independently against the requirements, rubric, and functional evidence. Fresh intermediate reviews are also eligible. |
 | opus-deep | OX: claude-opus-5-5 / xhigh | qa, spec-review; independent review | Critique visual design, interaction, and rendering code from a separate model's perspective. Fresh intermediate reviews are also eligible. |
 | investigate-deep | MFX: muse-wonder-full-1.0 / xhigh | qa, spec-review; independent review | Critique the candidate against existing components, tokens, and repository patterns. Fresh intermediate reviews are also eligible. |
+| neon-design-advisor | GNH: gemini-4-neon / high | research, planning; independent review; verified adapter; explicit selection | Flag where visual hierarchy, wording, or interaction flow obscures the user's task. Cite the screenshot and suggest the smallest fix. |
 <!-- END GENERATED:pool:ui-pro -->
 
-The browser binding defaults to TM. Verify actual browser/computer-control tools and session access, not merely shell access. If unavailable, report visual/interaction acceptance as blocked. Do not silently substitute another model or shell-only capture route. Explicit user choices and configured bindings override defaults.
+The browser binding defaults to AL. Verify actual browser/computer-control tools and session access, not merely shell access. If unavailable, report visual/interaction acceptance as blocked. Do not silently substitute another model or shell-only capture route. Explicit user choices and configured bindings override defaults.
 
-SM or OM implements. TH critiques baseline/intermediate evidence. SMAX, OX, and MFX form the final council and may give fresh intermediate reviews. Reviewers do not edit unless reassigned. These jobs are workflow choices, not measured model specialties.
+SM or OM implements. AL critiques in a fresh session, separate from capture. SMAX, OX, and MFX form the final council and may give fresh intermediate reviews. Reviewers do not edit unless reassigned. These jobs are workflow choices, not measured model specialties.
+
+On explicit request, give GNH the fresh packet below. If screenshots are inaccessible, skip and report. No browser control, edits, acceptance, or vote.
 
 ## Independent review packets
 
@@ -52,7 +55,7 @@ Blockers prevent or mislead the intended task or fail an applicable accessibilit
 
 Review an existing candidate when supplied. Do not reimplement it to create review work. Distinguish capture, viewport, build, and evaluator failures from UI defects before redesigning. Keep criteria stable unless requirements or evidence change. If product and evaluator changes obscure a failure, check the corrected evaluator against unchanged product behavior.
 
-Retain stable finding IDs, outcomes, and reasons in the coordinator's ledger. Reopen settled findings only for relevant changes or new material evidence. Keep prior verdicts out of fresh review packets. Intermediate rounds may use TH or any council profile in a fresh context. Staging does not remove the final council.
+Retain stable finding IDs, outcomes, and reasons in the coordinator's ledger. Reopen settled findings only for relevant changes or new material evidence. Keep prior verdicts out of fresh review packets. Intermediate rounds may use AL or any council profile in a fresh context. Staging does not remove the final council.
 
 Compare the scoped diff after corrections. Keep necessary coverage, but reject unrelated features, abstractions, and redesigns. Keep the reviewed candidate stable while reviewers inspect that checkout.
 
