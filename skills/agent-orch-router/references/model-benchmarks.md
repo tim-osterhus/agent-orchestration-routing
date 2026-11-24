@@ -1,6 +1,6 @@
 # Model benchmark snapshot
 
-Source: **Artificial Analysis Intelligence Index v5.0.1**. Snapshot **2026-11-13**; OpenAI section refreshed **2026-11-17**.
+Source: **Artificial Analysis Intelligence Index v5.0.1**. Snapshot **2026-11-13**; OpenAI refreshed **2026-11-17**; Neon added **2026-11-23**.
 
 Customization reference only. Deliberately not linked from the router entrypoint or modes; reading it is not part of normal dispatch. This snapshot does not add supported profiles or change routing.
 
@@ -49,6 +49,9 @@ Artificial Analysis Intelligence Index **v5.0.1** / Cost per Intelligence Index 
 | Gemini 4 Hydrogen | — | [27 / $0.29](https://artificialanalysis.ai/models/gemini-4-hydrogen-low) | [41 / $0.80](https://artificialanalysis.ai/models/gemini-4-hydrogen-medium) | [51 / $1.87](https://artificialanalysis.ai/models/gemini-4-hydrogen-high) | [54 / $3.16](https://artificialanalysis.ai/models/gemini-4-hydrogen) | — |
 | Gemini 4 Argon | — | — | — | [50 / $4.97](https://artificialanalysis.ai/models/gemini-4-argon) | — | — |
 | Gemini 4 Carbon | — | [54 / $5.22](https://artificialanalysis.ai/models/gemini-4-carbon-low) | [58 / $4.68](https://artificialanalysis.ai/models/gemini-4-carbon-medium) | [60 / $5.48](https://artificialanalysis.ai/models/gemini-4-carbon) | — | — |
+| [Gemini 4 Neon](https://artificialanalysis.ai/providers/google) | — | 44 / $0.75 | 55 / $1.90 | 60 / $3.74 | 61 / $6.44 | — |
+
+Neon values checked **2026-11-23** in AA’s Google provider table. These are Intelligence Index API costs, not Coding Agent Index costs or Antigravity subscription quota.
 
 ## Meta
 

@@ -23,7 +23,7 @@ class SlotTests(unittest.TestCase):
     def test_exact_frontier_and_disjoint_specialist_catalogs(self):
         self.assertEqual(self.config["catalogs"]["frontier"],
                          "LL LM HL TL EX EMAX TM SL TH TX SM SH SX SMAX AH AX AMAX FX FMAX".split())
-        self.assertEqual(len(self.config["catalogs"]["specialists"]), 9)
+        self.assertEqual(len(self.config["catalogs"]["specialists"]), 11)
         self.assertEqual(len(self.config["catalogs"]["conditional"]), 3)
         all_codes = [c for group in self.config["catalogs"].values() for c in group]
         self.assertEqual(len(all_codes), len(set(all_codes)))
@@ -55,7 +55,7 @@ class SlotTests(unittest.TestCase):
         for variant in self.config["variants"]:
             kwargs = {"mode": mode, "variant": variant}
             pool = bundle.mode_pools(self.config, variant)[mode]
-            self.assertEqual([e["profile"] for e in pool], expected)
+            self.assertEqual([e["profile"] for e in pool], expected + ["GNH"])
             for design in self.config["designs"]:
                 for bias in self.config["selection"]["bias_options"]:
                     browser = bundle.resolve(self.config, role="browser", design=design, bias=bias, **kwargs)
@@ -77,6 +77,39 @@ class SlotTests(unittest.TestCase):
             unavailable = bundle.resolve(no_muse, role="qa", final=True, **kwargs)
             self.assertEqual(unavailable["unavailable_profiles"], ["MFH"])
             self.assertEqual([c["code"] for c in unavailable["choices"]], general)
+
+    def test_neon_requires_explicit_selection_and_uses_only_the_subscription_route(self):
+        cases = [
+            ("balanced-split", "neon-diagnosis", "GNH", "high"),
+            ("council", "neon-advisor", "GNH", "high"),
+            ("frontier-research", "neon-counterhypothesis", "GNX", "xhigh"),
+        ]
+        api_only = bundle.merge(self.config, {"adapters": {
+            "gemini:public_api": {"verified": True},
+            "gemini:antigravity_subscription": {"verified": False},
+        }})
+        for variant in self.config["variants"]:
+            for mode, slot, code, effort in cases:
+                for design in self.config["designs"]:
+                    kwargs = dict(mode=mode, variant=variant, role="research", design=design)
+                    automatic = bundle.resolve(self.config, **kwargs)
+                    self.assertSetEqual({c["code"] for c in automatic["choices"]} & {"GNH", "GNX"}, set())
+                    self.assertNotIn(code, automatic.get("unavailable_profiles", []))
+                    choice, = bundle.resolve(self.config, code=code, **kwargs)["choices"]
+                    self.assertEqual(bundle.resolve(self.config, slot=slot, **kwargs)["choices"], [choice])
+                    self.assertEqual((choice["model"], choice["effort"], choice["dispatch"]),
+                                     ("gemini-4-neon", effort, "external-gemini"))
+                    self.assertEqual(choice["cli_model_id"], "gemini-4-neon-" + effort)
+                    self.assertTrue(choice["explicit_only"])
+                    self.assertTrue(choice["execution"]["adapter_route_available"])
+                    self.assertFalse(choice["execution"]["account_access_verified"])
+                    self.assertFalse(choice["execution"]["launch_plan_supported"])
+                    self.assertFalse(bundle.resolve(api_only, code=code, **kwargs)["choices"][0]
+                                     ["execution"]["adapter_route_available"])
+                with self.assertRaisesRegex(ValueError, "role/lifecycle"):
+                    bundle.resolve(self.config, variant=variant, mode=mode, code=code, role="implementation")
+            with self.assertRaisesRegex(ValueError, "outside"):
+                bundle.resolve(self.config, variant=variant, mode="balanced", code="GNH", role="research")
 
     def test_efficient_provider_preferences_and_muse_gate_are_variant_specific(self):
         for variant, codes in (("codex-primary", ["LM", "TL", "EX", "TM", "TH", "SM"]),
@@ -126,10 +159,10 @@ class SlotTests(unittest.TestCase):
                  "implementation": ["SX"], "integration": ["SX"]}
         for variant in self.config["variants"]:
             pool = bundle.mode_pools(self.config, variant)["frontier-research"]
-            self.assertEqual([e["profile"] for e in pool], expected)
+            self.assertEqual([e["profile"] for e in pool], expected + ["GNX"])
             self.assertNotIn("frontier-research", self.config["variants"][variant]["modes"])
             self.assertEqual([e["profile"] for e in pool if e.get("independent_review")], ["AMAX", "OX"])
-            self.assertEqual([e["profile"] for e in pool if e.get("escalation")], ["OMAX"])
+            self.assertEqual([e["profile"] for e in pool if e.get("escalation")], ["OMAX", "GNX"])
             for design in self.config["designs"]:
                 kwargs = dict(mode="frontier-research", variant=variant, design=design)
                 for role in self.config["roles"]:

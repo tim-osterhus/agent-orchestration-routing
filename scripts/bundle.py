@@ -169,7 +169,7 @@ def validate(config):
             require(name not in BURN_PROVIDERS or item["provider"] == BURN_PROVIDERS[name],
                     f"{name} requires {BURN_PROVIDERS.get(name)} profiles only")
             require(set(entry.get("roles", config["roles"])) <= set(config["roles"]), f"Unknown role in {name}")
-            for flag in ("one_off_only", "ongoing_thread_only", "final_only", "specialist", "independent_review", "escalation", "requires_verified_adapter"):
+            for flag in ("one_off_only", "ongoing_thread_only", "final_only", "specialist", "independent_review", "escalation", "requires_verified_adapter", "explicit_only"):
                 require(flag not in entry or type(entry[flag]) is bool, f"Invalid {flag} in {name}")
     codex = config["codex"]
     require(all(value in {"read-only", "workspace-write", "danger-full-access"} for value in codex["sandbox_by_role"].values()), "Invalid Codex sandbox")
@@ -276,7 +276,8 @@ def resolve(config, *, mode=None, code=None, slot=None, role="implementation", d
         selected = [{**allowed[0], "profile": code}] if allowed else [{"profile": code}]
     else:
         require(not role_override, "Role override requires an explicit profile")
-        candidates = [entry for entry in pool if eligible(entry, role, assignment_kind, ongoing, final)]
+        candidates = [entry for entry in pool
+                      if not entry.get("explicit_only") and eligible(entry, role, assignment_kind, ongoing, final)]
         unavailable = [entry["profile"] for entry in candidates if not adapter_available(config, profile(config, entry["profile"]))]
         candidates = [entry for entry in candidates if adapter_available(config, profile(config, entry["profile"]))]
         specialists = [entry for entry in candidates if entry.get("specialist")]
@@ -297,7 +298,7 @@ def resolve(config, *, mode=None, code=None, slot=None, role="implementation", d
             if item["provider"] == "codex":
                 codex_write_roles(config)
             choice["agent"] = plugin + ":" + agent_name(candidate, item)
-        for flag in ("specialist", "independent_review", "escalation"):
+        for flag in ("specialist", "independent_review", "escalation", "explicit_only"):
             if entry.get(flag):
                 choice[flag] = True
         if item["provider"] == "claude":

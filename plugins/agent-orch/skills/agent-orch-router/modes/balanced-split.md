@@ -17,6 +17,7 @@ Choose explicitly from either provider preference. Use this pool instead of prov
 | adversarial-review | AH: gpt-6.2-astra / high | general | Adversarial technical verification. Challenge a high-stakes candidate with failure cases, cross-system invariants, and neglected assumptions. |
 | fable | FH: claude-fable-5-2 / high | general | Architectural reframing. Compare materially different approaches and test the most consequential tradeoff with a bounded probe. |
 | muse-artifact-review | MFH: muse-wonder-full-1.0 / high | qa; independent review; verified adapter; final review | Specialist final QA for copywriting, documentation, and UI design only. Review the final candidate against the brief. Use rendered evidence for UI design and report what remains unverified. |
+| neon-diagnosis | GNH: gemini-4-neon / high | research, planning; verified adapter; explicit selection | Trace a scoped repository issue or critique a fix. Return source anchors and a check that distinguishes competing causes. |
 <!-- END GENERATED:pool:balanced-split -->
 
 The general jobs are routing defaults, not role restrictions or required stages. AH challenges the candidate. FH challenges the approach. Acceptance still requires a fresh, author-independent reviewer.
@@ -25,6 +26,6 @@ MFH is optional and only reviews its listed artifact types. It does not edit. Fo
 
 ## Split the work
 
-Aim for roughly even Codex and Claude workload across the backlog, not equal launches or subscription spend. Track estimated work by provider, including repeat work. Count MFH separately as Muse work. Compare like-sized packets. Do not equate a quick review with a long implementation.
+Aim for roughly even Codex and Claude workload across the backlog, not equal launches or subscription spend. Track estimated work by provider, including repeat work. Count MFH and explicitly requested GNH separately from Codex and Claude. Compare like-sized packets. Do not equate a quick review with a long implementation.
 
 Start with the default profile for the job. When multiple eligible profiles fit equally well, prefer the provider with less substantive work. Let both providers own implementation where they fit. Accept temporary imbalance rather than forcing a second worker, expanding scope, or weakening review. Use [shared dispatch](../references/dispatch.md) for exact-profile overrides, unavailable routes, and provider guidance.

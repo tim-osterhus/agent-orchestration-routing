@@ -12,6 +12,7 @@ Opt in for hard technical questions needing competing mechanisms, falsifiable ex
 | investigate-deep | MFX: muse-wonder-full-1.0 / xhigh | research, planning, qa | Seek a materially different representation or implementation when the first approach stalls. |
 | hard | SX: gpt-6.2-sol / xhigh | implementation, integration, qa | Build, integrate, or reproduce a bounded probe with explicit write ownership and acceptance checks. |
 | opus-max | OMAX: claude-opus-5-5 / max | research, planning, qa, spec-review; escalation | Investigate a named unresolved question after focused evidence or cheaper checks have narrowed it. |
+| neon-counterhypothesis | GNX: gemini-4-neon / xhigh | research, planning; escalation; verified adapter; explicit selection | For a named unresolved question, propose an alternative mechanism and the smallest test that could disprove it. |
 <!-- END GENERATED:pool:frontier-research -->
 
 ## Proposal and independent challenge

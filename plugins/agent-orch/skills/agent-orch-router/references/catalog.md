@@ -42,6 +42,8 @@ These disjoint exceptions neither expand pools nor authorize spending. See [mode
 | MFMAX | muse-wonder-full-1.0 | max | Orchestration and steerable prose trials | muse_code_subscription |
 | KK31 | kimi-k3.1-pro | unspecified | Terminal-intensive engineering | public_api_or_self_hosted_weights |
 | GA4H | gemini-4-argon | high | Visual reasoning and MCP tool use | public_api |
+| GNH | gemini-4-neon | high | Repository diagnosis and architectural critique | antigravity_subscription |
+| GNX | gemini-4-neon | xhigh | Counterhypotheses for unresolved technical questions | antigravity_subscription |
 | DSFH | deepseek-flash | high | Budget workflow automation experiments | public_api_rolling_alias_or_self_hosted_weights |
 | G38FH | gemini-3.8-flash | high | Audio understanding with text output | public_api |
 <!-- END GENERATED:catalog-specialists -->

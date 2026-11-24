@@ -44,7 +44,8 @@ def eligibility(entry):
     for flag, label in (("specialist", "specialist"), ("independent_review", "independent review"),
                         ("escalation", "escalation"), ("one_off_only", "one-off"),
                         ("requires_verified_adapter", "verified adapter"),
-                        ("ongoing_thread_only", "ongoing thread"), ("final_only", "final review")):
+                        ("ongoing_thread_only", "ongoing thread"), ("final_only", "final review"),
+                        ("explicit_only", "explicit selection")):
         if entry.get(flag):
             parts.append(label)
     return "; ".join(parts) or "general"

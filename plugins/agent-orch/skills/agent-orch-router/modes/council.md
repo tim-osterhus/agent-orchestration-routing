@@ -13,11 +13,12 @@ Opt in for decision, architecture, or research tradeoffs through independent ope
 | investigate-deep | MFX: muse-wonder-full-1.0 / xhigh | research, planning, qa, spec-review | Investigate competing hypotheses and identify evidence that distinguishes proposed approaches. |
 | broad | AMAX: gpt-6.2-astra / max | research, planning, qa, spec-review | Add an optional fourth perspective on assumptions, alternatives, and decision criteria. |
 | fable-review | FH: claude-fable-5-2 / high | research, planning, spec-review | Advise on requirements and overlooked constraints, challenging the premise when useful and proposing materially distinct alternatives. This advisory slot adds no vote. |
+| neon-advisor | GNH: gemini-4-neon / high | research, planning, spec-review; verified adapter; explicit selection | Challenge an architectural assumption with source evidence and a distinct alternative. No vote unless explicitly appointed. |
 <!-- END GENERATED:pool:council -->
 
 Default required member slots: **max-code, opus-deep, investigate-deep**, with their exact active bindings. The bundled bindings are SMAX, OX, and MFX. The broad slot is optional. If added as a member, it must endorse. The fable-review slot advises without a vote unless explicitly appointed. Rebinding changes the model, not membership or voting authority.
 
-Record required membership before openings. Five eligible profiles do not mean five members or concurrent workers. These task fits do not claim measured superiority.
+Record required membership before openings. GNH is an opt-in adviser, not a default seat.
 
 Honor explicit user changes to membership, effort, and route. If a required member or route is unavailable, report an incomplete council and request an explicit alternate. Never substitute silently. The optional inspector resolves eligibility only, not membership, debate, or consensus. Role exceptions require an explicit profile and user authorization. Existing `--allow-out-of-pool` and `--role-override` controls record exceptions, not authority.
 

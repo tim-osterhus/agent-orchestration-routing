@@ -17,7 +17,7 @@ Both variants: [Balanced Split](modes/balanced-split.md) · [Amusing](modes/amus
 
 ## Exact profile index
 
-Efforts are positional: l=low, m=medium, h=high, x=xhigh, max=max. These 19 frontier and nine specialist configurations add no automatic mode eligibility.
+Efforts: l=low, m=medium, h=high, x=xhigh, max=max. Catalog entries do not grant mode eligibility.
 
 | Exact model | Frontier aliases → efforts |
 | --- | --- |
@@ -38,6 +38,7 @@ Efforts are positional: l=low, m=medium, h=high, x=xhigh, max=max. These 19 fron
 | muse-wonder-full-1.0 | MFMAX → max |
 | kimi-k3.1-pro | KK31 → unspecified |
 | gemini-4-argon | GA4H → h |
+| gemini-4-neon | GNH/GNX → h/x |
 | deepseek-flash | DSFH → h |
 | gemini-3.8-flash | G38FH → h |
 

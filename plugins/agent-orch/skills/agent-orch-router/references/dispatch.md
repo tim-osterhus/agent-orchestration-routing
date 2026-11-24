@@ -1,12 +1,12 @@
 # Shared dispatch
 
-Read once per assignment alongside the selected mode.
+Read once with the selected mode.
 
 Pure orchestration delegates substantive work. Supporting delegation permits requested direct execution. Retain choices through compaction. Variant selects pool preference, not host. Never change the parent model.
 
 ## Selection and authority
 
-Honor explicit profiles and active bindings. Slots define distinct jobs, not stages or worker counts. Rebinding preserves roles, lifecycle, and review authority. Task fit expresses preference, not measured effort-specific specialty.
+Honor exact profiles and bindings. Slots define jobs, not stages or worker counts. Rebinding preserves role, lifecycle, and review authority. Task fit is a preference, not a benchmark.
 
 Choose the earliest suitable eligible slot, not a cheap-first sequence. General slots permit all roles. One-off slots require fresh bounded workers, never continuing controllers. Specialist slots take precedence for their role, without banning others' tools. Role-restricted reviewers do not preempt general candidates solely on task fit.
 
@@ -16,7 +16,7 @@ Use native workers for the host provider with exact model/effort and verified to
 
 Give workers objectives, inputs, disjoint write ownership, acceptance checks, profiles, and deadlines. Sequence dependent or overlapping writes. The controller integrates and accepts with author-independent checks. Reviewers need reassignment to fix. Analysis or tools do not authorize implementation or external mutations.
 
-Repository investigation handoffs list source locations, key constraints, edge cases, and unverified items.
+Investigation handoffs cite source locations, constraints, edge cases, and unverified items.
 
 Preserve host permissions and selected tools, approvals, timeouts, and account routes. Routing imposes no permission policy. Broader checks require profile selection, not silently widened access. Never change accounts, global settings, or capacity automatically.
 
@@ -42,6 +42,7 @@ Use fresh native workers or provider sessions for independent reviews. Exclude a
 - Claude selected: read [Claude execution](claude-execution.md).
 - FM/FH/FX/FMAX selected: read [Fable prompting and usage-cap fallback](fable-prompting.md) before briefing/dispatch. Pass relevant guidance. Its narrow fallback overrides pool, required-profile, mapped-role/lifecycle, and no-alternate fences only as specified there.
 - Muse selected: read [Muse checks](muse.md). Verify exact adapter/account/tools/effort/data handling/result metadata/session lifecycle. Availability is not implied. Never substitute Wonder API for Code subscription. The planner does not launch Muse.
+- GNH/GNX explicitly selected: read [Antigravity CLI](antigravity.md).
 - KK31 selected: verify an exact supported runtime effort before execution.
 
-Pool eligibility alone does not trigger provider reads.
+Read provider guidance only on selection.

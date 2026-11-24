@@ -24,7 +24,7 @@ def documented_pool(path):
     flags = {"specialist": "specialist", "independent review": "independent_review",
              "escalation": "escalation", "one-off": "one_off_only",
              "ongoing thread": "ongoing_thread_only", "final review": "final_only",
-             "verified adapter": "requires_verified_adapter"}
+             "verified adapter": "requires_verified_adapter", "explicit selection": "explicit_only"}
     for slot, exact, eligibility, task_fit in rows(path)[1:]:
         code = exact.split(": ", 1)[0]
         entry = {"slot": slot, "profile": code, "fit": task_fit}

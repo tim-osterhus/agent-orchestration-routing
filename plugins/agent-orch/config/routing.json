@@ -67,6 +67,8 @@
     "SNMAX": {"provider": "claude", "model": "claude-sonnet-5-5", "effort": "max", "service_tier": "standard", "description": "Professional deliverable candidate.", "specialty": "Professional deliverables and knowledge work", "evidence_type": "agentic_knowledge_work_default_fallback", "access_mode": "public_api"},
     "MFMAX": {"provider": "muse", "model": "muse-wonder-full-1.0", "effort": "max", "service_tier": "standard", "description": "Orchestration and steerable-prose preference trial through a verified Muse Code subscription adapter.", "label": "Muse Wonder Full", "specialty": "Orchestration and steerable prose trials", "evidence_type": "pdf_benchmark_plus_user_anecdote", "access_mode": "muse_code_subscription", "api_model_id": null, "adapter_required": true},
     "KK31": {"provider": "kimi", "model": "kimi-k3.1-pro", "effort": null, "service_tier": "standard", "description": "Terminal-engineering candidate. Choose an explicit supported runtime effort before dispatch.", "specialty": "Terminal-intensive engineering", "evidence_type": "agentic_terminal_benchmark_effort_unspecified", "access_mode": "public_api_or_self_hosted_weights", "effort_options": ["low", "high", "max"], "executable": false},
+    "GNH": {"provider": "gemini", "model": "gemini-4-neon", "effort": "high", "service_tier": "standard", "description": "Repository diagnosis and architectural critique.", "specialty": "Repository diagnosis and architectural critique", "access_mode": "antigravity_subscription", "cli_model_id": "gemini-4-neon-high", "adapter_required": true},
+    "GNX": {"provider": "gemini", "model": "gemini-4-neon", "effort": "xhigh", "service_tier": "standard", "description": "Counterhypotheses for unresolved technical questions.", "specialty": "Counterhypotheses for unresolved technical questions", "access_mode": "antigravity_subscription", "cli_model_id": "gemini-4-neon-xhigh", "adapter_required": true},
     "GA4H": {"provider": "gemini", "model": "gemini-4-argon", "effort": "high", "service_tier": "standard", "description": "Visual-reasoning and MCP-tool-use candidate.", "specialty": "Visual reasoning and MCP tool use", "evidence_type": "visual_reasoning_and_tool_use", "access_mode": "public_api", "adapter_required": true},
     "DSFH": {"provider": "deepseek", "model": "deepseek-flash", "effort": "high", "service_tier": "standard", "description": "Budget workflow-automation experiment. Rolling alias currently maps to V4.1 Flash 1017.", "specialty": "Budget workflow automation experiments", "evidence_type": "supplied_benchmark_candidate", "access_mode": "public_api_rolling_alias_or_self_hosted_weights", "adapter_required": true},
     "G38FH": {"provider": "gemini", "model": "gemini-3.8-flash", "effort": "high", "service_tier": "standard", "description": "Audio-understanding intake with text output.", "specialty": "Audio understanding with text output", "evidence_type": "audio_input_text_output_benchmark", "access_mode": "public_api", "adapter_required": true},
@@ -163,7 +165,8 @@
       {"slot": "opus-deep", "fit": "Complex refactoring. Restructure tangled code across boundaries while preserving behavior and reducing maintenance burden."},
       {"slot": "adversarial-review", "fit": "Adversarial technical verification. Challenge a high-stakes candidate with failure cases, cross-system invariants, and neglected assumptions."},
       {"slot": "fable", "fit": "Architectural reframing. Compare materially different approaches and test the most consequential tradeoff with a bounded probe."},
-      {"slot": "muse-artifact-review", "roles": ["qa"], "independent_review": true, "final_only": true, "requires_verified_adapter": true, "fit": "Specialist final QA for copywriting, documentation, and UI design only. Review the final candidate against the brief. Use rendered evidence for UI design and report what remains unverified."}
+      {"slot": "muse-artifact-review", "roles": ["qa"], "independent_review": true, "final_only": true, "requires_verified_adapter": true, "fit": "Specialist final QA for copywriting, documentation, and UI design only. Review the final candidate against the brief. Use rendered evidence for UI design and report what remains unverified."},
+      {"slot": "neon-diagnosis", "roles": ["research", "planning"], "explicit_only": true, "requires_verified_adapter": true, "fit": "Trace a scoped repository issue or critique a fix. Return source anchors and a check that distinguishes competing causes."}
     ],
     "frontier-research": [
       {"slot": "frontier-proposer", "roles": ["research", "planning"], "fit": "Propose a mechanism, identify its hardest assumption, and design the cheapest decisive test."},
@@ -171,7 +174,8 @@
       {"slot": "opus-deep", "roles": ["qa", "spec-review"], "independent_review": true, "fit": "Provide an alternate review of runtime constraints and failure cases when useful."},
       {"slot": "investigate-deep", "roles": ["research", "planning", "qa"], "fit": "Seek a materially different representation or implementation when the first approach stalls."},
       {"slot": "hard", "roles": ["implementation", "integration", "qa"], "fit": "Build, integrate, or reproduce a bounded probe with explicit write ownership and acceptance checks."},
-      {"slot": "opus-max", "roles": ["research", "planning", "qa", "spec-review"], "escalation": true, "fit": "Investigate a named unresolved question after focused evidence or cheaper checks have narrowed it."}
+      {"slot": "opus-max", "roles": ["research", "planning", "qa", "spec-review"], "escalation": true, "fit": "Investigate a named unresolved question after focused evidence or cheaper checks have narrowed it."},
+      {"slot": "neon-counterhypothesis", "roles": ["research", "planning"], "explicit_only": true, "requires_verified_adapter": true, "escalation": true, "fit": "For a named unresolved question, propose an alternative mechanism and the smallest test that could disprove it."}
     ],
     "ui-pro": [
       {"slot":"browser","roles":["browser"],"specialist":true,"fit":"Capture screenshots and run interaction, keyboard, and focus checks with verified browser/computer-control tools. Record build, route, viewport, theme, and state."},
@@ -194,7 +198,8 @@
       {"slot": "opus-deep", "roles": ["research", "planning", "qa", "spec-review"], "fit": "Challenge architectural choices against requirements, source evidence, and simpler alternatives."},
       {"slot": "investigate-deep", "roles": ["research", "planning", "qa", "spec-review"], "fit": "Investigate competing hypotheses and identify evidence that distinguishes proposed approaches."},
       {"slot": "broad", "roles": ["research", "planning", "qa", "spec-review"], "fit": "Add an optional fourth perspective on assumptions, alternatives, and decision criteria."},
-      {"slot": "fable-review", "roles": ["research", "planning", "spec-review"], "fit": "Advise on requirements and overlooked constraints, challenging the premise when useful and proposing materially distinct alternatives. This advisory slot adds no vote."}
+      {"slot": "fable-review", "roles": ["research", "planning", "spec-review"], "fit": "Advise on requirements and overlooked constraints, challenging the premise when useful and proposing materially distinct alternatives. This advisory slot adds no vote."},
+      {"slot": "neon-advisor", "roles": ["research", "planning", "spec-review"], "explicit_only": true, "requires_verified_adapter": true, "fit": "Challenge an architectural assumption with source evidence and a distinct alternative. No vote unless explicitly appointed."}
     ],
     "codex-burn": [
       {"slot": "standard", "fit": "Use for ordinary authorized implementation or verification with a clear change surface and acceptance checks."},
@@ -287,19 +292,23 @@
   },
   "catalogs": {
     "frontier": ["LL", "LM", "HL", "TL", "EX", "EMAX", "TM", "SL", "TH", "TX", "SM", "SH", "SX", "SMAX", "AH", "AX", "AMAX", "FX", "FMAX"],
-    "specialists": ["OH", "MWM", "MSX", "SNMAX", "MFMAX", "KK31", "GA4H", "DSFH", "G38FH"],
+    "specialists": ["OH", "MWM", "MSX", "SNMAX", "MFMAX", "KK31", "GA4H", "GNH", "GNX", "DSFH", "G38FH"],
     "conditional": ["GLMMAX", "MSMAX", "CYBER"],
     "compatibility": ["L", "AL", "AM", "HMED", "HH", "HM", "HK", "HMAX", "SNH", "SNX", "OM", "OX", "OMAX", "FM", "FH", "MFH", "MFX", "GCM", "GCH"]
   },
   "adapters": {
     "muse:muse_code_subscription": {"verified": true, "verification_scope": "Existing Muse Code adapter route only. Current account access, model entitlement, tools, and effective effort require dispatch preflight."},
     "muse:public_api_standard": {"verified": false},
+    "gemini:antigravity_subscription": {"verified": true, "verification_scope": "Known standalone agy CLI route. Check exact model and signed-in entitlement before dispatch."},
     "gemini:public_api": {"verified": false},
     "kimi:public_api_or_self_hosted_weights": {"verified": false},
     "deepseek:public_api_rolling_alias_or_self_hosted_weights": {"verified": false},
     "glm:public_api_or_self_hosted_weights": {"verified": false}
   },
   "slots": {
+    "neon-diagnosis": {"description": "Trace a scoped repository issue or critique a fix. Return source anchors and a check that distinguishes competing causes."},
+    "neon-advisor": {"description": "Challenge an architectural assumption with source evidence and a distinct alternative. No vote unless explicitly appointed."},
+    "neon-counterhypothesis": {"description": "For a named unresolved question, propose an alternative mechanism and the smallest test that could disprove it."},
     "claude-review": {"description": "Independent acceptance review against the brief and evidence."},
     "adversarial-review": {"description": "Challenge high-stakes technical work with failure cases and cross-system invariants."},
     "muse-artifact-review": {"description": "Independent final QA of copywriting, documentation, and UI design."},
@@ -417,7 +426,8 @@
         "opus-deep": "OX",
         "adversarial-review": "AH",
         "fable": "FH",
-        "muse-artifact-review": "MFH"
+        "muse-artifact-review": "MFH",
+        "neon-diagnosis": "GNH"
       },
       "frontier-research": {
         "frontier-proposer": "FH",
@@ -425,7 +435,8 @@
         "opus-deep": "OX",
         "investigate-deep": "MFX",
         "hard": "SX",
-        "opus-max": "OMAX"
+        "opus-max": "OMAX",
+        "neon-counterhypothesis": "GNX"
       },
       "ui-pro": {"browser": "TM", "visual-deep": "TH", "standard": "SM", "opus-medium": "OM", "max-code": "SMAX", "opus-deep": "OX", "investigate-deep": "MFX"},
       "browser-3d": {
@@ -440,7 +451,8 @@
         "opus-deep": "OX",
         "investigate-deep": "MFX",
         "broad": "AMAX",
-        "fable-review": "FH"
+        "fable-review": "FH",
+        "neon-advisor": "GNH"
       },
       "codex-burn": {
         "standard": "SM",
