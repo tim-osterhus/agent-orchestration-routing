@@ -197,10 +197,18 @@
     "council": [
       {"slot": "max-code", "roles": ["research", "planning", "qa", "spec-review"], "fit": "Develop a decision proposal, test its assumptions, and compare concrete implementation tradeoffs."},
       {"slot": "opus-deep", "roles": ["research", "planning", "qa", "spec-review"], "fit": "Challenge architectural choices against requirements, source evidence, and simpler alternatives."},
-      {"slot": "investigate-deep", "roles": ["research", "planning", "qa", "spec-review"], "fit": "Investigate competing hypotheses and identify evidence that distinguishes proposed approaches."},
+      {"slot": "neon-member", "roles": ["research", "planning", "qa", "spec-review"], "requires_verified_adapter": true, "fit": "Challenge assumptions and compare a distinct, source-backed option."},
       {"slot": "broad", "roles": ["research", "planning", "qa", "spec-review"], "fit": "Add an optional fourth perspective on assumptions, alternatives, and decision criteria."},
       {"slot": "fable-review", "roles": ["research", "planning", "spec-review"], "fit": "Advise on requirements and overlooked constraints, challenging the premise when useful and proposing materially distinct alternatives. This advisory slot adds no vote."},
-      {"slot": "neon-advisor", "roles": ["research", "planning", "spec-review"], "explicit_only": true, "requires_verified_adapter": true, "fit": "Challenge an architectural assumption with source evidence and a distinct alternative. No vote unless explicitly appointed."}
+      {"slot": "investigate-deep", "roles": ["research", "planning", "qa", "spec-review"], "requires_verified_adapter": true, "explicit_only": true, "fit": "Offer a Muse perspective on competing hypotheses. No vote unless explicitly appointed."}
+    ],
+    "council-max": [
+      {"slot": "max-code", "roles": ["research", "planning", "qa", "spec-review"], "fit": "Develop a decision proposal, test its assumptions, and compare concrete implementation tradeoffs."},
+      {"slot": "astra-member", "roles": ["research", "planning", "qa", "spec-review"], "fit": "Stress-test the decision against cross-system constraints and failure cases."},
+      {"slot": "opus-deep", "roles": ["research", "planning", "qa", "spec-review"], "fit": "Challenge architectural choices against requirements, source evidence, and simpler alternatives."},
+      {"slot": "investigate-deep", "roles": ["research", "planning", "qa", "spec-review"], "requires_verified_adapter": true, "fit": "Investigate competing hypotheses and identify evidence that distinguishes proposed approaches."},
+      {"slot": "fable", "roles": ["research", "planning", "qa", "spec-review"], "fit": "Reframe the decision and propose a materially different approach. Address objections and ratify the final version."},
+      {"slot": "neon-member", "roles": ["research", "planning", "qa", "spec-review"], "requires_verified_adapter": true, "fit": "Challenge assumptions and compare a distinct, source-backed option."}
     ],
     "codex-burn": [
       {"slot": "standard", "fit": "Use for ordinary authorized implementation or verification with a clear change surface and acceptance checks."},
@@ -308,7 +316,8 @@
   },
   "slots": {
     "neon-diagnosis": {"description": "Trace a scoped repository issue or critique a fix. Return source anchors and a check that distinguishes competing causes."},
-    "neon-advisor": {"description": "Challenge an architectural assumption with source evidence and a distinct alternative. No vote unless explicitly appointed."},
+    "neon-member": {"description": "Challenge assumptions and compare a distinct, source-backed option."},
+    "astra-member": {"description": "Stress-test the decision against cross-system constraints and failure cases."},
     "neon-design-advisor": {"description": "Opt-in design second opinion on hierarchy, wording, and interaction flow."},
     "neon-counterhypothesis": {"description": "For a named unresolved question, propose an alternative mechanism and the smallest test that could disprove it."},
     "claude-review": {"description": "Independent acceptance review against the brief and evidence."},
@@ -451,10 +460,18 @@
       "council": {
         "max-code": "SMAX",
         "opus-deep": "OX",
-        "investigate-deep": "MFX",
+        "neon-member": "GNH",
         "broad": "AMAX",
         "fable-review": "FH",
-        "neon-advisor": "GNH"
+        "investigate-deep": "MFX"
+      },
+      "council-max": {
+        "max-code": "SMAX",
+        "astra-member": "AX",
+        "opus-deep": "OX",
+        "investigate-deep": "MFX",
+        "fable": "FH",
+        "neon-member": "GNH"
       },
       "codex-burn": {
         "standard": "SM",

@@ -10,15 +10,15 @@ Opt in for decision, architecture, or research tradeoffs through independent ope
 | --- | --- | --- | --- |
 | max-code | SMAX: gpt-6.2-sol / max | research, planning, qa, spec-review | Develop a decision proposal, test its assumptions, and compare concrete implementation tradeoffs. |
 | opus-deep | OX: claude-opus-5-5 / xhigh | research, planning, qa, spec-review | Challenge architectural choices against requirements, source evidence, and simpler alternatives. |
-| investigate-deep | MFX: muse-wonder-full-1.0 / xhigh | research, planning, qa, spec-review | Investigate competing hypotheses and identify evidence that distinguishes proposed approaches. |
+| neon-member | GNH: gemini-4-neon / high | research, planning, qa, spec-review; verified adapter | Challenge assumptions and compare a distinct, source-backed option. |
 | broad | AMAX: gpt-6.2-astra / max | research, planning, qa, spec-review | Add an optional fourth perspective on assumptions, alternatives, and decision criteria. |
 | fable-review | FH: claude-fable-5-2 / high | research, planning, spec-review | Advise on requirements and overlooked constraints, challenging the premise when useful and proposing materially distinct alternatives. This advisory slot adds no vote. |
-| neon-advisor | GNH: gemini-4-neon / high | research, planning, spec-review; verified adapter; explicit selection | Challenge an architectural assumption with source evidence and a distinct alternative. No vote unless explicitly appointed. |
+| investigate-deep | MFX: muse-wonder-full-1.0 / xhigh | research, planning, qa, spec-review; verified adapter; explicit selection | Offer a Muse perspective on competing hypotheses. No vote unless explicitly appointed. |
 <!-- END GENERATED:pool:council -->
 
-Default required member slots: **max-code, opus-deep, investigate-deep**, with their exact active bindings. The bundled bindings are SMAX, OX, and MFX. The broad slot is optional. If added as a member, it must endorse. The fable-review slot advises without a vote unless explicitly appointed. Rebinding changes the model, not membership or voting authority.
+Default required slots: **max-code, opus-deep, neon-member** (SMAX, OX, GNH). AMAX is optional. FH and explicitly selected MFX advise without votes unless appointed. Every appointed member must endorse. Rebinding does not change voting authority.
 
-Record required membership before openings. GNH is an opt-in adviser, not a default seat.
+Record required membership before openings. [Council Max](council-max.md) uses a different roster. Load it only when requested.
 
 Honor explicit user changes to membership, effort, and route. If a required member or route is unavailable, report an incomplete council and request an explicit alternate. Never substitute silently. The optional inspector resolves eligibility only, not membership, debate, or consensus. Role exceptions require an explicit profile and user authorization. Existing `--allow-out-of-pool` and `--role-override` controls record exceptions, not authority.
 
@@ -54,4 +54,4 @@ Stop at consensus, a configured budget/deadline, or a blocker. Also stop when no
 
 The host coordinator owns the brief, ledger, proposal versions, and consensus record. Council is decision-only. Implementation, deployment, messages, purchases, commits, and publication require separate task authority.
 
-Muse continuation requires actual adapter support. Otherwise use a fresh execution with the complete relevant debate packet. A reused session identifier alone does not establish continuation. Sequential dispatch is valid. Report failures instead of endorsements.
+Continue external sessions only when the adapter supports exact-session resume. Otherwise use fresh executions with the complete debate packet. Sequential dispatch is valid. Report failures instead of endorsements.

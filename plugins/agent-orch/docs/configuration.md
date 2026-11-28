@@ -69,9 +69,9 @@ The [Fable usage-cap policy](../skills/agent-orch-router/references/fable-prompt
 
 [Frontier Research](../skills/agent-orch-router/modes/frontier-research.md) is shared and opt-in for hard technical questions. FH proposes and AMAX independently challenges by default. OX, MFX, SX, and OMAX support alternate review, competing hypotheses, bounded probes, and named unresolved escalation. The current controller retains acceptance. Evidence, not model consensus, resolves disagreements. The inspector checks eligibility and bindings, not research completion or evidence quality.
 
-[Council](../skills/agent-orch-router/modes/council.md) is shared and opt-in for decision deliberation. Required members default to SMAX, OX, and MFX. AMAX is optional. FH advises without a vote unless explicitly appointed.
+[Council](../skills/agent-orch-router/modes/council.md) is shared and opt-in for decision deliberation. Its default required members are SMAX, OX, and GNH. AMAX is optional. FH and explicitly selected MFX advise without a vote unless appointed.
 
-Its five-profile pool describes eligibility, not required membership or simultaneous workers. The inspector does not run a council or establish consensus. Implementation, frontend, integration, and browser roles have no automatic eligibility. Existing concurrency, provider checks, permissions, and assignment budgets still apply.
+[Council Max](../skills/agent-orch-router/modes/council-max.md) (`--mode council-max`) uses the same protocol with six required members: SMAX, AX, OX, MFX, FH, and GNH. The inspector shows eligibility, not consensus. Neither sub-mode assigns implementation or browser work. Provider checks, permissions, and budgets still apply.
 
 Amusing is shared and opt-in. Its eight profiles are eligible choices, not required pipeline stages. Muse `MFH`/`MFX` default to investigation and allow implementation when the work order authorizes edits. Their exact efforts remain `high`/`xhigh`. Read [Muse provider checks](../skills/agent-orch-router/references/muse.md) only when selecting them.
 
@@ -144,7 +144,7 @@ python3 scripts/bundle.py validate
 python3 scripts/bundle.py resolve --mode efficient --role research
 python3 scripts/bundle.py resolve --mode performance --role browser
 python3 scripts/bundle.py resolve --mode amusing --profile MFH --role research
-python3 scripts/bundle.py resolve --mode council --profile MFX --role planning
+python3 scripts/bundle.py resolve --mode council-max --role planning
 python3 scripts/bundle.py resolve --mode balanced --profile OH --role qa
 python3 scripts/bundle.py resolve --mode balanced --profile SM --role implementation --design claude-first
 python3 scripts/bundle.py resolve --variant claude-primary --design claude-first --mode balanced --profile OH --role implementation --bias high

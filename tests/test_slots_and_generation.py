@@ -81,7 +81,6 @@ class SlotTests(unittest.TestCase):
     def test_neon_requires_explicit_selection_and_uses_only_the_subscription_route(self):
         cases = [
             ("balanced-split", "neon-diagnosis", "GNH", "high"),
-            ("council", "neon-advisor", "GNH", "high"),
             ("frontier-research", "neon-counterhypothesis", "GNX", "xhigh"),
             ("ui-pro", "neon-design-advisor", "GNH", "high"),
         ]
@@ -138,18 +137,46 @@ class SlotTests(unittest.TestCase):
     def test_default_council_and_amusing_keep_known_code_routes_not_api_routes(self):
         for variant in self.config["variants"]:
             council = bundle.resolve(self.config, variant=variant, mode="council", role="research")
-            self.assertEqual([c["code"] for c in council["choices"]], ["SMAX", "OX", "MFX", "AMAX", "FH"])
+            self.assertEqual([c["code"] for c in council["choices"]], ["SMAX", "OX", "GNH", "AMAX", "FH"])
             amusing = bundle.resolve(self.config, variant=variant, mode="amusing", role="implementation")
             self.assertEqual([c["code"] for c in amusing["choices"]], ["SM", "SX", "OM", "FH", "MFH", "MFX"])
             for result in (council, amusing):
                 self.assertNotIn("unavailable_profiles", result)
                 for choice in result["choices"]:
-                    if choice["provider"] == "muse":
+                    if choice["provider"] in {"muse", "gemini"}:
                         self.assertTrue(choice["execution"]["adapter_route_available"])
                         self.assertFalse(choice["execution"]["account_access_verified"])
                         self.assertFalse(choice["execution"]["launch_plan_supported"])
             efficient = bundle.resolve(self.config, variant=variant, mode="efficient")
             self.assertEqual(efficient.get("unavailable_profiles", []), ["EX"] if variant == "codex-primary" else [])
+
+    def test_council_max_exact_pool_and_optional_muse_in_standard_council(self):
+        expected = ["SMAX", "AX", "OX", "MFX", "FH", "GNH"]
+        unavailable = bundle.merge(self.config, {"adapters": {
+            "gemini:public_api": {"verified": True},
+            "gemini:antigravity_subscription": {"verified": False},
+            "muse:muse_code_subscription": {"verified": False},
+        }})
+        for variant in self.config["variants"]:
+            self.assertEqual([e["profile"] for e in bundle.mode_pools(self.config, variant)["council-max"]], expected)
+            for design in self.config["designs"]:
+                kwargs = dict(variant=variant, design=design)
+                for role in ("research", "planning", "qa", "spec-review"):
+                    result = bundle.resolve(self.config, mode="council-max", role=role, **kwargs)
+                    self.assertEqual([c["code"] for c in result["choices"]], expected)
+                    self.assertNotIn("unavailable_profiles", result)
+                hard = bundle.resolve(unavailable, mode="council-max", role="planning", **kwargs)
+                self.assertEqual(hard["unavailable_profiles"], ["MFX", "GNH"])
+                default = bundle.resolve(unavailable, mode="council", role="planning", **kwargs)
+                self.assertEqual(default["unavailable_profiles"], ["GNH"])
+                muse, = bundle.resolve(self.config, mode="council", code="MFX", role="planning", **kwargs)["choices"]
+                self.assertTrue(muse["explicit_only"])
+                neon, = bundle.resolve(self.config, mode="council-max", code="GNH", role="planning", **kwargs)["choices"]
+                self.assertEqual(neon["cli_model_id"], "gemini-4-neon-high")
+                self.assertEqual(neon["dispatch"], "external-gemini")
+                self.assertFalse(neon["execution"]["account_access_verified"])
+                with self.assertRaisesRegex(ValueError, "No eligible profile"):
+                    bundle.resolve(self.config, mode="council-max", role="implementation", **kwargs)
 
     def test_frontier_research_exact_bindings_and_role_fences_across_hosts(self):
         expected = ["FH", "AMAX", "OX", "MFX", "SX", "OMAX"]
@@ -215,7 +242,7 @@ class SlotTests(unittest.TestCase):
                                                      "muse:muse_code_subscription": {"verified": False}}})
         self.assertTrue(bundle.adapter_available(api_only, bundle.profile(api_only, "EX")))
         self.assertFalse(bundle.adapter_available(api_only, bundle.profile(api_only, "MFX")))
-        council = bundle.resolve(api_only, mode="council", role="research")
+        council = bundle.resolve(api_only, mode="council-max", role="research")
         self.assertIn("MFX", council["unavailable_profiles"])
         self.assertNotIn("EX", [c["code"] for c in council["choices"]])
         exact = bundle.resolve(api_only, mode="council", code="MFX", role="research")["choices"][0]

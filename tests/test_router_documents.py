@@ -115,8 +115,11 @@ class RouterDocumentTests(unittest.TestCase):
         # into every mode. Mode-specific launch designs remain local.
         for target in targets:
             mode = (SKILL / target).read_text()
+            if target == "modes/council-max.md":
+                self.assertIn("](council.md)", mode)
+                mode += (SKILL / "modes/council.md").read_text()
             # Count the complete required native read, not conditional provider references.
-            budget = 2100 if target in {"modes/council.md", "modes/ui-pro.md"} else 1750
+            budget = 2100 if target in {"modes/council.md", "modes/council-max.md", "modes/ui-pro.md"} else 1750
             self.assertLessEqual(len((entrypoint + shared + mode).split()), budget, target)
             self.assertIn("](../references/dispatch.md)", mode)
             self.assertNotRegex(mode, r"\]\([^)]*modes/|\]\([^)]*routing\.json|references/(execution|routing-policy)")
@@ -145,7 +148,9 @@ class RouterDocumentTests(unittest.TestCase):
                 # Count the conditional document once, including when the mode
                 # also links it. Ordinary research paths retain the old budgets.
                 path = entrypoint + shared + mode.read_text() + acceptance
-                budget = 2650 if mode.name in {"council.md", "ui-pro.md"} else 2300
+                if mode.name == "council-max.md":
+                    path += (SKILL / "modes/council.md").read_text()
+                budget = 2650 if mode.name in {"council.md", "council-max.md", "ui-pro.md"} else 2300
                 self.assertLessEqual(len(path.split()), budget)
 
     def test_provider_defaults_and_mode_specific_controller_contracts_remain_distinct(self):
